@@ -296,8 +296,9 @@ noVNC 内有 QQ 登录界面，绝不能长期向公网开放。优先使用 VPN
 
 ### GitHub Actions
 
-[`.github/workflows/windows-build.yml`](.github/workflows/windows-build.yml) 在
-`windows-latest` 上：
+[`.github/workflows/windows-build.yml`](.github/workflows/windows-build.yml) 已在
+GitHub 托管的 `windows-latest` runner 上实际运行通过（run `40862213882`，
+commit `46f4bee`，conclusion `success`）。workflow 会：
 
 1. 安装 Python 3.12；
 2. 跑独立测试；
@@ -332,8 +333,8 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 
 ### 仍未验证
 
-- GitHub Actions 的 `windows-latest` runner 尚未真实运行；本地只检查了 workflow
-  YAML 语法，并在本机 Windows 完成同一 PyInstaller 构建路径。
+- GitHub Actions 最新提交的 workflow run 仍需在每次 push 后确认绿色；本任务已实际
+  触发并确认首个 run 成功（`40862213882`），包括构建与 artifact upload。
 - 浏览器自动打开未测试，服务生命周期测试均使用 `--no-open`。
 - `install.ps1` 全流程、winget 安装、WSL2 初始化/重启未测试。
 - Windows Defender 防火墙、云安全组、局域网/VPN 远程访问未测试。

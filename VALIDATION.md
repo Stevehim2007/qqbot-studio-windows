@@ -78,6 +78,28 @@ Results: config exited 0; image pulled; container printed
 `qqbot-windows-compose-smoke`; container exited 0; `down` removed the container
 and network.
 
+### GitHub Actions windows-latest run
+
+The repository was pushed and GitHub Actions actually ran the workflow on a
+GitHub-hosted Windows runner.
+
+- Workflow: `Windows EXE build`
+- Run id: `40862213882`
+- Commit: `46f4bee1fb805f05ac6f59e265cc4ca884d6f9ac`
+- Conclusion: `success`
+- URL: https://github.com/Stevehim2007/qqbot-studio-windows/actions/runs/40862213882
+
+Successful steps included:
+
+- Checkout;
+- Set up Python 3.12;
+- Run independent test suite;
+- Compile Python sources;
+- Validate PowerShell syntax;
+- Build one-file EXE;
+- Smoke-test EXE with `--version`/`--help`;
+- Upload Windows artifact.
+
 ### Real one-file EXE build
 
 Command:
@@ -147,9 +169,9 @@ No AstrBot, SnowLuma, DeepSeek or real QQ deployment was started.
 
 ## Not verified / still required
 
-- GitHub Actions workflow has **not** actually run on a GitHub-hosted
-  `windows-latest` runner. The YAML syntax was checked locally and the same
-  PyInstaller build path succeeded on the local Windows host.
+- Future workflow runs must still be observed after subsequent pushes; the
+  first push/run is confirmed successful. The locally built EXE and the CI-built
+  EXE are not byte-identical by design because build timestamps/paths may differ.
 - No browser auto-open test; all service lifecycle tests used `--no-open`.
 - No `install.ps1` end-to-end test, winget install, or WSL setup/reboot test.
 - No Windows Defender Firewall rule, cloud security-group, remote LAN, or VPN
