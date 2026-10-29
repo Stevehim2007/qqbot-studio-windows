@@ -18,6 +18,12 @@
     "type": "bool",
     "default": true
   },
+  "image_search_natural_language_enabled": {
+    "description": "允许 @/私聊自然语言找图",
+    "type": "bool",
+    "default": true,
+    "hint": "仅对 @ 机器人和私聊生效；非 @ 群消息不会触发。命中后直接搜索发送并阻断默认 LLM。"
+  },
   "image_search_timeout_seconds": {
     "description": "Bing Images HTML 搜索超时（秒）",
     "type": "int",
@@ -163,7 +169,7 @@
   "image_search_download_attempts": {
     "description": "每次命令最多尝试下载的候选数",
     "type": "int",
-    "default": 5,
+    "default": 8,
     "slider": {
       "min": 1,
       "max": 15,
@@ -242,6 +248,32 @@
     "type": "text",
     "default": "点歌冷却中，请约 {seconds} 秒后再试。",
     "hint": "支持 {seconds} 占位符。"
+  },
+  "option_include_other_plugins": {
+    "description": "/option 是否列出已加载插件元数据",
+    "type": "bool",
+    "default": true,
+    "hint": "使用公开 Context.get_all_stars() 读取名称/版本/描述；不枚举其他插件命令。"
+  },
+  "option_max_plugins": {
+    "description": "/option 最多显示的插件数",
+    "type": "int",
+    "default": 20,
+    "slider": {
+      "min": 1,
+      "max": 50,
+      "step": 1
+    }
+  },
+  "option_max_chars": {
+    "description": "/option 输出最大字符数",
+    "type": "int",
+    "default": 1800,
+    "slider": {
+      "min": 200,
+      "max": 4000,
+      "step": 100
+    }
   },
   "reply_probability": {
     "description": "群聊非 @ 消息的回复概率",

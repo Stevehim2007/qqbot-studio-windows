@@ -8,12 +8,13 @@ QQ Bot Studio 的**独立 Windows 10/11 发行项目**，面向 Docker Desktop +
 本仓库不是 Linux 项目的打包目录，也不是它的自动更新分支。它拥有自己的启动器、
 Windows 服务生命周期实现、版本号、数据目录约定、测试和发布流水线。
 
-> **状态：初始独立发行版。**
+> **状态：Windows 独立发行版 v0.2.0，已同步主项目 core 3.3.0。**
 >
-> 启动器、PowerShell 脚本、Python 核心、PyInstaller 配置和 GitHub Actions
-> workflow 已提供。真实 Windows 上的 Docker Desktop、管理服务、noVNC 扫码和
-> QQ 登录仍需按本文“已验证/未验证”章节逐项验收。**不能把本仓库当作已完成
-> Windows QQ 扫码生产联调的版本。**
+> 已包含独立 `/assistant` AI 助手页面、控制台 30 分钟刷新 + 手动刷新、
+> AI 助手 B 本机/公网配置、qqbot_enhancer 1.4.1 插件和最新 API/FAQ 文档。
+> Windows EXE 构建、隐藏管理服务、Docker Desktop/Linux engine 和本机 artifact
+> 已做部分真实验证；但真实 Windows 上完整 AstrBot/SnowLuma 部署、noVNC 扫码和
+> QQ 验证仍未测试。**不能把本仓库当作已完成完整 Windows QQ 扫码生产联调的版本。**
 
 ---
 
@@ -28,6 +29,17 @@ Windows 服务生命周期实现、版本号、数据目录约定、测试和发
 `plugins/qqbot_enhancer/`。这不是符号链接，也不会在运行时从 Linux 主项目拉取代码。
 快照来源与更新方法见 [`UPSTREAM.md`](UPSTREAM.md)。
 
+### v3.3.0 同步内容
+
+- 控制台顶部新增 **“AI 助手”** 链接，进入独立页面 `/assistant`；
+- 删除控制台内旧离线“使用助手”A 面板和内嵌 AI 助手 B 卡片；
+- `/assistant` 支持 B 的安装、更新、配置、启动、停止和打开；
+- B 默认仅本机 `127.0.0.1`，也支持显式 `0.0.0.0 + public_host` 高风险公网模式；
+- 控制台自动刷新为 **30 分钟**，并保留手动刷新；
+- qqbot_enhancer **1.4.1**：自然语言找图、图片本地下载、本地唱歌/点歌、
+  `/option` 和 `direct/astrbot` 记忆模式；
+- 同步最新 README/FAQ/API 契约到 [`docs/`](docs/README.md)。
+
 ### 数据目录不能直接共用
 
 - Windows 默认数据目录：`%LOCALAPPDATA%\QQBotStudio\data`
@@ -39,8 +51,8 @@ Windows 服务生命周期实现、版本号、数据目录约定、测试和发
 
 ### 升级边界
 
-- 本仓库独立维护版本：当前 `VERSION = 0.1.0`，bundled core 版本见
-  `qqbot_studio.__version__`。
+- 本仓库独立维护版本：当前 `VERSION = 0.2.0`，bundled core 版本为
+  `qqbot_studio.__version__ = 3.3.0`。
 - Linux 主项目的自动更新、`scripts/auto-update.sh` 和网页内“更新并重启”不适用于
   本仓库。
 - Windows 版升级方式是：下载新的 EXE / PowerShell 发行包，停止旧管理服务，保留
@@ -117,6 +129,8 @@ SHA256SUMS.txt
 README.md
 VERSION
 UPSTREAM.md
+VALIDATION.md
+docs\
 windows\...
 ```
 
@@ -151,6 +165,17 @@ Get-FileHash .\QQBotStudioWindows.exe -Algorithm SHA256
 6. 打开多实例控制台；
 7. 父进程退出，后台管理服务继续运行。
 
+控制台点击顶部 **“AI 助手”** 可进入独立 `/assistant` 页面。也可以直接启动到该页面：
+
+```powershell
+.\QQBotStudioWindows.exe --assistant
+```
+
+`/assistant` 页面负责可选 AI 助手 B 的安装、配置、启动、停止和打开。B 默认只监听
+`127.0.0.1`；只有显式选择“公网/所有网卡”并填写 `public_host` 时才生成公网 URL。
+**B 没有内置登录认证**，公网模式必须使用 Windows 防火墙/云安全组/VPN 或带认证的
+反向代理限制来源，不能裸奔到互联网。
+
 新建机器人实例并直接打开部署向导：
 
 ```powershell
@@ -167,6 +192,7 @@ Get-FileHash .\QQBotStudioWindows.exe -Algorithm SHA256
 |---|---|
 | `QQBotStudioWindows.exe` | 启动/复用管理服务并打开控制台 |
 | `QQBotStudioWindows.exe --new-instance [NAME]` | 新建实例并打开 wizard |
+| `QQBotStudioWindows.exe --assistant` | 启动/复用服务并打开独立 AI 助手页面 `/assistant` |
 | `QQBotStudioWindows.exe --status` | 查看监听、健康、PID/runtime 和日志路径 |
 | `QQBotStudioWindows.exe --stop` | 停止管理服务；Docker 容器继续运行 |
 | `QQBotStudioWindows.exe --logs` | 输出最近 80 行服务日志 |
@@ -266,6 +292,10 @@ New-NetFirewallRule `
 noVNC 内有 QQ 登录界面，绝不能长期向公网开放。优先使用 VPN、Tailscale/WireGuard、
 固定来源 IP 或临时隧道；用完即关规则。
 
+AI 助手 B 默认端口为 `8766`，但实际值以 `/assistant` 页面配置为准。B 未内置认证；
+如果配置 `0.0.0.0` + `public_host`，同样必须同时配置 Windows Defender 防火墙、
+云安全组或 VPN，并建议使用带认证的反向代理。
+
 ---
 
 ## 6. 从源码构建 EXE
@@ -296,9 +326,10 @@ noVNC 内有 QQ 登录界面，绝不能长期向公网开放。优先使用 VPN
 
 ### GitHub Actions
 
-[`.github/workflows/windows-build.yml`](.github/workflows/windows-build.yml) 已在
-GitHub 托管的 `windows-latest` runner 上实际运行通过（run `40862213882`，
-commit `46f4bee`，conclusion `success`）。workflow 会：
+[`.github/workflows/windows-build.yml`](.github/workflows/windows-build.yml) 会在
+GitHub 托管的 `windows-latest` runner 上运行。v0.1.0 曾实际通过
+run `40862213882`；v0.2.0 的构建/artifact 结果会记录在
+[`VALIDATION.md`](VALIDATION.md)。workflow 会：
 
 1. 安装 Python 3.12；
 2. 跑独立测试；
@@ -319,15 +350,17 @@ Artifact 包括 EXE、SHA256、README、VERSION、LICENSE、UPSTREAM 和备用 P
 本仓库已在同一台 Windows 主机上通过 WSL interop 使用 Windows PowerShell 5.1、
 Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 
-- 独立测试套件 31 tests 在 Linux Python 和 Windows Python 下均通过；
+- 独立测试套件 42 tests 在 Linux Python 和 Windows Python 下均通过；
 - Windows Python `compileall` 通过；
 - 5 个 PowerShell `.ps1` 通过 Windows PowerShell AST 语法解析；
 - Docker Desktop 引擎处于 Linux containers，`docker version`、`docker info`、
   Docker Compose v5.5.1 和最小 busybox Compose `config/up/down` 成功；
 - PyInstaller 6.10.0 在 Windows 上实际构建出 one-file EXE；
 - EXE 首次配置、隐藏管理服务启动、`/healthz`、PID/runtime、`--status`、
-  `--restart`、`--logs`、`--stop` 和 `--new-instance` 已在本机实际执行；
-- EXE-created `bot-1` 的实例元数据隔离正确。
+  `--restart`、`--logs`、`--stop`、`--new-instance` 和 `--assistant` 已在本机实际执行；
+- EXE-created `bot-1` 的实例元数据隔离正确；
+- 实际 EXE 服务返回 `/assistant` HTTP 200 并注入 token，`/api/assistant/status`
+  返回 200；`/console` 不含旧 A/B 控制台 DOM，顶部存在 `/assistant` 链接。
 
 详细命令、环境和输出见 [`VALIDATION.md`](VALIDATION.md)。
 
@@ -345,7 +378,19 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 **基础 Windows 启动器、Docker Desktop 和最小 Compose 已验证；完整 QQ 部署/扫码
 链路未验证，因此不能宣称 Windows 生产可用。**
 
-## 8. 常见问题
+## 8. 文档与 FAQ
+
+- [`docs/README.md`](docs/README.md)：Windows 文档索引；
+- [`docs/FAQ.md`](docs/FAQ.md)：`/assistant`、AI 助手 B 公网、30 分钟刷新、插件 1.4.1、
+  EXE、端口和升级问题；
+- [`docs/ui-api-contract-v2.md`](docs/ui-api-contract-v2.md)：最新管理 API 契约；
+- [`docs/plugin-qqbot-enhancer.md`](docs/plugin-qqbot-enhancer.md)：qqbot_enhancer 1.4.1；
+- [`VALIDATION.md`](VALIDATION.md)：真实执行和未验证项；
+- [`UPSTREAM.md`](UPSTREAM.md)：vendor 来源与下次同步步骤；
+- [Linux 主项目 README](https://github.com/Stevehim2007/qqbot-studio/blob/main/README.md)：
+  Ubuntu/Linux 安装说明，不要与 Windows 数据目录混用。
+
+## 9. 常见问题
 
 ### EXE 一启动就退出或没打开浏览器
 
@@ -381,7 +426,7 @@ Get-NetTCPConnection -LocalPort 8765 -State Listen
 
 ---
 
-## 9. 安全与许可
+## 10. 安全与许可
 
 - 不收集或保存 QQ 密码；不会绕过验证码、滑块、设备验证或风控。
 - 使用 QQ 小号，遵守腾讯 QQ 用户协议。

@@ -27,7 +27,7 @@ import webbrowser
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
-LAUNCHER_VERSION = "0.1.0"
+LAUNCHER_VERSION = "0.2.0"
 DEFAULT_SERVER_WAIT_SECONDS = 90
 
 if getattr(sys, "frozen", False):
@@ -177,6 +177,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         metavar="NAME",
         help="Create a new bot instance and open its wizard instead of only opening the console.",
+    )
+    parser.add_argument(
+        "--assistant",
+        action="store_true",
+        help="Open the standalone AI Assistant B page (/assistant) instead of the console.",
     )
     parser.add_argument("--configure", action="store_true", help="Force the first-run IP/port/public-host prompts.")
     parser.add_argument("--non-interactive", action="store_true", help="Use defaults/arguments without prompts.")
@@ -907,8 +912,10 @@ def _validate_action_combination(parser: argparse.ArgumentParser, args: argparse
     terminal = [bool(args.status), bool(args.stop), args.logs is not None]
     if sum(1 for item in terminal if item) > 1:
         parser.error("--status, --stop and --logs are mutually exclusive.")
-    if any(terminal) and (args.new_instance is not None or args.configure or args.restart):
+    if any(terminal) and (args.new_instance is not None or args.assistant or args.configure or args.restart):
         parser.error("--status/--stop/--logs cannot be combined with start/configure/restart actions.")
+    if args.assistant and args.new_instance is not None:
+        parser.error("--assistant and --new-instance select different browser targets; use only one.")
 
 
 def run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
@@ -958,6 +965,11 @@ def run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
         print("IMPORTANT: a new instance must scan the QQ login QR code in noVNC.")
         print("Complete device/SMS/slider verification manually in the official QQ window.")
         print("The tool never asks for or stores the QQ password.")
+    elif args.assistant:
+        target_url = f"{base_url}/assistant"
+        print("")
+        print("Opening the standalone AI Assistant B page. Optional installation/configuration is handled there.")
+        print("B has no built-in authentication; keep loopback/VPN or restrict 0.0.0.0 exposure with a firewall.")
     else:
         target_url = f"{base_url}/console"
 

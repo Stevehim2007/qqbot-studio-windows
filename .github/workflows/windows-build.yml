@@ -68,6 +68,7 @@ jobs:
             LICENSE
             UPSTREAM.md
             VALIDATION.md
+            docs/**
             windows/build.ps1
             windows/qqbot-studio-windows.spec
             windows/install.ps1

@@ -25,6 +25,7 @@ datas = [
 hiddenimports = [
     "qqbot_studio",
     "qqbot_studio.__main__",
+    "qqbot_studio.assistant_ext",
     "qqbot_studio.astrbot_api",
     "qqbot_studio.configgen",
     "qqbot_studio.deployer",

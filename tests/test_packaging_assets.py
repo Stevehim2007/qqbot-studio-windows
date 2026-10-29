@@ -29,6 +29,7 @@ class PackagingAssetTests(unittest.TestCase):
             'windows_dir / "launcher.py"',
             "qqbot_studio/static",
             "plugins/qqbot_enhancer",
+            "qqbot_studio.assistant_ext",
             "QQBotStudioWindows",
             "console=True",
         ):
@@ -71,6 +72,9 @@ class PackagingAssetTests(unittest.TestCase):
             "%LOCALAPPDATA%\\QQBotStudio\\data",
             "升级边界",
             "不能直接共用",
+            "/assistant",
+            "30 分钟",
+            "1.4",
             "真实 Windows",
             "未验证",
         ):

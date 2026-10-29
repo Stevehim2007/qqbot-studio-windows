@@ -8,10 +8,11 @@
 > 直接共用。完整说明见根目录 [`README.md`](../README.md) 和
 > [`UPSTREAM.md`](../UPSTREAM.md)。
 >
-> **状态：初始独立发行版，已完成部分本机 Windows 验证。** 基础 Docker Desktop、
-> Linux engine、Compose、EXE 构建和管理服务生命周期已实际测试；完整 AstrBot/SnowLuma
-> 部署、noVNC 扫码和 QQ 验证仍未测试。详见根目录
-> [`VALIDATION.md`](../VALIDATION.md)；未验证项不得当作已通过。
+> **状态：Windows 独立发行版 v0.2.0，已同步 upstream core 3.3.0。** 已包含独立
+> `/assistant` 页面、AI 助手 B 本机/公网配置、30 分钟刷新和 qqbot_enhancer 1.4.1。
+> 基础 Docker Desktop/Linux engine、Compose、EXE 构建和管理服务生命周期已实际测试；
+> 完整 AstrBot/SnowLuma 部署、noVNC 扫码和 QQ 验证仍未测试。详见根目录
+> [`VALIDATION.md`](../VALIDATION.md) 和 [`docs/FAQ.md`](../docs/FAQ.md)。
 
 ---
 
@@ -194,6 +195,20 @@ New-NetFirewallRule `
 - noVNC 中有 QQ 登录界面，禁止长期公开到互联网。
 
 ---
+
+## 6.1 v3.3.0 同步后的新入口
+
+- 主控制台不再有离线“使用助手”A 面板或内嵌 AI 助手 B 卡片；
+- 点击控制台顶部 **AI 助手**，或运行 `QQBotStudioWindows.exe --assistant`，进入
+  `/assistant`；
+- 在 `/assistant` 中安装/更新/配置/启动/停止 B；B 默认只监听 `127.0.0.1`；
+- 显式使用 `0.0.0.0 + public_host` 时才生成公网 URL，且 B 没有认证，必须由
+  Windows 防火墙、云安全组、VPN 或带认证的反向代理保护；
+- 控制台自动刷新为 30 分钟，手动刷新会立即生效并重新计时；
+- 插件 1.4.1 支持自然语言找图、图片下载后本地发送、唱歌/点歌、`/option` 和记忆模式。
+
+详细操作见 [`../docs/FAQ.md`](../docs/FAQ.md) 与
+[`../docs/ui-api-contract-v2.md`](../docs/ui-api-contract-v2.md)。
 
 ## 7. 已知限制与未验证项
 

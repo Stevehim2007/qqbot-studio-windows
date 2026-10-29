@@ -16,6 +16,8 @@ class VendoredCoreSmokeTests(unittest.TestCase):
         self.assertTrue(core_version)
         self.assertTrue((ROOT / "qqbot_studio" / "static" / "index.html").is_file())
         self.assertTrue((ROOT / "qqbot_studio" / "static" / "console.html").is_file())
+        self.assertTrue((ROOT / "qqbot_studio" / "static" / "assistant.html").is_file())
+        self.assertTrue((ROOT / "qqbot_studio" / "assistant_ext.py").is_file())
         self.assertTrue((ROOT / "plugins" / "qqbot_enhancer" / "main.py").is_file())
 
     def test_instance_creation_uses_independent_data_dir(self):

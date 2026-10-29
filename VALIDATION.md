@@ -1,5 +1,102 @@
 # Validation record
 
+## v0.2.0 / core 3.3.0 sync (latest)
+
+Sync source: Linux main commit `7cdeb0ecc60066eb7df7702777289aa03a6f8bd1`,
+core `3.3.0`, plugin `1.4.1`.
+
+### Test and static checks
+
+- Linux Python: `python3 -m unittest discover -s tests -v` -> **42 tests OK**.
+- Windows Python 3.10.9: same independent suite -> **42 tests OK**.
+- Windows `python -m compileall -q qqbot_studio windows` -> OK.
+- Windows PowerShell 5.1 AST parser: all 5 `.ps1` files -> OK.
+- `node --check` for `app.js` and `console.js` -> OK.
+- All two inline `<script>` blocks in `assistant.html` extracted and
+  `node --check` -> OK.
+- Static regression checks passed:
+  - `/assistant` contains `window.QB_TOKEN = "{{TOKEN}}"`;
+  - `host-public`, `public-host`, independent/instance key selectors present;
+  - console has `href="/assistant"`;
+  - console has no `assistant-open`, `assistant-panel`, `assistant-b-card` or
+    old offline “使用助手” markers;
+  - console refresh interval is `30 * 60 * 1000`;
+  - plugin metadata version is `1.4.1`;
+  - synced API contract contains `/assistant`, assistant config/start APIs and
+    `public_host`.
+
+### Real Windows PyInstaller build
+
+Command:
+
+```powershell
+.\windows\build.ps1 -Python C:\Users\<user>\AppData\Local\Programs\Python\Python310\python.exe -Clean
+```
+
+Result:
+
+- Build exited 0.
+- Artifact: `dist\QQBotStudioWindows.exe`
+- Version: launcher `0.2.0`, core `3.3.0`
+- Size: `8,438,864` bytes
+- SHA256: `830a7c920d280c2819abdb82da28745b6fac01f72ec1ba8e514a6440fac14fba`
+- EXE `--version` returned
+  `QQBot Studio Windows launcher 0.2.0 (core 3.3.0)`; `--help` exited 0.
+
+### Real Windows EXE service smoke
+
+Commands used a temporary data directory and `127.0.0.1:18770`:
+
+```powershell
+.\QQBotStudioWindows.exe --assistant --configure --non-interactive \
+  --data-dir <tmp> --ip 127.0.0.1 --port 18770 \
+  --public-host 127.0.0.1 --no-open
+Invoke-RestMethod http://127.0.0.1:18770/healthz
+.\QQBotStudioWindows.exe --restart --new-instance "V3 Sync Smoke" \
+  --non-interactive --data-dir <tmp> --no-open
+.\QQBotStudioWindows.exe --status --data-dir <tmp>
+.\QQBotStudioWindows.exe --stop --data-dir <tmp>
+```
+
+Verified:
+
+- Docker Desktop 4.93.0 / Linux engine 29.8.1 was started and checked
+  (`OSType=linux`, Compose v5.5.1).
+- `/healthz` returned `{"ok":true,"version":"3.3.0"}`.
+- `/assistant` returned HTTP 200 and injected a real token.
+- `/api/assistant/status` with `X-QB-Token` returned HTTP 200 for the
+  not-installed state and did not expose an `api_key` field.
+- `/console` returned HTTP 200, contained `href="/assistant"`, and contained
+  none of the old A/B DOM markers.
+- `--assistant` selected the `/assistant` browser target.
+- `--restart` stopped the old PID and started a new healthy PID.
+- `--new-instance "V3 Sync Smoke"` created isolated `instances\bot-1`
+  metadata and printed console and wizard URLs.
+- `--stop` terminated the service; health became unreachable afterward.
+- No PyInstaller temporary-directory warning was observed after the
+  `PYINSTALLER_RESET_ENVIRONMENT=1` fix.
+
+### GitHub Actions for v0.2.0
+
+The result is updated after the final push:
+
+- Run: pending at the time this build was verified locally.
+- Artifact: pending.
+
+### Not verified for v0.2.0
+
+- Actual AI assistant B installation/update from GitHub and its real startup.
+- Actual AstrBot + SnowLuma deployment through the wizard.
+- Real DeepSeek API requests and QQ account login.
+- noVNC QR scan, device/SMS/email/slider verification.
+- Windows Defender firewall/cloud security-group remote access.
+- Browser auto-open (all service checks used `--no-open`).
+- Long-duration multi-instance or container bind-mount ownership behavior.
+
+---
+
+## Historical v0.1.0 validation
+
 Date: 2026-10-29 (local test machine time)
 Repository version: `VERSION 0.1.0`, bundled core `2.2.0`
 

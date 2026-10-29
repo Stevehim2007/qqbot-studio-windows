@@ -34,6 +34,17 @@ class WindowsLauncherArgumentTests(unittest.TestCase):
         self.assertEqual(self.parser.parse_args(["--logs"]).logs, 80)
         self.assertEqual(self.parser.parse_args(["--logs", "250"]).logs, 250)
 
+    def test_assistant_flag_opens_standalone_page(self):
+        args = self.parser.parse_args(["--assistant"])
+        self.assertTrue(args.assistant)
+        self.assertIsNone(args.new_instance)
+
+    def test_assistant_and_new_instance_targets_conflict(self):
+        args = self.parser.parse_args(["--assistant", "--new-instance", "bot"])
+        with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as raised:
+            launcher._validate_action_combination(self.parser, args)
+        self.assertEqual(raised.exception.code, 2)
+
     def test_terminal_actions_are_mutually_exclusive(self):
         args = self.parser.parse_args(["--status", "--stop"])
         with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as raised:
