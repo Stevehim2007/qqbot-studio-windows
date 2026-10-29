@@ -78,10 +78,21 @@ Verified:
 
 ### GitHub Actions for v0.2.0
 
-The result is updated after the final push:
+The `windows-latest` workflow ran on the synced repository and succeeded.
 
-- Run: pending at the time this build was verified locally.
-- Artifact: pending.
+- Run id: `40895998356`
+- Source commit: `9b4e44ad427dfb6889c4578c75d7e86a0685f639`
+- Conclusion: `success`
+- URL: https://github.com/Stevehim2007/qqbot-studio-windows/actions/runs/40895998356
+- Artifact name: `QQBotStudioWindows-9b4e44ad427dfb6889c4578c75d7e86a0685f639`
+- Artifact size: `10,688,179` bytes
+- Artifact uploaded, not expired at query time.
+- Successful steps: checkout, Python 3.12 setup, 42-test suite, Python
+  compileall, PowerShell AST validation, one-file EXE build, EXE
+  `--version`/`--help` smoke, and artifact upload.
+
+A docs-only follow-up commit may have its own workflow run and artifact with a
+different size; the final task report states the latest result.
 
 ### Not verified for v0.2.0
 

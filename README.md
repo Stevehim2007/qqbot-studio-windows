@@ -326,10 +326,10 @@ AI 助手 B 默认端口为 `8766`，但实际值以 `/assistant` 页面配置�
 
 ### GitHub Actions
 
-[`.github/workflows/windows-build.yml`](.github/workflows/windows-build.yml) 会在
-GitHub 托管的 `windows-latest` runner 上运行。v0.1.0 曾实际通过
-run `40862213882`；v0.2.0 的构建/artifact 结果会记录在
-[`VALIDATION.md`](VALIDATION.md)。workflow 会：
+[`.github/workflows/windows-build.yml`](.github/workflows/windows-build.yml) 已在
+GitHub 托管的 `windows-latest` runner 上实际运行通过：v0.2.0 同步提交
+`9b4e44a` 的 run `40895998356` conclusion 为 `success`，artifact 大小
+`10,688,179` bytes。workflow 会：
 
 1. 安装 Python 3.12；
 2. 跑独立测试；
@@ -338,8 +338,12 @@ run `40862213882`；v0.2.0 的构建/artifact 结果会记录在
 5. 执行 EXE `--version` / `--help` smoke test；
 6. 上传 artifact `QQBotStudioWindows-<sha>`。
 
-Artifact 包括 EXE、SHA256、README、VERSION、LICENSE、UPSTREAM 和备用 PowerShell
-脚本。真实 Docker Desktop/QQ 扫码测试不在 CI runner 上执行。
+Artifact 包括 EXE、SHA256、README、VERSION、LICENSE、UPSTREAM、VALIDATION、
+`docs/**` 和备用 PowerShell 脚本。真实 Docker Desktop/QQ 扫码测试不在 CI runner
+上执行。
+
+- Run URL: <https://github.com/Stevehim2007/qqbot-studio-windows/actions/runs/40895998356>
+- Artifact: `QQBotStudioWindows-9b4e44ad427dfb6889c4578c75d7e86a0685f639`
 
 ---
 
@@ -366,8 +370,8 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 
 ### 仍未验证
 
-- GitHub Actions 最新提交的 workflow run 仍需在每次 push 后确认绿色；本任务已实际
-  触发并确认首个 run 成功（`40862213882`），包括构建与 artifact upload。
+- v0.2.0 的 `windows-latest` 构建与 artifact upload 已成功；后续 docs-only 提交仍
+  需保持 workflow 绿色。
 - 浏览器自动打开未测试，服务生命周期测试均使用 `--no-open`。
 - `install.ps1` 全流程、winget 安装、WSL2 初始化/重启未测试。
 - Windows Defender 防火墙、云安全组、局域网/VPN 远程访问未测试。
