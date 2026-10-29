@@ -12,7 +12,7 @@
 # QQ Bot Studio 最终 QA 报告
 
 - 审计时间：2026-10-28 22:15（Asia/Shanghai，UTC 14:15）
-- 审计对象：Linux 主项目当前最终稳定快照（上游历史记录）。
+- 审计对象：`/home/stevehim/QQ Ai bot` 当前最终稳定快照。该目录不是 Git 仓库，无法做 commit 级 diff。
 - 环境：Ubuntu 24.04.3 LTS（WSL2）、Python 3.12.3、Node v24.21.0、Bash 5.2.21、普通用户 uid=1000。
 - 安全/成本约束：未启动 Docker 守护进程，未拉取或启动容器，未调用真实 DeepSeek 付费接口，未执行真实 QQ 扫码/验证。
 - 最终结论：**条件通过（Conditional Pass）**。25/25 单测通过，JS/Shell/Python 语法检查通过，本地 HTTP 冒烟、安全边界检查、密钥落盘/权限和文档一致性检查通过；**没有开放的 P0/P1/P2 代码或文档缺陷**。由于本环境没有 Docker daemon，真实容器、AstrBot/SnowLuma、QQ 扫码和 DeepSeek 联网 E2E 仍未验收，生产发布前必须补做。

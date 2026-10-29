@@ -8,8 +8,9 @@
 > 直接共用。完整说明见根目录 [`README.md`](../README.md) 和
 > [`UPSTREAM.md`](../UPSTREAM.md)。
 >
-> **状态：Windows 独立发行版 v0.2.0，已同步 upstream core 3.3.0。** 已包含独立
-> `/assistant` 页面、AI 助手 B 本机/公网配置、30 分钟刷新和 qqbot_enhancer 1.4.1。
+> **状态：Windows 独立发行版 v0.3.0，已同步 upstream core 3.4.0。** 已包含独立
+> `/assistant` 页面、AI 助手 B 本机/公网配置、30 分钟刷新、控制台插件参数编辑和
+> qqbot_enhancer 1.4.1。发布由 `v*` tag 触发 GitHub Release，上传 EXE 和 SHA256。
 > 基础 Docker Desktop/Linux engine、Compose、EXE 构建和管理服务生命周期已实际测试；
 > 完整 AstrBot/SnowLuma 部署、noVNC 扫码和 QQ 验证仍未测试。详见根目录
 > [`VALIDATION.md`](../VALIDATION.md) 和 [`docs/FAQ.md`](../docs/FAQ.md)。
@@ -196,7 +197,7 @@ New-NetFirewallRule `
 
 ---
 
-## 6.1 v3.3.0 同步后的新入口
+## 6.1 v3.4.0 同步后的新入口
 
 - 主控制台不再有离线“使用助手”A 面板或内嵌 AI 助手 B 卡片；
 - 点击控制台顶部 **AI 助手**，或运行 `QQBotStudioWindows.exe --assistant`，进入
@@ -209,6 +210,22 @@ New-NetFirewallRule `
 
 详细操作见 [`../docs/FAQ.md`](../docs/FAQ.md) 与
 [`../docs/ui-api-contract-v2.md`](../docs/ui-api-contract-v2.md)。
+
+### v3.4.0 插件参数编辑
+
+控制台插件行中的 **“编辑参数”** 打开 schema 驱动面板。`reply_probability` 等
+`qqbot_enhancer` 参数可读取/编辑并保存；离线时提示 `restart_required`，在线时尽量
+通过 AstrBot 热重载。Key/token/password 类字段不会返回或提交。
+
+### 正式 EXE Release
+
+`v0.3.0` 起推送匹配 `VERSION` 的 tag 会触发
+`.github/workflows/windows-release.yml`，创建真实 GitHub Release 并上传：
+
+- `QQBotStudioWindows.exe`
+- `SHA256SUMS.txt`
+
+只上传 Actions artifact 不算正式发布。参见根 README 的下载/校验示例。
 
 ## 7. 已知限制与未验证项
 

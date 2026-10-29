@@ -8,13 +8,15 @@ QQ Bot Studio 的**独立 Windows 10/11 发行项目**，面向 Docker Desktop +
 本仓库不是 Linux 项目的打包目录，也不是它的自动更新分支。它拥有自己的启动器、
 Windows 服务生命周期实现、版本号、数据目录约定、测试和发布流水线。
 
-> **状态：Windows 独立发行版 v0.2.0，已同步主项目 core 3.3.0。**
+> **状态：Windows 独立发行版 v0.3.0，已同步主项目 core 3.4.0。**
 >
 > 已包含独立 `/assistant` AI 助手页面、控制台 30 分钟刷新 + 手动刷新、
-> AI 助手 B 本机/公网配置、qqbot_enhancer 1.4.1 插件和最新 API/FAQ 文档。
-> Windows EXE 构建、隐藏管理服务、Docker Desktop/Linux engine 和本机 artifact
-> 已做部分真实验证；但真实 Windows 上完整 AstrBot/SnowLuma 部署、noVNC 扫码和
-> QQ 验证仍未测试。**不能把本仓库当作已完成完整 Windows QQ 扫码生产联调的版本。**
+> AI 助手 B 本机/公网配置、控制台插件参数编辑（`reply_probability` 等）、
+> qqbot_enhancer 1.4.1 和最新 API/FAQ 文档。
+> Windows EXE 构建、隐藏管理服务、Docker Desktop/Linux engine 和本机 smoke
+> 已做部分真实验证；发布使用 `v*` tag 触发的 GitHub Release。
+> 但真实 Windows 上完整 AstrBot/SnowLuma 部署、noVNC 扫码和 QQ 验证仍未测试。
+> **不能把本仓库当作已完成完整 Windows QQ 扫码生产联调的版本。**
 
 ---
 
@@ -28,6 +30,15 @@ Windows 服务生命周期实现、版本号、数据目录约定、测试和发
 本仓库 vendor 了主项目的 `qqbot_studio/` Python 核心、静态 UI、`assets/` 和
 `plugins/qqbot_enhancer/`。这不是符号链接，也不会在运行时从 Linux 主项目拉取代码。
 快照来源与更新方法见 [`UPSTREAM.md`](UPSTREAM.md)。
+
+### v3.4.0 同步内容
+
+- 控制台插件面板新增 **编辑参数**：读取 schema、生成表单、保存并提示热重载/重启；
+- `qqbot_enhancer` 的 `reply_probability` 等 61 项参数可通过 UI 编辑；
+- 新增 token 保护的 GET/POST `/api/instances/<id>/plugins/<plugin_id>/config`；
+- 敏感 Key/token/password 类字段不会返回或提交；
+- 支持 bool/int/float/string/text/list 类型、范围、选项和默认值；
+- Windows 独立版本升至 `0.3.0`，新增 tag 驱动的真实 GitHub Release。
 
 ### v3.3.0 同步内容
 
@@ -51,8 +62,8 @@ Windows 服务生命周期实现、版本号、数据目录约定、测试和发
 
 ### 升级边界
 
-- 本仓库独立维护版本：当前 `VERSION = 0.2.0`，bundled core 版本为
-  `qqbot_studio.__version__ = 3.3.0`。
+- 本仓库独立维护版本：当前 `VERSION = 0.3.0`，bundled core 版本为
+  `qqbot_studio.__version__ = 3.4.0`。
 - Linux 主项目的自动更新、`scripts/auto-update.sh` 和网页内“更新并重启”不适用于
   本仓库。
 - Windows 版升级方式是：下载新的 EXE / PowerShell 发行包，停止旧管理服务，保留
@@ -119,9 +130,32 @@ docker info --format "{{.OSType}}"
 
 ---
 
-## 3. 预构建 EXE 使用
+## 3. 预构建 EXE / GitHub Release 使用
 
-从 GitHub Actions 的 `windows-build` workflow 下载 artifact：
+正式发布从 GitHub Releases 下载，而不是只依赖 Actions artifact：
+
+- Releases: <https://github.com/Stevehim2007/qqbot-studio-windows/releases>
+- Tag: `v0.3.0`
+- Release assets：
+  - `QQBotStudioWindows.exe`
+  - `SHA256SUMS.txt`
+  - `README.md`
+  - `VALIDATION.md`
+
+下载与校验示例：
+
+```powershell
+$release = 'https://github.com/Stevehim2007/qqbot-studio-windows/releases/download/v0.3.0'
+Invoke-WebRequest "$release/QQBotStudioWindows.exe" -OutFile .\QQBotStudioWindows.exe
+Invoke-WebRequest "$release/SHA256SUMS.txt" -OutFile .\SHA256SUMS.txt
+Get-FileHash .\QQBotStudioWindows.exe -Algorithm SHA256
+Get-Content .\SHA256SUMS.txt
+```
+
+CI 分支构建也会上传 Actions artifact，便于测试，但正式用户应优先使用 Release
+中的 EXE 和 SHA256。
+
+从 Actions `windows-build` workflow 下载测试 artifact：
 
 ```text
 QQBotStudioWindows.exe
@@ -342,8 +376,18 @@ Artifact 包括 EXE、SHA256、README、VERSION、LICENSE、UPSTREAM、VALIDATIO
 `docs/**` 和备用 PowerShell 脚本。真实 Docker Desktop/QQ 扫码测试不在 CI runner
 上执行。
 
-- Run URL: <https://github.com/Stevehim2007/qqbot-studio-windows/actions/runs/40895998356>
-- Artifact: `QQBotStudioWindows-9b4e44ad427dfb6889c4578c75d7e86a0685f639`
+### GitHub Release workflow
+
+[`.github/workflows/windows-release.yml`](.github/workflows/windows-release.yml) 在
+推送 `v*` tag 时：
+
+1. 校验 `VERSION` 与 tag 一致（例如 `VERSION=0.3.0` 必须对应 `v0.3.0`）；
+2. 重新跑独立测试、compileall、PowerShell AST、PyInstaller 构建和 EXE smoke；
+3. 上传 Actions artifact；
+4. 通过 `softprops/action-gh-release@v2` 创建真实 GitHub Release；
+5. 把 `QQBotStudioWindows.exe` 和 `SHA256SUMS.txt` 作为 Release assets 上传。
+
+只上传 Actions artifact 不算发布；Release assets 必须存在。
 
 ---
 
@@ -354,7 +398,8 @@ Artifact 包括 EXE、SHA256、README、VERSION、LICENSE、UPSTREAM、VALIDATIO
 本仓库已在同一台 Windows 主机上通过 WSL interop 使用 Windows PowerShell 5.1、
 Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 
-- 独立测试套件 42 tests 在 Linux Python 和 Windows Python 下均通过；
+- 独立测试套件将在 Linux Python 和 Windows Python 下运行；本版本测试结果见
+  [`VALIDATION.md`](VALIDATION.md)；
 - Windows Python `compileall` 通过；
 - 5 个 PowerShell `.ps1` 通过 Windows PowerShell AST 语法解析；
 - Docker Desktop 引擎处于 Linux containers，`docker version`、`docker info`、

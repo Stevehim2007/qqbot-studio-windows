@@ -12,7 +12,7 @@ STATIC = ROOT / "qqbot_studio" / "static"
 class V3SyncFeatureTests(unittest.TestCase):
     def test_core_version_is_synced(self):
         init_text = (ROOT / "qqbot_studio" / "__init__.py").read_text(encoding="utf-8")
-        self.assertIn('__version__ = "3.3.0"', init_text)
+        self.assertIn('__version__ = "3.4.0"', init_text)
 
     def test_assistant_page_exists_and_has_token_placeholder(self):
         path = STATIC / "assistant.html"
@@ -90,10 +90,36 @@ class V3SyncFeatureTests(unittest.TestCase):
         for marker in ("自然语言", "本地唱歌", "/option", "memory_mode"):
             self.assertIn(marker, plugin_doc)
 
+    def test_plugin_parameter_config_api_and_ui_are_synced(self):
+        server = (ROOT / "qqbot_studio" / "server.py").read_text(encoding="utf-8")
+        console_html = (STATIC / "console.html").read_text(encoding="utf-8")
+        console_js = (STATIC / "console.js").read_text(encoding="utf-8")
+        deployer = (ROOT / "qqbot_studio" / "deployer.py").read_text(encoding="utf-8")
+        api_doc = (ROOT / "docs" / "ui-api-contract-v2.md").read_text(encoding="utf-8")
+
+        self.assertIn("get_plugin_config", server)
+        self.assertIn("set_plugin_config", server)
+        self.assertIn("get_plugin_config", deployer)
+        self.assertIn("set_plugin_config", deployer)
+        for marker in (
+            'id="plugin-config-panel"',
+            'id="plugin-config-save"',
+            'id="plugin-config-search"',
+        ):
+            self.assertIn(marker, console_html)
+        for marker in (
+            "/api/instances/${encodeURIComponent(instance.id)}/plugins/${encodeURIComponent(plugin.id)}/config",
+            "reply_probability",
+            "编辑参数",
+        ):
+            self.assertIn(marker, console_js)
+        self.assertIn("/api/instances/<instance_id>/plugins/<plugin_id>/config", api_doc)
+        self.assertIn("reply_probability", api_doc)
+
     def test_upstream_metadata_is_updated(self):
         upstream = (ROOT / "UPSTREAM.md").read_text(encoding="utf-8")
-        self.assertIn("7cdeb0ecc60066eb7df7702777289aa03a6f8bd1", upstream)
-        self.assertIn("3.3.0", upstream)
+        self.assertIn("1e9d4a46b0aba7f89519066693f95b5939c7732e", upstream)
+        self.assertIn("3.4.0", upstream)
 
 
 if __name__ == "__main__":

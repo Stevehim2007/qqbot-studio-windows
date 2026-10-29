@@ -1,6 +1,6 @@
 # Windows 文档索引
 
-本目录保存从 Linux 主项目 v3.3.0 同步的功能/API/FAQ 文档，并补充 Windows 独立发行
+本目录保存从 Linux 主项目 v3.4.0 同步的功能/API/FAQ 文档，并补充 Windows 独立发行
 项目自己的说明。
 
 ## 先读
@@ -16,15 +16,15 @@
 
 | 文档 | 内容 |
 |---|---|
-| [`ui-api-contract-v2.md`](ui-api-contract-v2.md) | v3.3.0 管理 API，包括 `/assistant`、AI 助手 B 配置/启停、插件、记忆、统计 |
+| [`ui-api-contract-v2.md`](ui-api-contract-v2.md) | v3.4.0 管理 API，包括 `/assistant`、AI 助手 B 配置/启停、插件、记忆、统计 |
 | [`plugin-qqbot-enhancer.md`](plugin-qqbot-enhancer.md) | qqbot_enhancer 1.4.1：自然语言找图、图片下载、本地唱歌、`/option`、记忆模式 |
 | [`server-troubleshooting.md`](server-troubleshooting.md) | Linux/云服务器排错资料；Windows 场景请同时阅读本目录 FAQ 和根 README |
 | [`integration-research.md`](integration-research.md) | AstrBot / SnowLuma / OneBot / DeepSeek 集成调研 |
-| [`qa-report-v2.md`](qa-report-v2.md) | 主项目 v3.3.0 条件验收和真实 E2E 待测清单 |
+| [`qa-report-v2.md`](qa-report-v2.md) | 主项目 v3.4.0 条件验收和真实 E2E 待测清单 |
 | [`ui-api-contract.md`](ui-api-contract.md) | 旧版单实例 API，历史兼容参考 |
 | [`qa-report.md`](qa-report.md) | 旧版 QA 快照，历史参考 |
 
-## v3.3.0 同步重点
+## v3.4.0 同步重点
 
 - 控制台顶部 **“AI 助手”** 链接跳转独立 `/assistant` 页面。
 - 主控制台不再内置离线“使用助手”A 面板，也不再内嵌 AI 助手 B 卡片。

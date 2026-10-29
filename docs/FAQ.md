@@ -105,7 +105,46 @@ QQ 密码，也不会绕过验证。
 5. `QQBotStudioWindows.exe --status`；
 6. 重新验证容器、插件和 AI 助手 B。
 
-## 10. 能否把 Linux 数据复制到 Windows？
+## 10. 如何编辑 qqbot_enhancer 参数（例如 reply_probability）？
+
+打开控制台，在对应实例的插件列表中找到 `qqbot_enhancer`，点击 **编辑参数**。
+面板会根据 `_conf_schema.json` 生成字段：
+
+- `reply_probability` 是群聊非 @ 消息的回复概率，范围 0–1；
+- bool、int/float、string/text、list 都按 schema 类型编辑；
+- 敏感 Key/token/password 字段不会显示或提交；
+- 保存后如果 AstrBot 在线，尽量热重载；离线时返回
+  `restart_required=true`，启动 AstrBot 后生效。
+
+对应 API：
+
+```text
+GET  /api/instances/<id>/plugins/<plugin_id>/config
+POST /api/instances/<id>/plugins/<plugin_id>/config
+```
+
+## 11. 从哪里下载正式 Windows EXE？
+
+从 GitHub Releases 下载，而不是只找 Actions artifact：
+
+<https://github.com/Stevehim2007/qqbot-studio-windows/releases>
+
+正式 tag 示例：`v0.3.0`。Release 应包含：
+
+- `QQBotStudioWindows.exe`
+- `SHA256SUMS.txt`
+- `README.md`
+- `VALIDATION.md`
+
+下载后先核对 SHA256，再运行 `QQBotStudioWindows.exe --version`。
+
+## 12. 能不能只下载 Actions artifact？
+
+Actions artifact 主要用于 CI 验证和测试；正式用户应下载 GitHub Release 中经过
+tag 校验的 EXE。Release workflow 会校验 `VERSION` 与 `v*` tag 一致，并重新跑测试、
+构建、EXE smoke 后才上传 assets。
+
+## 13. 能否把 Linux 数据复制到 Windows？
 
 不建议。Windows/Linux 的 Docker 宿主、路径、容器发布端口、登录态和程序版本边界不同。
 迁移实例前必须停机、备份并逐项复验容器、插件、QQ 登录和 AI 助手 B。

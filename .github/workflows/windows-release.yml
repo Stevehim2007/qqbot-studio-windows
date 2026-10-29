@@ -1,0 +1,95 @@
+name: Windows Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish Windows EXE
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout tagged source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements-build.txt
+
+      - name: Verify tag matches VERSION
+        shell: pwsh
+        run: |
+          $version = (Get-Content -LiteralPath VERSION -Raw).Trim()
+          $tag = '${{ github.ref_name }}'
+          if ("v$version" -ne $tag) {
+            throw "Tag $tag does not match VERSION $version (expected v$version)."
+          }
+          Write-Host "Building release v$version"
+
+      - name: Run independent test suite
+        shell: pwsh
+        run: python -m unittest discover -s tests -v
+
+      - name: Compile Python sources
+        shell: pwsh
+        run: python -m compileall -q qqbot_studio windows
+
+      - name: Validate PowerShell syntax
+        shell: pwsh
+        run: |
+          $failed = $false
+          Get-ChildItem -Path windows -Filter *.ps1 | ForEach-Object {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) {
+              $failed = $true
+              $errors | ForEach-Object { Write-Error ("{0}: {1}" -f $_.Extent.File, $_.Message) }
+            }
+          }
+          if ($failed) { throw 'PowerShell syntax validation failed.' }
+
+      - name: Build one-file EXE
+        shell: powershell
+        run: .\windows\build.ps1 -Clean
+
+      - name: Smoke-test EXE
+        shell: powershell
+        run: |
+          .\dist\QQBotStudioWindows.exe --version
+          .\dist\QQBotStudioWindows.exe --help | Out-Null
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: QQBotStudioWindows-${{ github.ref_name }}
+          path: |
+            dist/QQBotStudioWindows.exe
+            dist/SHA256SUMS.txt
+            README.md
+            VALIDATION.md
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Create GitHub Release and upload EXE assets
+        uses: softprops/action-gh-release@v2
+        with:
+          name: QQ Bot Studio Windows ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            dist/QQBotStudioWindows.exe
+            dist/SHA256SUMS.txt
+            README.md
+            VALIDATION.md

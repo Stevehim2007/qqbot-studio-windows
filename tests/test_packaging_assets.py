@@ -18,6 +18,7 @@ class PackagingAssetTests(unittest.TestCase):
             "windows/qqbot-studio-windows.spec",
             "windows/launcher.py",
             ".github/workflows/windows-build.yml",
+            ".github/workflows/windows-release.yml",
         ):
             self.assertTrue((ROOT / relative).is_file(), relative)
 
@@ -62,6 +63,22 @@ class PackagingAssetTests(unittest.TestCase):
         ):
             self.assertIn(expected, text, expected)
 
+    def test_release_workflow_publishes_exe_and_sha256(self):
+        text = (ROOT / ".github/workflows/windows-release.yml").read_text(
+            encoding="utf-8"
+        )
+        for expected in (
+            "tags:",
+            "v*",
+            "contents: write",
+            "windows-latest",
+            "softprops/action-gh-release@v2",
+            "dist/QQBotStudioWindows.exe",
+            "dist/SHA256SUMS.txt",
+            "fail_on_unmatched_files: true",
+        ):
+            self.assertIn(expected, text, expected)
+
     def test_readme_defines_independent_boundaries(self):
         text = (ROOT / "README.md").read_text(encoding="utf-8")
         for expected in (
@@ -75,6 +92,8 @@ class PackagingAssetTests(unittest.TestCase):
             "/assistant",
             "30 分钟",
             "1.4",
+            "GitHub Release",
+            "reply_probability",
             "真实 Windows",
             "未验证",
         ):

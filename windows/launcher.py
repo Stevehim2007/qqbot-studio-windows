@@ -27,7 +27,7 @@ import webbrowser
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
-LAUNCHER_VERSION = "0.2.0"
+LAUNCHER_VERSION = "0.3.0"
 DEFAULT_SERVER_WAIT_SECONDS = 90
 
 if getattr(sys, "frozen", False):

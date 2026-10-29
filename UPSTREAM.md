@@ -5,11 +5,11 @@ reusable Python/UI core from the Linux project instead of fetching code at
 runtime or build time.
 
 - Upstream project: `git@github.com:Stevehim2007/qqbot-studio.git`
-- Upstream snapshot commit: `7cdeb0ecc60066eb7df7702777289aa03a6f8bd1`
+- Upstream snapshot commit: `1e9d4a46b0aba7f89519066693f95b5939c7732e`
 - Snapshot date: 2026-10-29
-- Upstream release line: v3.3.0
-- Bundled core version: `qqbot_studio.__version__ == 3.3.0`
-- Windows launcher version: `0.2.0`
+- Upstream release line: v3.4.0
+- Bundled core version: `qqbot_studio.__version__ == 3.4.0`
+- Windows launcher version: `0.3.0`
 - Plugin snapshot: `qqbot_enhancer` 1.4.1
 
 The upstream working tree was clean at the snapshot commit. This repository is
@@ -23,11 +23,17 @@ Linux data directory or the Linux auto-update pipeline.
   from the Windows console;
 - 30-minute console auto-refresh and manual refresh;
 - AI assistant B loopback and explicit `0.0.0.0 + public_host` public mode;
+- **plugin parameter read/edit API and console panel**:
+  - GET/POST `/api/instances/<instance_id>/plugins/<plugin_id>/config`;
+  - schema-driven bool/int/float/string/text/list validation;
+  - `reply_probability` highlighted editor and offline restart guidance;
+  - sensitive Key/token/password fields excluded;
 - `qqbot_enhancer` 1.4.1 with natural-language image search, downloaded image
   sending, local song playback, `/option`, and memory-mode support;
 - latest API contract, plugin documentation, troubleshooting and QA references
   under `docs/`;
-- Windows launcher/services/PowerShell/PyInstaller/CI files maintained here.
+- Windows launcher/services/PowerShell/PyInstaller/CI files maintained here,
+  plus tag-driven GitHub Release publishing of the EXE and SHA256.
 
 ## Vendored / synced paths
 
@@ -48,6 +54,7 @@ syncs:
 - `windows/qqbot-studio-windows.spec`
 - `windows/install.ps1`, `start.ps1`, `console.ps1`, `common.ps1`
 - `.github/workflows/windows-build.yml`
+- `.github/workflows/windows-release.yml`
 - Windows-specific README/UPSTREAM/VALIDATION/tests
 
 ## Updating from upstream
@@ -67,10 +74,12 @@ syncs:
    ```
 
 6. Confirm `QQBotStudioWindows.exe --version`, `--help`, and (on a Windows host
-   with Docker Desktop) `--assistant`, service health, `--status`, `--stop`.
-7. Push and confirm the `windows-latest` CI workflow is green and uploads the
-   artifact.
-8. Only then announce the Windows artifact. Never claim unexecuted AstrBot,
+   with Docker Desktop) `--assistant`, plugin-config API, service health,
+   `--status`, and `--stop`.
+7. Push main and confirm `windows-build.yml` succeeds.
+8. Push a `v<version>` tag and confirm `windows-release.yml` creates a real
+   GitHub Release with `QQBotStudioWindows.exe` and `SHA256SUMS.txt` assets.
+9. Only then announce the Windows release. Never claim unexecuted AstrBot,
    SnowLuma, QQ, noVNC or DeepSeek end-to-end tests.
 
 Do not copy the Linux project's `install.sh`, `start.sh`, `console.sh`, screen
