@@ -1,6 +1,90 @@
 # Validation record
 
-## v0.4.0 / core 3.5.0 / plugin 1.5.0 (latest)
+## v0.4.1 / Windows file locations + safe data migration (latest)
+
+This development version adds the Windows data-location documentation and the
+`--move-data <NEW_DIR>` migration command. Core remains `3.5.0`; plugin remains
+`1.5.0`.
+
+### Migration behavior and tests
+
+Implemented behavior:
+
+- target must be an absolute path on a local fixed NTFS drive;
+- target must be absent or empty; no implicit merge is performed;
+- WSL/Docker Desktop filesystem paths, UNC/network shares, mapped/remote drives,
+  OneDrive paths, removable/unknown drives, drive roots, non-writable ACLs and
+  source/target nesting are rejected;
+- management service is stopped before copying;
+- every instance with a `compose.yml` in the old data directory gets
+  `docker compose down --remove-orphans`;
+- data is copied to a staging directory in the target parent, then published
+  with `os.replace`; the old data directory is retained;
+- `windows-data-move.json` and `studio.json` migration fields are written;
+- `%LOCALAPPDATA%\QQBotStudio\data-location.json` is updated atomically;
+- the service and containers are deliberately not auto-restarted;
+- failure cleans the staging/published target and keeps the old directory;
+- PowerShell fallback `Resolve-StudioDataDir` reads the same pointer file.
+
+Tests:
+
+- Linux Python: `python3 -m unittest discover -s tests -v` -> **59 tests OK
+  (1 Windows-drive test skipped)**.
+- Windows Python 3.10.9: same suite -> **59 tests OK** (including drive-type
+  checks).
+- New tests cover copy/pointer/record, empty-target conflict, nested/same source
+  and target, WSL/UNC/OneDrive path rejection, fixed-vs-remote drive type,
+  confirmation cancellation, service/container stop order, copy failure and
+  pointer-update failure rollback, PowerShell pointer parsing, CLI argument
+  validation, and documentation contents.
+- Windows `compileall` and existing static/Node/PowerShell checks remain green.
+
+### Local Windows PyInstaller build
+
+- Windows Python 3.10.9 + PyInstaller 6.10.0, `build.ps1 -Clean` exit 0.
+- EXE: `8,466,834` bytes.
+- SHA256: `8f12df1d3a2a5126a71fb7f4e776767b75190a13e33c1fd081cbf230dfc830e2`.
+- `--version`: `QQBot Studio Windows launcher 0.4.1 (core 3.5.0)`.
+- This is a local development build; v0.4.1 has not been tagged/released by this
+  task, so no published release digest is claimed for it.
+
+### Real EXE + Docker migration smoke
+
+Executed on the same Windows host with an isolated `%LOCALAPPDATA%`:
+
+- Started the EXE with explicit source data directory and a new `bot-1`
+  instance; source `/healthz` returned
+  `{"ok":true,"version":"3.5.0"}`.
+- Started a real busybox Compose service under the instance with
+  `container_name=qqbot-bot-1-astrbot`; `docker ps` showed it running.
+- Ran:
+  `QQBotStudioWindows.exe --move-data <target> --data-dir <source> --non-interactive`
+- Result:
+  - move exit 0; old directory retained;
+  - target contains `studio.json`, `instances\bot-1\instance.json`, and
+    `windows-data-move.json`;
+  - source container is gone after Compose `down`;
+  - pointer file exists and points at the target;
+  - copied `studio.json` contains `windows_data_dir=<target>`;
+  - service start from the target via the pointer succeeds;
+  - target `/healthz` returns version `3.5.0`; `/assistant` returns HTTP 200;
+  - `--stop` succeeds and health becomes unreachable.
+
+### Not verified for v0.4.1
+
+- No real AstrBot/SnowLuma deployment, QQ login, noVNC verification, DeepSeek
+  call or AI assistant B install/start.
+- Migration was tested with a synthetic Compose container, not a full QQ bot.
+- OneDrive/UNC/WSL actual host paths were covered by validation unit tests and
+  path logic; no real OneDrive/network-share mount was used for the smoke.
+- Browser auto-open, Windows Defender/firewall/cloud security-group access,
+  long-running multi-instance migration and actual user ACLs were not tested.
+- The migration smoke used `C:` fixed storage; a physical second disk was not
+  available for this host test.
+
+---
+
+## v0.4.0 / core 3.5.0 / plugin 1.5.0 (previous)
 
 Sync source: Linux main `d87f96561cd9167a0279584fffee7cc366564208`, clean
 working tree, core `3.5.0`, plugin `1.5.0`, Windows launcher `0.4.0`.

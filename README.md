@@ -8,11 +8,12 @@ QQ Bot Studio 的**独立 Windows 10/11 发行项目**，面向 Docker Desktop +
 本仓库不是 Linux 项目的打包目录，也不是它的自动更新分支。它拥有自己的启动器、
 Windows 服务生命周期实现、版本号、数据目录约定、测试和发布流水线。
 
-> **状态：Windows 独立发行版 v0.4.0，已同步主项目 core 3.5.0。**
+> **状态：Windows 开发版 v0.4.1（最新正式 Release 为 v0.4.0），已同步主项目 core 3.5.0。**
 >
 > 已包含独立 `/assistant` AI 助手页面、控制台 30 分钟刷新 + 手动刷新、
 > AI 助手 B 本机/公网配置、控制台插件参数编辑（`reply_probability` 等）、
-> qqbot_enhancer 1.5.0 用户表情自动反应/收藏分类/发表情和最新 API/FAQ 文档。
+> qqbot_enhancer 1.5.0 用户表情自动反应/收藏分类/发表情和最新 API/FAQ 文档；
+> v0.4.1 新增 Windows 文件位置说明与安全 `--move-data` 数据目录迁移。
 > Windows EXE 构建、隐藏管理服务、Docker Desktop/Linux engine 和本机 smoke
 > 已做部分真实验证；发布使用 `v*` tag 触发的 GitHub Release。
 > 但真实 Windows 上完整 AstrBot/SnowLuma 部署、noVNC 扫码和 QQ 验证仍未测试。
@@ -71,7 +72,7 @@ Windows 服务生命周期实现、版本号、数据目录约定、测试和发
 
 ### 升级边界
 
-- 本仓库独立维护版本：当前 `VERSION = 0.4.0`，bundled core 版本为
+- 本仓库独立维护版本：当前开发版 `VERSION = 0.4.1`，bundled core 版本为
   `qqbot_studio.__version__ = 3.5.0`。
 - Linux 主项目的自动更新、`scripts/auto-update.sh` 和网页内“更新并重启”不适用于
   本仓库。
@@ -144,8 +145,10 @@ docker info --format "{{.OSType}}"
 正式发布从 GitHub Releases 下载，而不是只依赖 Actions artifact：
 
 - Releases: <https://github.com/Stevehim2007/qqbot-studio-windows/releases>
-- Tag: `v0.4.0`
+- 最新正式 Release: `v0.4.0`
 - Release URL: <https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.4.0>
+- 当前源码/CI 构建为 `v0.4.1` 开发版（包含本文新增的 `--move-data`）；在下一个 tag
+  发布前，请从源码或最新 Actions artifact 获取该功能。
 - 发布 workflow: `windows-release.yml` run `40997401439`，conclusion `success`
 - Release assets 已确认：
   - `QQBotStudioWindows.exe`：`10,803,066` bytes，
@@ -290,6 +293,92 @@ Get-Content "$env:LOCALAPPDATA\QQBotStudio\data\studio-server.log" -Encoding UTF
 Get-Content "$env:LOCALAPPDATA\QQBotStudio\data\studio-server.err.log" -Encoding UTF8 -Tail 100
 ```
 
+### Windows 文件位置与安全迁移数据目录
+
+#### 文件位置
+
+Windows 版没有系统级安装目录：`QQBotStudioWindows.exe`、README、VERSION 等就是发行包
+文件，放在你下载/解压的位置；EXE 解包运行的临时目录不是数据目录。正式安装/升级建议
+先停止管理服务，再整体替换 EXE 发行文件。
+
+默认根目录：
+
+```text
+%LOCALAPPDATA%\QQBotStudio\
+├── data\                         # 默认数据目录
+│   ├── studio.json               # 监听 IP/端口/public_host、镜像节点
+│   ├── windows-data-move.json    # 迁移后生成的迁移记录
+│   ├── server.pid
+│   ├── server-runtime.json
+│   ├── studio-server.log
+│   ├── studio-server.err.log
+│   ├── instances\bot-N\
+│   │   ├── instance.json
+│   │   ├── config.json           # QQ 号、模型、端口等
+│   │   ├── secrets.json          # 敏感凭据，勿分享
+│   │   ├── deploy-state.json
+│   │   ├── compose.yml
+│   │   ├── .env                  # 敏感凭据，勿分享
+│   │   ├── jobs\                 # 部署任务日志
+│   │   └── data\
+│   │       ├── astrbot\
+│   │       │   ├── plugins\qqbot_enhancer\
+│   │       │   ├── config\qqbot_enhancer_config.json
+│   │       │   └── plugin_data\qqbot_enhancer\collected_stickers\
+│   │       └── snowluma\
+│   ├── extensions\ai-assistant\  # 可选 AI 助手 B 代码
+│   └── ai-assistant\
+│       ├── config.json           # B 的配置；不要分享
+│       ├── assistant.log
+│       └── assistant.pid
+└── data-location.json            # 仅在 --move-data 后出现，指向新数据目录
+```
+
+- 内置插件/表情包随 EXE 打包；实际安装到实例的插件在
+  `instances\bot-N\data\astrbot\plugins\qqbot_enhancer`。
+- 本地点歌音频放在该实例的
+  `data\astrbot\plugins\qqbot_enhancer\songs\`（仅使用你有权使用的音频）。
+- `config.json`、`secrets.json`、`.env`、AI 助手 `config.json` 均可能含敏感信息，请使用
+  Windows ACL 限制访问，不要上传到公开仓库/issue。
+- 移动数据目录后，启动器会读取 `%LOCALAPPDATA%\QQBotStudio\data-location.json`；
+  也可以始终显式传 `--data-dir <目录>`。
+
+#### 安全迁移命令
+
+```powershell
+# 先备份整个默认数据目录，然后运行；交互模式会要求输入 MOVE 确认
+.\QQBotStudioWindows.exe --move-data "D:\QQBotStudioData"
+
+# 已确认备份且需要脚本自动化时
+.\QQBotStudioWindows.exe --move-data "D:\QQBotStudioData" --non-interactive
+```
+
+迁移会自动：
+
+1. 校验目标必须是本机固定 NTFS 磁盘上的**不存在或空目录**；拒绝 WSL/Docker Desktop
+   WSL 路径、OneDrive、UNC/网络共享、可移动盘、未知盘和不可写 ACL；
+2. 停止管理服务；对旧数据目录中已有 `compose.yml` 的实例执行
+   Compose `down --remove-orphans`，避免旧 bind mount 继续运行；
+3. 复制整个数据目录到目标目录（暂存 + 原子发布），写入
+   `windows-data-move.json` 和 `studio.json` 的迁移字段；
+4. 原子更新 `%LOCALAPPDATA%\QQBotStudio\data-location.json`；
+5. **保留旧目录**作为备份，不自动删除，也不自动重启管理服务/容器。
+
+迁移后：
+
+```powershell
+.\QQBotStudioWindows.exe --status
+.\QQBotStudioWindows.exe --assistant
+```
+
+Compose bind mount 必须由 Windows 核心在新数据目录下重新执行/重建，不能只修改
+`compose.yml` 字符串。若新目录不可用：
+
+1. 以 `--data-dir <旧目录>` 运行 `--status`/`--stop`；
+2. 不要把 `data-location.json` 指向不存在/不可写的位置；
+3. 旧目录仍完整保留，可继续用 `--data-dir <旧目录>` 启动；确认新目录验证完成后再人工
+   删除旧备份。
+
 ---
 
 ## 4. PowerShell 安装/启动脚本（备用）
@@ -401,7 +490,7 @@ Artifact 包括 EXE、SHA256、README、VERSION、LICENSE、UPSTREAM、VALIDATIO
 [`.github/workflows/windows-release.yml`](.github/workflows/windows-release.yml) 在
 推送 `v*` tag 时：
 
-1. 校验 `VERSION` 与 tag 一致（`VERSION=0.4.0` 必须对应 `v0.4.0`）；
+1. 校验 `VERSION` 与 tag 一致（例如 `VERSION=0.4.1` 必须对应 `v0.4.1`）；
 2. 重新跑独立测试、compileall、PowerShell AST、PyInstaller 构建和 EXE smoke；
 3. 上传 Actions artifact；
 4. 通过 `softprops/action-gh-release@v2` 创建真实 GitHub Release；

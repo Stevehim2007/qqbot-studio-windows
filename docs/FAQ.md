@@ -126,6 +126,29 @@ GET  /api/instances/<id>/plugins/<plugin_id>/config
 POST /api/instances/<id>/plugins/<plugin_id>/config
 ```
 
+## 10.1 如何安全更改 Windows 数据文件夹？
+
+先停止使用并备份旧数据目录，然后运行：
+
+```powershell
+.\QQBotStudioWindows.exe --move-data "D:\QQBotStudioData"
+```
+
+规则和结果：
+
+- 目标必须位于本机固定 NTFS 磁盘，且为空或不存在；
+- 拒绝 WSL/Docker Desktop WSL 文件系统、OneDrive、UNC/网络共享、可移动盘/未知盘；
+- 迁移前停止管理服务；已有 `compose.yml` 的实例执行 Compose `down`；
+- 复制数据并写入 `windows-data-move.json`，原子更新
+  `%LOCALAPPDATA%\QQBotStudio\data-location.json`；
+- 旧目录保留作为备份，不自动删除、不自动重启服务/容器；
+- 迁移后运行 `--status`，让核心从新数据目录重新生成/启动 Compose bind mount；
+- 失败或需要回滚时，继续用 `--data-dir <旧目录>` 显式启动；不要删除旧目录直到新目录
+  验证完成。
+
+路径没有 EXE 安装目录时，默认数据根、日志、AI 助手和插件详细路径见根 README 的
+“Windows 文件位置与安全迁移数据目录”。
+
 ## 11. 从哪里下载正式 Windows EXE？
 
 从 GitHub Releases 下载，而不是只找 Actions artifact：

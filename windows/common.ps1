@@ -30,13 +30,35 @@ function Resolve-StudioDataDir {
     if ([string]::IsNullOrWhiteSpace($candidate)) {
         $candidate = [Environment]::GetEnvironmentVariable('QQBOT_STUDIO_DATA_DIR')
     }
+    $localAppData = [Environment]::GetEnvironmentVariable('LOCALAPPDATA')
+    $baseDir = $null
+    if (-not [string]::IsNullOrWhiteSpace($localAppData)) {
+        $baseDir = Join-Path $localAppData 'QQBotStudio'
+    } else {
+        $baseDir = Join-Path $HOME 'AppData\Local\QQBotStudio'
+    }
     if ([string]::IsNullOrWhiteSpace($candidate)) {
-        $localAppData = [Environment]::GetEnvironmentVariable('LOCALAPPDATA')
-        if (-not [string]::IsNullOrWhiteSpace($localAppData)) {
-            $candidate = Join-Path $localAppData 'QQBotStudio\data'
-        } else {
-            $candidate = Join-Path $HOME 'AppData\Local\QQBotStudio\data'
+        $pointerPath = Join-Path $baseDir 'data-location.json'
+        if (Test-Path -LiteralPath $pointerPath -PathType Leaf) {
+            try {
+                $pointer = Get-Content -LiteralPath $pointerPath -Raw | ConvertFrom-Json
+                $pointerDataDir = [string]$pointer.data_dir
+                if ([string]::IsNullOrWhiteSpace($pointerDataDir)) {
+                    throw 'data_dir is empty'
+                }
+                $pointerResolved = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($pointerDataDir.Trim())
+                $pointerResolved = [System.IO.Path]::GetFullPath($pointerResolved)
+                if (-not (Test-Path -LiteralPath $pointerResolved -PathType Container)) {
+                    throw "target directory does not exist: $pointerResolved"
+                }
+                $candidate = $pointerResolved
+            } catch {
+                throw "Cannot read data-location.json: $pointerPath : $($_.Exception.Message). Pass -DataDir explicitly to override."
+            }
         }
+    }
+    if ([string]::IsNullOrWhiteSpace($candidate)) {
+        $candidate = Join-Path $baseDir 'data'
     }
 
     $unresolved = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($candidate.Trim())

@@ -8,7 +8,7 @@
 > 直接共用。完整说明见根目录 [`README.md`](../README.md) 和
 > [`UPSTREAM.md`](../UPSTREAM.md)。
 >
-> **状态：Windows 独立发行版 v0.4.0，已同步 upstream core 3.5.0。** 已包含独立
+> **状态：Windows 开发版 v0.4.1（最新正式 Release 为 v0.4.0），已同步 upstream core 3.5.0。** 已包含独立
 > `/assistant` 页面、AI 助手 B 本机/公网配置、30 分钟刷新、控制台插件参数编辑和
 > qqbot_enhancer 1.5.0。发布由 `v*` tag 触发 GitHub Release，上传 EXE 和 SHA256。
 > 基础 Docker Desktop/Linux engine、Compose、EXE 构建和管理服务生命周期已实际测试；
@@ -226,6 +226,39 @@ qqbot_enhancer 1.5.0 新增：
 - 收藏表情参与正常回复，和内置 8 张表情包可混合使用；
 - WebUI/API 可编辑 `user_sticker_reaction_*`、`collected_sticker_*` schema 参数。
 
+### 文件位置与数据迁移
+
+- EXE/发行文件：你下载/解压的位置；本工具不创建系统级安装目录。
+- 默认数据根：`%LOCALAPPDATA%\QQBotStudio\data`。
+- 迁移指针：`%LOCALAPPDATA%\QQBotStudio\data-location.json`（执行 `--move-data` 后）。
+- 全局配置：数据根下的 `studio.json`。
+- 实例：`instances\bot-N\`，含 `instance.json`、`config.json`、`secrets.json`、
+  `compose.yml`、`.env`、`jobs\` 和 `data\astrbot\...`、`data\snowluma\...`。
+- 管理日志：`studio-server.log`、`studio-server.err.log`；状态：`server.pid`、
+  `server-runtime.json`。
+- AI 助手 B：代码在 `extensions\ai-assistant\`，配置/日志/PID 在
+  `ai-assistant\config.json`、`assistant.log`、`assistant.pid`。
+- 插件：实例内 `data\astrbot\plugins\qqbot_enhancer\`；配置在
+  `data\astrbot\config\qqbot_enhancer_config.json`；收藏表情在
+  `data\astrbot\plugin_data\qqbot_enhancer\collected_stickers\`；点歌音频在插件目录
+  `songs\`。
+
+安全迁移命令：
+
+```powershell
+.\QQBotStudioWindows.exe --move-data "D:\QQBotStudioData"
+```
+
+目标必须是本机固定 NTFS 磁盘上的不存在或空目录；拒绝 WSL、OneDrive、UNC/网络共享、
+可移动盘/未知盘和不可写路径。迁移会先停止管理服务并对其旧数据目录中已有
+`compose.yml` 的实例执行 Compose `down --remove-orphans`，再复制数据、写迁移记录和
+`data-location.json`。旧目录会保留，服务/容器不会自动重启；迁移后执行
+`QQBotStudioWindows.exe --status`，并让核心在新目录下重新生成/启动 Compose。
+失败时旧目录不变；回滚可继续显式使用旧目录 `--data-dir <旧目录>`。
+
+详细目录树见根 README。
+
+### 正式 EXE Release
 ### 正式 EXE Release
 
 `v0.4.0` 起推送匹配 `VERSION` 的 tag 会触发

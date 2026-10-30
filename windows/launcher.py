@@ -16,19 +16,24 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import socket
 import subprocess
 import sys
+import tempfile
 import time
 import traceback
 import urllib.request
 import webbrowser
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
-LAUNCHER_VERSION = "0.4.0"
+LAUNCHER_VERSION = "0.4.1"
 DEFAULT_SERVER_WAIT_SECONDS = 90
+DATA_LOCATION_POINTER_FILENAME = "data-location.json"
+MOVE_RECORD_FILENAME = "windows-data-move.json"
 
 if getattr(sys, "frozen", False):
     PROJECT_ROOT = Path(getattr(sys, "_MEIPASS", Path(sys.executable).resolve().parent))
@@ -183,6 +188,15 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Open the standalone AI Assistant B page (/assistant) instead of the console.",
     )
+    parser.add_argument(
+        "--move-data",
+        default=None,
+        metavar="NEW_DIR",
+        help=(
+            "Safely copy the data directory to NEW_DIR, update the data-location pointer, "
+            "and stop the management service and deployed instance containers."
+        ),
+    )
     parser.add_argument("--configure", action="store_true", help="Force the first-run IP/port/public-host prompts.")
     parser.add_argument("--non-interactive", action="store_true", help="Use defaults/arguments without prompts.")
     parser.add_argument("--no-open", action="store_true", help="Do not open the default browser.")
@@ -204,12 +218,360 @@ def build_parser() -> argparse.ArgumentParser:
 # ---------------------------------------------------------------------------
 
 
-def resolve_data_dir(value: str | None) -> Path:
+def data_location_pointer_path() -> Path:
+    """Stable pointer outside the data directory, used after --move-data."""
+
+    base = (
+        os.environ.get("LOCALAPPDATA", "").strip()
+        or os.environ.get("APPDATA", "").strip()
+        or str(Path.home())
+    )
+    return Path(base) / "QQBotStudio" / DATA_LOCATION_POINTER_FILENAME
+
+
+def _read_data_location_pointer(pointer_path: Path | None = None) -> Path | None:
+    path = pointer_path or data_location_pointer_path()
+    if not path.is_file():
+        return None
+    payload = _read_json(path)
+    if not isinstance(payload, dict) or not str(payload.get("data_dir") or "").strip():
+        raise ValueError(
+            f"Data location pointer is invalid: {path}. Repair it or pass --data-dir explicitly."
+        )
+    target = Path(str(payload["data_dir"])).expanduser().resolve()
+    if not target.is_dir():
+        raise ValueError(
+            f"Data location pointer points to a missing directory: {target}. "
+            "Restore the directory or pass --data-dir explicitly."
+        )
+    return target
+
+
+def _write_data_location_pointer(target: Path, pointer_path: Path | None = None) -> Path:
+    path = pointer_path or data_location_pointer_path()
+    _write_json_atomic(
+        path,
+        {
+            "schema_version": 1,
+            "data_dir": str(target.resolve()),
+            "updated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        },
+    )
+    return path
+
+
+def resolve_data_dir(value: str | None, *, pointer_path: Path | None = None) -> Path:
     if value:
-        path = Path(value).expanduser()
+        return Path(value).expanduser().resolve()
+    env_value = os.environ.get("QQBOT_STUDIO_DATA_DIR", "").strip()
+    if env_value:
+        return Path(env_value).expanduser().resolve()
+    pointed = _read_data_location_pointer(pointer_path)
+    if pointed is not None:
+        return pointed
+    return default_data_dir().resolve()
+
+
+def _write_json_atomic(path: Path, payload: dict[str, Any]) -> None:
+    _write_text_atomic(path, json.dumps(payload, ensure_ascii=False, indent=2) + "\n")
+
+
+def _is_path_within(child: Path, parent: Path) -> bool:
+    try:
+        child.resolve().relative_to(parent.resolve())
+        return True
+    except ValueError:
+        return False
+
+
+def _lower_path_parts(value: str) -> list[str]:
+    return [part for part in re.split(r"[\\/]+", value.lower()) if part]
+
+
+def _windows_drive_type(path: Path) -> int:
+    """Return the Win32 drive type for a path, or 1 when unavailable."""
+
+    if os.name != "nt":
+        return 3
+    try:
+        import ctypes
+
+        drive = str(path.drive)
+        if not drive:
+            return 1
+        root = drive + "\\"
+        return int(ctypes.windll.kernel32.GetDriveTypeW(root))
+    except Exception:
+        return 1
+
+
+def validate_move_target(
+    source: Path,
+    target: Path,
+    *,
+    drive_type_func: Callable[[Path], int] | None = None,
+) -> Path:
+    """Validate a destination for the safe data-directory migration."""
+
+    raw_source = str(source)
+    raw_target = str(target)
+    lower_target = raw_target.lower().replace("/", "\\")
+    parts = _lower_path_parts(lower_target)
+
+    # Reject forbidden path kinds before resolve(): resolving a nonexistent UNC
+    # path on Windows raises FileNotFoundError before we can emit a clear error.
+    if (
+        lower_target.startswith("\\\\wsl$")
+        or lower_target.startswith("\\\\wsl.localhost")
+        or "\\wsl$\\" in lower_target
+        or "\\wsl.localhost\\" in lower_target
+        or any(part in {"wsl$", "wsl.localhost"} for part in parts)
+    ):
+        raise ValueError("Data directory cannot be placed in the Docker Desktop/WSL filesystem.")
+
+    if lower_target.startswith("\\\\") or lower_target.startswith("//"):
+        raise ValueError("Data directory cannot be a UNC/network share.")
+
+    if any(
+        part == "onedrive"
+        or part.startswith("onedrive ")
+        or part.startswith("onedrive-")
+        for part in parts
+    ):
+        raise ValueError("Data directory cannot be inside OneDrive; use a local fixed NTFS directory.")
+
+    source = Path(raw_source).expanduser().resolve()
+    target = Path(raw_target).expanduser().resolve()
+
+    for env_name in ("OneDrive", "OneDriveConsumer", "OneDriveCommercial"):
+        root_value = os.environ.get(env_name, "").strip()
+        if root_value:
+            try:
+                root = Path(root_value).expanduser().resolve()
+            except OSError:
+                continue
+            if _is_path_within(target, root):
+                raise ValueError(
+                    "Data directory cannot be inside OneDrive; choose a local non-synced directory."
+                )
+
+    if os.name == "nt":
+        if not target.drive:
+            raise ValueError("Data directory must be an absolute path on a local fixed drive.")
+        drive_type = (drive_type_func or _windows_drive_type)(target)
+        # 3 = DRIVE_FIXED. Reject remote/removable/unknown drives for migration.
+        if drive_type != 3:
+            raise ValueError(
+                "Data directory must be on a local fixed NTFS drive "
+                "(network, removable, CD-ROM, RAM and unknown drives are rejected)."
+            )
+
+    if target.parent == target:
+        raise ValueError("A filesystem/drive root cannot be used as the data directory.")
+    if target == source:
+        raise ValueError("New data directory must differ from the current data directory.")
+    if _is_path_within(target, source) or _is_path_within(source, target):
+        raise ValueError("New data directory cannot contain the old data directory or be nested inside it.")
+
+    if target.exists():
+        if not target.is_dir():
+            raise ValueError(f"New data path exists but is not a directory: {target}")
+        try:
+            if any(target.iterdir()):
+                raise ValueError(
+                    f"New data directory must be empty or absent; refusing to merge into: {target}"
+                )
+        except OSError as exc:
+            raise ValueError(f"Cannot inspect new data directory {target}: {exc}") from exc
+
+    try:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        probe = target.parent / f".qqbot-move-write-test-{os.getpid()}"
+        probe.write_text("QQ Bot Studio data-directory write probe\n", encoding="utf-8")
+        probe.unlink()
+    except OSError as exc:
+        raise ValueError(f"New data directory is not writable: {target}: {exc}") from exc
+
+    return target
+
+
+def _stop_instance_containers(data_dir: Path, *, print_func: PrintFunc = _say) -> list[str]:
+    """Bring down Compose projects whose files live in this data directory."""
+
+    studio = StudioManager(data_dir)
+    candidates: list[tuple[dict[str, Any], Path]] = []
+    for meta in studio.list_instance_metas():
+        instance_dir = data_dir / "instances" / str(meta.get("id") or "")
+        if instance_dir.is_dir() and (instance_dir / "compose.yml").is_file():
+            candidates.append((meta, instance_dir))
+    if not candidates:
+        return []
+
+    probe = DockerController(data_dir)
+    status = probe.detect(force=True)
+    if not status.ready:
+        raise RuntimeError(
+            "Existing deployed instances have Docker Compose files, but Docker Desktop is not ready. "
+            "Start Docker Desktop and retry --move-data before migration."
+        )
+
+    stopped: list[str] = []
+    for meta, instance_dir in candidates:
+        instance_id = str(meta.get("id") or "unknown")
+        controller = DockerController(
+            instance_dir,
+            project_name=str(meta.get("project_name") or f"qqbot-studio-{instance_id}"),
+            astrbot_container=str(meta.get("astrbot_container") or f"qqbot-{instance_id}-astrbot"),
+            snowluma_container=str(meta.get("snowluma_container") or f"qqbot-{instance_id}-snowluma"),
+        )
+        print_func(f"Stopping containers for instance {instance_id} (compose down)...")
+        result = controller.compose(
+            ["down", "--remove-orphans"],
+            timeout=300,
+            check=False,
+            what=f"停止实例 {instance_id} 的容器",
+        )
+        if not result.ok:
+            raise RuntimeError(
+                f"Could not stop containers for instance {instance_id}; migration aborted. "
+                f"{result.output or 'Docker Compose down failed'}"
+            )
+        stopped.append(instance_id)
+    return stopped
+
+
+def move_data(
+    current_data_dir: Path,
+    new_data_dir: Path,
+    *,
+    non_interactive: bool = False,
+    pointer_path: Path | None = None,
+    stop_service_func: Callable[..., Any] | None = None,
+    stop_containers_func: Callable[..., list[str]] | None = None,
+    input_func: Callable[[str], str] = input,
+    print_func: PrintFunc = _say,
+) -> int:
+    """Copy data to an empty local target and persist the new location pointer.
+
+    The old directory is never deleted. Deployed Compose projects are brought
+    down before copying; they are not silently restarted because the caller must
+    verify the new data directory and let the deployer recreate bind mounts from
+    the new path.
+    """
+
+    source = Path(current_data_dir).expanduser().resolve()
+    target = Path(new_data_dir).expanduser().resolve()
+    validate_move_target(source, target)
+
+    if not source.is_dir():
+        raise ValueError(f"Current data directory does not exist: {source}")
+    if not (source / "studio.json").is_file() and not (source / "instances").is_dir():
+        raise ValueError(f"Current directory does not look like a QQ Bot Studio data directory: {source}")
+
+    settings = _read_json(source / "studio.json") or {}
+    bind_host = str(settings.get("bind_host") or DEFAULT_BIND_HOST)
+    try:
+        bind_port = int(settings.get("bind_port") or DEFAULT_BIND_PORT)
+    except (TypeError, ValueError):
+        bind_port = DEFAULT_BIND_PORT
+
+    print_func("")
+    print_func("Data-directory migration safety notice:")
+    print_func("  - The old directory will be retained as a backup.")
+    print_func("  - The management service and deployed instance containers will be stopped.")
+    print_func("  - The target must be empty/absent; no merge is performed.")
+    print_func("  - Back up sensitive data before continuing.")
+    print_func("  - WSL, OneDrive, UNC/network, removable and unknown drives are rejected.")
+    if not non_interactive:
+        try:
+            answer = input_func("Type MOVE to continue: ").strip()
+        except EOFError:
+            answer = ""
+        if answer.upper() != "MOVE":
+            print_func("Migration cancelled; nothing was changed.")
+            return 1
+
+    # Stop the management service before touching instance containers/data.
+    if stop_service_func is None:
+        stop_management_server(source, bind_host=bind_host, port=bind_port, print_func=print_func)
     else:
-        path = default_data_dir()
-    return path.resolve()
+        stop_service_func(
+            source, bind_host=bind_host, port=bind_port, print_func=print_func
+        )
+
+    # Stop Compose projects whose files live under the old data directory.
+    if stop_containers_func is None:
+        stopped_instances = _stop_instance_containers(source, print_func=print_func)
+    else:
+        stopped_instances = stop_containers_func(source, print_func=print_func)
+
+    staging: Path | None = None
+    published = False
+    try:
+        staging = Path(
+            tempfile.mkdtemp(prefix=f".{target.name}.qqbot-move-", dir=str(target.parent))
+        )
+        print_func(f"Copying data to staging directory: {staging}")
+        shutil.copytree(
+            source,
+            staging,
+            dirs_exist_ok=True,
+            copy_function=shutil.copy2,
+        )
+        moved_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+        record = {
+            "schema_version": 1,
+            "from": str(source),
+            "to": str(target),
+            "moved_at": moved_at,
+            "status": "copied",
+            "old_directory_retained": True,
+            "containers_stopped": list(stopped_instances),
+        }
+        _write_json_atomic(staging / MOVE_RECORD_FILENAME, record)
+        copied_settings = _read_json(staging / "studio.json") or {}
+        copied_settings["windows_data_dir"] = str(target)
+        copied_settings["windows_data_moved_at"] = moved_at
+        _write_json_atomic(staging / "studio.json", copied_settings)
+
+        if target.exists():
+            if any(target.iterdir()):
+                raise RuntimeError(
+                    f"Target became non-empty during migration; refusing to overwrite: {target}"
+                )
+            target.rmdir()
+        os.replace(staging, target)
+        staging = None
+        published = True
+        pointer = _write_data_location_pointer(target, pointer_path)
+    except Exception as exc:
+        if staging is not None and staging.exists():
+            shutil.rmtree(staging, ignore_errors=True)
+        if published:
+            shutil.rmtree(target, ignore_errors=True)
+        raise RuntimeError(
+            "Data migration failed. The old data directory was retained unchanged. "
+            f"Target: {target}. Original error: {exc}"
+        ) from exc
+
+    print_func("")
+    print_func("Data migration completed.")
+    print_func(f"  Old data (retained as backup): {source}")
+    print_func(f"  New data: {target}")
+    print_func(f"  Location pointer: {pointer}")
+    print_func(f"  Migration record: {target / MOVE_RECORD_FILENAME}")
+    if stopped_instances:
+        print_func("  Containers brought down: " + ", ".join(stopped_instances))
+    else:
+        print_func("  Containers brought down: none found")
+    print_func("  The management service was not automatically restarted.")
+    print_func("  Verify with: QQBotStudioWindows.exe --status")
+    print_func("  Start the UI with: QQBotStudioWindows.exe")
+    print_func("  If the new location is unusable, keep using the old directory directly:")
+    print_func(f"    QQBotStudioWindows.exe --data-dir \"{source}\"")
+    print_func("  Do not delete the old directory until the new service and containers are verified.")
+    print_func("  Existing Compose projects were brought down; let the deployer recreate them from the new data path.")
+    return 0
 
 
 def _prompt_value(default: str, prompt: str, input_func: Callable[[str], str]) -> str:
@@ -909,6 +1271,18 @@ def _run_management_server(args: argparse.Namespace) -> int:
 
 
 def _validate_action_combination(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
+    if args.move_data is not None:
+        if (
+            args.status
+            or args.stop
+            or args.logs is not None
+            or args.new_instance is not None
+            or args.assistant
+            or args.configure
+            or args.restart
+        ):
+            parser.error("--move-data must be used alone (apart from --data-dir/--non-interactive).")
+        return
     terminal = [bool(args.status), bool(args.stop), args.logs is not None]
     if sum(1 for item in terminal if item) > 1:
         parser.error("--status, --stop and --logs are mutually exclusive.")
@@ -922,6 +1296,13 @@ def run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
     _validate_action_combination(parser, args)
     data_dir = resolve_data_dir(args.data_dir)
 
+    if args.move_data is not None:
+        return move_data(
+            data_dir,
+            Path(args.move_data),
+            non_interactive=args.non_interactive,
+            print_func=_say,
+        )
     if args.logs is not None:
         return print_logs(data_dir, int(args.logs))
 
