@@ -136,8 +136,11 @@ docker info --format "{{.OSType}}"
 
 - Releases: <https://github.com/Stevehim2007/qqbot-studio-windows/releases>
 - Tag: `v0.3.0`
+- Release URL: <https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.3.0>
+- 发布 workflow: run `40995684732`，conclusion `success`
 - Release assets：
-  - `QQBotStudioWindows.exe`
+  - `QQBotStudioWindows.exe`：`10,795,114` bytes，
+    SHA256 `e676ded2bc78ca5b65ac45a11f98e9c1bbb11cd325d39791592242385aca08d0`
   - `SHA256SUMS.txt`
   - `README.md`
   - `VALIDATION.md`
@@ -360,10 +363,11 @@ AI 助手 B 默认端口为 `8766`，但实际值以 `/assistant` 页面配置�
 
 ### GitHub Actions
 
-[`.github/workflows/windows-build.yml`](.github/workflows/windows-build.yml) 已在
-GitHub 托管的 `windows-latest` runner 上实际运行通过：v0.2.0 同步提交
-`9b4e44a` 的 run `40895998356` conclusion 为 `success`，artifact 大小
-`10,688,179` bytes。workflow 会：
+[`.github/workflows/windows-build.yml`](.github/workflows/windows-build.yml) 会在
+push/PR 时构建并上传测试 artifact。正式发布由
+[`.github/workflows/windows-release.yml`](.github/workflows/windows-release.yml)
+在 `v*` tag 上执行；`v0.3.0` 的 Release run `40995684732` 已实际成功。构建
+workflow 会：
 
 1. 安装 Python 3.12；
 2. 跑独立测试；
@@ -388,6 +392,20 @@ Artifact 包括 EXE、SHA256、README、VERSION、LICENSE、UPSTREAM、VALIDATIO
 5. 把 `QQBotStudioWindows.exe` 和 `SHA256SUMS.txt` 作为 Release assets 上传。
 
 只上传 Actions artifact 不算发布；Release assets 必须存在。
+
+v0.3.0 实际结果：
+
+- Run: <https://github.com/Stevehim2007/qqbot-studio-windows/actions/runs/40995684732>
+- 全部 11 个步骤成功，包括 tag/VERSION 校验、44 tests、compileall、PowerShell
+  AST、PyInstaller 构建、EXE `--version/--help` smoke、Actions artifact upload 和
+  Create GitHub Release。
+- Release assets 已确认：`QQBotStudioWindows.exe`、`SHA256SUMS.txt`、`README.md`、
+  `VALIDATION.md`。Release EXE digest 由 GitHub API 返回并核验为
+  `sha256:e676ded2bc78ca5b65ac45a11f98e9c1bbb11cd325d39791592242385aca08d0`。
+- 本地复现构建（Windows Python 3.10/PyInstaller 6.10.0）为 `8,453,805` bytes，
+  SHA256 `a3eaa74880d5f64fe954c3842cb986dac782650d83a127422560ac172be144c1`；
+  与 CI one-file EXE 不保证逐字节一致，正式 Release 以
+  `e676ded2bc78ca5b65ac45a11f98e9c1bbb11cd325d39791592242385aca08d0` 为准。
 
 ---
 

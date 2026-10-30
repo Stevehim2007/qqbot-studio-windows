@@ -222,10 +222,12 @@ New-NetFirewallRule `
 `v0.3.0` 起推送匹配 `VERSION` 的 tag 会触发
 `.github/workflows/windows-release.yml`，创建真实 GitHub Release 并上传：
 
-- `QQBotStudioWindows.exe`
+- `QQBotStudioWindows.exe`（v0.3.0 release 为 `10,795,114` bytes，
+  SHA256 `e676ded2bc78ca5b65ac45a11f98e9c1bbb11cd325d39791592242385aca08d0`）
 - `SHA256SUMS.txt`
 
-只上传 Actions artifact 不算正式发布。参见根 README 的下载/校验示例。
+实际 release workflow run `40995684732` 已成功。只上传 Actions artifact 不算正式
+发布；参见根 README 的下载/校验示例。
 
 ## 7. 已知限制与未验证项
 

@@ -81,16 +81,41 @@ Verified:
   - `docker compose down --remove-orphans` exit 0;
   - no leftover test container.
 
-### GitHub Actions and Release
+### GitHub Actions and Release (actual)
 
-- `windows-build.yml` is intended to run for push/PR and upload a workflow
-  artifact.
-- `windows-release.yml` is intended to run for `v*` tags, verify the tag matches
-  `VERSION`, rebuild the EXE, and create a real GitHub Release with
-  `QQBotStudioWindows.exe` and `SHA256SUMS.txt`.
-- Release execution result is recorded after the tag is pushed. This section is
-  updated by a follow-up docs commit if needed; it is not a substitute for a
-  GitHub Release asset.
+The release workflow was executed on tag `v0.3.0` and succeeded.
+
+- Release tag: `v0.3.0`
+- Tagged release commit: `5b540f08d1a8d4d7f6833c8a82d310eb305f9cf4`
+- Release workflow run: `40995684732`
+- Run URL: https://github.com/Stevehim2007/qqbot-studio-windows/actions/runs/40995684732
+- Conclusion: `success`
+- All steps succeeded:
+  - checkout tagged source;
+  - Python 3.12 setup;
+  - tag/VERSION validation;
+  - independent test suite;
+  - Python compileall;
+  - PowerShell AST validation;
+  - PyInstaller one-file EXE build;
+  - EXE `--version`/`--help` smoke;
+  - workflow artifact upload;
+  - Create GitHub Release and EXE assets upload.
+- Release URL: https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.3.0
+- Release assets confirmed through the public GitHub API:
+  - `QQBotStudioWindows.exe` size `10,795,114` bytes;
+  - GitHub API asset digest:
+    `sha256:e676ded2bc78ca5b65ac45a11f98e9c1bbb11cd325d39791592242385aca08d0`;
+  - `SHA256SUMS.txt` downloaded and contained the same digest;
+  - `README.md`;
+  - `VALIDATION.md`.
+- GitHub's release asset CDN download of the EXE timed out from this WSL
+  environment after the API metadata and SHA256SUMS download succeeded; the
+  release EXE itself was built and smoke-tested by the successful Windows CI
+  job. The digest was verified against the downloadable `SHA256SUMS.txt`.
+- The local independently built EXE is intentionally listed above with a
+  different digest; one-file artifacts are not guaranteed byte-identical across
+  build hosts.
 
 ### Not verified for v0.3.0
 
