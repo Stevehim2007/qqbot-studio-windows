@@ -601,7 +601,9 @@ v0.4.0 实际结果：
 5. 同步后的测试必须通过，否则 workflow 不提交；版本号升级和发布 tag 仍由发布任务
    显式处理；
 6. tag `v*` 发布前必须校验 `VERSION`，并同批构建/上传 Docker 与 Native 两个 EXE。
-   未同步或任一 EXE smoke 失败时不得发布，不得只上传 Actions artifact。
+   Release workflow 还会运行 `scripts/check_upstream_state.py`，校验
+   `.upstream-commit`、UPSTREAM.md、vendored core/plugin 版本一致；未同步或元数据
+   不一致时直接失败、阻止发布，且不得只上传 Actions artifact。
 
 本地 dry-run：
 
@@ -620,7 +622,7 @@ Windows 文档同步规则与 Linux 主项目 `docs/windows-editions-research.md
 本仓库已在同一台 Windows 主机上通过 WSL interop 使用 Windows PowerShell 5.1、
 Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 
-- 独立测试套件 **77 tests** 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
+- 独立测试套件 **79 tests** 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
 - Windows Python `compileall`、PowerShell 5.1 AST、Node JS 检查通过；
 - Docker Desktop 4.93.0 / Engine 29.8.1 / `OSType=linux` / Compose v5.5.1；
 - 最小 busybox Compose `config/up/down` 全部 exit 0，容器实际输出

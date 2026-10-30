@@ -101,13 +101,15 @@ Implemented behavior:
 
 Tests:
 
-- Linux Python: `python3 -m unittest discover -s tests -v` -> **77 tests OK
+- Linux Python: `python3 -m unittest discover -s tests -v` -> **79 tests OK
   (1 Windows-drive test skipped)**.
-- Windows Python 3.10.9: same suite -> **77 tests OK**.
+- Windows Python 3.10.9: same suite -> **79 tests OK**.
 - New tests cover migration copy/pointer/record/conflict/failure rollback,
   WSL/UNC/OneDrive drive-type validation, stop ordering, sync allowlist and
-  preserve rules, dry-run/no-op behavior, dual workflow assets, and Native
-  spec/build files.
+  preserve rules, upstream snapshot guard failures, dry-run/no-op behavior,
+  dual workflow assets, and Native spec/build files.
+- `python scripts/check_upstream_state.py --root .` passes on the final synced
+  tree and fails when vendored core/plugin metadata does not match UPSTREAM.md.
 - Windows `compileall`, PowerShell AST, static UI and YAML checks passed.
 
 ### Real Docker-edition EXE smoke (current build)
@@ -162,8 +164,9 @@ Executed against the final v0.4.2/core 3.6.0 Docker EXE with isolated
 
 - `windows-build.yml` now builds, smoke-tests, and uploads both EXEs and
   `SHA256SUMS.txt`.
-- `windows-release.yml` now validates tag/VERSION and publishes both EXEs plus
-  SHA/README/VALIDATION in one GitHub Release. Workflow URL:
+- `windows-release.yml` now validates tag/VERSION, runs
+  `scripts/check_upstream_state.py` as a release gate, and publishes both EXEs
+  plus SHA/README/VALIDATION in one GitHub Release. Workflow URL:
   https://github.com/Stevehim2007/qqbot-studio-windows/actions/workflows/windows-release.yml.
 - The dual `v*` release workflow was **not executed** because this development
   task did not push a v0.4.2 tag. A future tag run must be treated as unverified

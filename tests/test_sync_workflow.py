@@ -22,6 +22,7 @@ class SyncWorkflowStaticTests(unittest.TestCase):
             "ref: main",
             "python scripts/sync_upstream.py",
             "--dry-run",
+            "python scripts/check_upstream_state.py --root .",
             "git diff --quiet",
             "git push origin HEAD:main",
             "python -m unittest discover -s tests -v",
@@ -41,6 +42,52 @@ class SyncWorkflowStaticTests(unittest.TestCase):
             "VERSION",
         ):
             self.assertIn(expected, text, expected)
+
+
+class UpstreamStateGuardTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self.commit = "b" * 40
+        (self.root / ".upstream-commit").write_text(self.commit + "\n", encoding="ascii")
+        (self.root / "qqbot_studio").mkdir()
+        (self.root / "qqbot_studio" / "__init__.py").write_text(
+            '__version__ = "7.8.9"\n', encoding="utf-8"
+        )
+        (self.root / "plugins" / "qqbot_enhancer").mkdir(parents=True)
+        (self.root / "plugins" / "qqbot_enhancer" / "metadata.yaml").write_text(
+            "name: qqbot_enhancer\nversion: 4.5.6\n", encoding="utf-8"
+        )
+        self._write_upstream()
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _write_upstream(self):
+        (self.root / "UPSTREAM.md").write_text(
+            "# Snapshot\n\n"
+            f"- Upstream snapshot commit: `{self.commit}`\n"
+            "- Snapshot date: 2026-10-30\n"
+            "- Upstream release line: v7.8.9\n"
+            "- Bundled core version: `qqbot_studio.__version__ == 7.8.9`\n"
+            "- Windows launcher version: `0.4.2`\n"
+            "- Plugin snapshot: `qqbot_enhancer` 4.5.6\n",
+            encoding="utf-8",
+        )
+
+    def test_consistent_metadata_passes(self):
+        from scripts import check_upstream_state
+
+        self.assertEqual(check_upstream_state.check_upstream_state(self.root), [])
+
+    def test_stale_metadata_blocks_release(self):
+        (self.root / "qqbot_studio" / "__init__.py").write_text(
+            '__version__ = "7.9.0"\n', encoding="utf-8"
+        )
+        from scripts import check_upstream_state
+
+        errors = check_upstream_state.check_upstream_state(self.root)
+        self.assertTrue(any("bundled core version" in error for error in errors), errors)
 
 
 class SyncUpstreamTests(unittest.TestCase):

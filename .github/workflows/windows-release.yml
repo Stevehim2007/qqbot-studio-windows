@@ -36,6 +36,10 @@ jobs:
           }
           Write-Host "Building release v$version"
 
+      - name: Verify upstream snapshot metadata is release-ready
+        shell: pwsh
+        run: python scripts/check_upstream_state.py --root .
+
       - name: Run independent test suite
         shell: pwsh
         run: python -m unittest discover -s tests -v
