@@ -64,9 +64,9 @@ and smoke-tested both EXEs:
   - `--help`, `--guide`, `--check` exit 0; guide/check explicitly report
     `NATIVE_E2E=NOT_VERIFIED` and `NATIVE_INTEGRATION=NOT_IMPLEMENTED_IN_BOOTSTRAP`.
 
-`dist/SHA256SUMS.txt` contains both EXEs. These are local v0.5.0 release
-candidate builds; the official GitHub Release EXE sizes and SHA256 digests are
-recorded after the v0.5.0 tag workflow completes.
+`dist/SHA256SUMS.txt` contains both local v0.5.0 builds. Local and CI one-file
+EXEs are not byte-identical; the official Release sizes and SHA256 digests are
+recorded in the dual release section below.
 
 ### Migration behavior and tests
 
@@ -173,24 +173,32 @@ Executed against the final v0.5.0/core 3.7.0 Docker EXE with isolated
 - The test did not run a real browser click flow; UI static/asset and HTTP API
   behavior were verified. Browser automation remains a limitation.
 
-### Dual release workflow status
+### Dual release workflow status (actual)
 
-- `windows-build.yml` now builds, smoke-tests, and uploads both EXEs and
-  `SHA256SUMS.txt`.
-- `windows-release.yml` now validates tag/VERSION, runs
-  `scripts/check_upstream_state.py` as a release gate, and publishes both EXEs
-  plus SHA/README/VALIDATION in one GitHub Release. Workflow URL:
-  https://github.com/Stevehim2007/qqbot-studio-windows/actions/workflows/windows-release.yml.
-- The dual `v*` release workflow is executed after tagging v0.5.0; actual
-  Release URL/asset digests are recorded in the follow-up release documentation
-  and final task report.
+- Dual build CI run `41004697517` for commit
+  `bb252c0227e08626c19bccc65fd3f92840731ba1`: success; artifact
+  `QQBotStudioWindows-dual-bb252c0...` size `19,018,812` bytes.
+- `v0.5.0` tag was pushed at `bb252c0227e08626c19bccc65fd3f92840731ba1`.
+- Dual release workflow run `41004873808`: success, all release steps passed
+  including tag/VERSION, upstream snapshot gate, 80 tests, compileall,
+  PowerShell AST, dual PyInstaller build, both EXE smokes, artifact upload and
+  Create GitHub Release.
+- Release URL:
+  https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.5.0
+- Public GitHub API confirms these assets:
+  - `QQBotStudioWindows.exe`: `10,887,484` bytes, digest
+    `sha256:4e7da088887bd5d629ace7f8d02b470f4478e7bdd524469e659a37238cfe46f7`;
+  - `QQBotStudioWindowsNative.exe`: `8,350,395` bytes, digest
+    `sha256:2664bf83f269e7a90a75c93605f932f3155b1295ad722f9a22260a441b0524e7`;
+  - `SHA256SUMS.txt` downloaded and its two SHA256 lines matched the API
+    digests;
+  - `README.md` and `VALIDATION.md`.
 - No Native AstrBot/SnowLuma/NTQQ E2E claim is made.
 
 ### Not verified for v0.5.0
 
 - GitHub Actions `sync-upstream` dispatch/schedule run was not executed; only
   local script and workflow-file validation.
-- Dual-EXE `v*` Release for v0.5.0 is validated after the tag run.
 - No real AstrBot/SnowLuma deployment, QQ login, noVNC verification, DeepSeek
   call, or AI assistant B install/start.
 - Native edition is a bootstrap/guide placeholder: no real NTQQ/SnowLuma hook,
