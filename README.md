@@ -398,18 +398,23 @@ Artifact 包括 EXE、SHA256、README、VERSION、LICENSE、UPSTREAM、VALIDATIO
 本仓库已在同一台 Windows 主机上通过 WSL interop 使用 Windows PowerShell 5.1、
 Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 
-- 独立测试套件将在 Linux Python 和 Windows Python 下运行；本版本测试结果见
-  [`VALIDATION.md`](VALIDATION.md)；
+- 独立测试套件 **44 tests** 在 Linux Python 和 Windows Python 下均通过；
 - Windows Python `compileall` 通过；
 - 5 个 PowerShell `.ps1` 通过 Windows PowerShell AST 语法解析；
-- Docker Desktop 引擎处于 Linux containers，`docker version`、`docker info`、
-  Docker Compose v5.5.1 和最小 busybox Compose `config/up/down` 成功；
-- PyInstaller 6.10.0 在 Windows 上实际构建出 one-file EXE；
+- Docker Desktop 4.93.0 / Engine 29.8.1 / `OSType=linux` / Compose v5.5.1；
+- 最小 busybox Compose `config/up/down` 全部 exit 0，容器输出
+  `qqbot-windows-v034-compose-smoke` 后清理；
+- PyInstaller 6.10.0 在 Windows 上实际构建出 one-file EXE：
+  `8,453,805` bytes，SHA256
+  `a3eaa74880d5f64fe954c3842cb986dac782650d83a127422560ac172be144c1`；
 - EXE 首次配置、隐藏管理服务启动、`/healthz`、PID/runtime、`--status`、
   `--restart`、`--logs`、`--stop`、`--new-instance` 和 `--assistant` 已在本机实际执行；
-- EXE-created `bot-1` 的实例元数据隔离正确；
-- 实际 EXE 服务返回 `/assistant` HTTP 200 并注入 token，`/api/assistant/status`
-  返回 200；`/console` 不含旧 A/B 控制台 DOM，顶部存在 `/assistant` 链接。
+- `/healthz` 返回 version `3.4.0`；`/console` 与 `/assistant` 均 HTTP 200；
+- 插件参数配置 API 实测：GET 返回 61 个 schema 字段和
+  `reply_probability=0.12`；POST 保存 `0.5`，离线状态返回
+  `restart_required=true`；第二次 GET 读取为 `0.5`；
+- `/console` 含插件编辑器和 `/assistant` 链接，不含旧 A/B DOM；
+- EXE-created `bot-1` 的实例元数据隔离正确。
 
 详细命令、环境和输出见 [`VALIDATION.md`](VALIDATION.md)。
 
