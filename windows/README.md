@@ -8,7 +8,7 @@
 > 直接共用。完整说明见根目录 [`README.md`](../README.md) 和
 > [`UPSTREAM.md`](../UPSTREAM.md)。
 >
-> **状态：Windows v0.7.0 发布候选（最新正式 Release 为 v0.6.0），已同步 upstream core 3.9.0。** 双发行版开发中：Docker edition 稳定，Native edition 为 bootstrap/guide 占位。已包含独立
+> **状态：Windows v0.7.0（最新正式 Release 为 v0.7.0），已同步 upstream core 3.9.0。** 双发行版开发中：Docker edition 稳定，Native edition 为 bootstrap/guide 占位。已包含独立
 > `/assistant` 页面、AI 助手 B 本机/公网配置、30 分钟刷新、控制台插件参数编辑和
 > qqbot_enhancer 1.15.0。发布由 `v*` tag 触发 GitHub Release，上传 EXE 和 SHA256。
 > 基础 Docker Desktop/Linux engine、Compose、EXE 构建和管理服务生命周期已实际测试；
@@ -326,13 +326,13 @@ python -m unittest discover -s tests -v
 
 ### 正式 EXE Release
 
-`v0.7.0` 的双 EXE Release 将在本次发布中执行；v0.6.0 Release 已实际成功（run `41008090389`）：
+`v0.7.0` 的双 EXE Release 已实际成功（run `41078425027`）：
 
-- Release: <https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.6.0>
-- `QQBotStudioWindows.exe`（Docker edition）：`10,914,001` bytes，
-  SHA256 `269b71b18d94950684b99b9b14fea314a739397d55f41e2ea71c63e417c2dbdb`
-- `QQBotStudioWindowsNative.exe`（Native bootstrap/guide）：`8,350,396` bytes，
-  SHA256 `f2deb9cc7e6ede11345f4e587f7f7023513d944f5beb4ee79067a171e2c0277c`
+- Release: <https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.7.0>
+- `QQBotStudioWindows.exe`（Docker edition）：`10,926,947` bytes，
+  SHA256 `eeb96134806c92356033590d71fc9a8af977cbbc8be4dd5600079acab32a664e`
+- `QQBotStudioWindowsNative.exe`（Native bootstrap/guide）：`8,350,397` bytes，
+  SHA256 `f16284efa7fe933e3852359b4602b0e560ca4c59e0c45a367a6d305a8c1c2206`
 - `SHA256SUMS.txt`、`README.md`、`VALIDATION.md`
 
 Release workflow 校验 tag/VERSION 和 upstream snapshot metadata 后构建、smoke、

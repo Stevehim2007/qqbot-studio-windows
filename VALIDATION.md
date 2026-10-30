@@ -1,6 +1,6 @@
 # Validation record
 
-## v0.7.0 / core 3.9.0 / plugin 1.15.0 release candidate (latest)
+## v0.7.0 / core 3.9.0 / plugin 1.15.0 dual-edition release (latest)
 
 This development version adds:
 
@@ -177,21 +177,21 @@ Executed against the final v0.7.0/core 3.9.0 Docker EXE with isolated
 
 ### Dual release workflow status (actual)
 
-- Dual build CI run `41007908682` for commit
-  `60307225d24822faab6b7841dd2d95a06eb5c94b`: success; artifact
-  `QQBotStudioWindows-dual-6030722...` size `19,053,365` bytes.
-- `v0.6.0` tag was pushed at `60307225d24822faab6b7841dd2d95a06eb5c94b`.
-- Dual release workflow run `41008090389`: success, all release steps passed
-  including tag/VERSION, upstream snapshot gate, 81 tests, compileall,
+- Dual build CI run `41078163641` for commit
+  `ba3100108280f54c8004a7ef33f7abf3a6a18baa`: success; artifact
+  `QQBotStudioWindows-dual-ba3100...` size `19,070,883` bytes.
+- `v0.7.0` tag was pushed at `ba3100108280f54c8004a7ef33f7abf3a6a18baa`.
+- Dual release workflow run `41078425027`: success, all release steps passed
+  including tag/VERSION, upstream snapshot gate, 82 tests, compileall,
   PowerShell AST, dual PyInstaller build, both EXE smokes, artifact upload and
   Create GitHub Release.
 - Release URL:
-  https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.6.0
+  https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.7.0
 - Public GitHub API confirms these assets:
-  - `QQBotStudioWindows.exe`: `10,914,001` bytes, digest
-    `sha256:269b71b18d94950684b99b9b14fea314a739397d55f41e2ea71c63e417c2dbdb`;
-  - `QQBotStudioWindowsNative.exe`: `8,350,396` bytes, digest
-    `sha256:f2deb9cc7e6ede11345f4e587f7f7023513d944f5beb4ee79067a171e2c0277c`;
+  - `QQBotStudioWindows.exe`: `10,926,947` bytes, digest
+    `sha256:eeb96134806c92356033590d71fc9a8af977cbbc8be4dd5600079acab32a664e`;
+  - `QQBotStudioWindowsNative.exe`: `8,350,397` bytes, digest
+    `sha256:f16284efa7fe933e3852359b4602b0e560ca4c59e0c45a367a6d305a8c1c2206`;
   - `SHA256SUMS.txt` downloaded and its two SHA256 lines matched the API
     digests;
   - `README.md` and `VALIDATION.md`.
