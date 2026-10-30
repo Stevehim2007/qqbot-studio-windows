@@ -8,7 +8,7 @@
 > 直接共用。完整说明见根目录 [`README.md`](../README.md) 和
 > [`UPSTREAM.md`](../UPSTREAM.md)。
 >
-> **状态：Windows 开发版 v0.4.1（最新正式 Release 为 v0.4.0），已同步 upstream core 3.5.0。** 已包含独立
+> **状态：Windows 开发版 v0.4.1（最新正式 Release 为 v0.4.0），已同步 upstream core 3.5.1。** 双发行版开发中：Docker edition 稳定，Native edition 为 bootstrap/guide 占位。已包含独立
 > `/assistant` 页面、AI 助手 B 本机/公网配置、30 分钟刷新、控制台插件参数编辑和
 > qqbot_enhancer 1.5.0。发布由 `v*` tag 触发 GitHub Release，上传 EXE 和 SHA256。
 > 基础 Docker Desktop/Linux engine、Compose、EXE 构建和管理服务生命周期已实际测试；
@@ -197,7 +197,10 @@ New-NetFirewallRule `
 
 ---
 
-## 6.1 v3.5.0 同步后的新入口
+## 6.1 v3.5.1 同步后的新入口
+
+- 新增平台感知部署向导（Windows/Ubuntu/其它 Linux 分支检查与命令）；
+- Windows 双发行版可行性/同步规则文档已同步。
 
 - 主控制台不再有离线“使用助手”A 面板或内嵌 AI 助手 B 卡片；
 - 点击控制台顶部 **AI 助手**，或运行 `QQBotStudioWindows.exe --assistant`，进入
@@ -258,22 +261,54 @@ qqbot_enhancer 1.5.0 新增：
 
 详细目录树见根 README。
 
+### Docker/Native 双发行版与上游同步
+
+当前构建产出两个 EXE，同版本、同一 Release：
+
+| 文件 | 用途 | 状态 |
+|---|---|---|
+| `QQBotStudioWindows.exe` | Docker Desktop + WSL2，QQBotStudio 管理控制台 | 稳定推荐 |
+| `QQBotStudioWindowsNative.exe` | Native Windows bootstrap/guide：官方 SnowLuma Windows + 本机 NTQQ 路径 | POC/占位；只做指南和只读检查，未集成完整进程管理，未做 native E2E |
+
+Native 版官方推荐路径是本机安装桌面 QQ、官方 AstrBot Windows 运行时和官方
+SnowLuma Windows x64 包，直接在本机 QQ 窗口扫码；noVNC 仅是可选高级增强，需要
+Windows VNC Server + websockify 并共享整个交互桌面，不承诺每实例独立屏幕。
+Native bootstrap 当前不下载、不启动、不注入、不登录 AstrBot/SnowLuma/NTQQ，不能
+宣称原生版生产可用。日常稳定使用请选 Docker edition。
+
+#### 每次上游更新必须同步双版本
+
+- `.github/workflows/sync-upstream.yml` 支持 `workflow_dispatch` 和每日 schedule，
+  从公开 `Stevehim2007/qqbot-studio` main 同步 allowlist：
+  `qqbot_studio/`（含 static）、`plugins/qqbot_enhancer/`、`assets/` 和必要 docs；
+- 保留 Windows launcher、PowerShell、build/spec、`VERSION`、release workflow 和
+  Windows 专属 README/FAQ；
+- 更新 `.upstream-commit` 与 `UPSTREAM.md`，有变化才自动 commit/push；
+- 发布 tag 前必须让两个 EXE 同批构建、smoke 和校验 `VERSION`，同一 Release 上传
+  Docker/Native 两个 EXE + `SHA256SUMS.txt` + README/VALIDATION；
+- 本地预演：
+
+```powershell
+python scripts\sync_upstream.py --upstream-dir ..\qqbot-studio --target-dir . --dry-run
+python -m unittest discover -s tests -v
+```
+
 ### 正式 EXE Release
 ### 正式 EXE Release
 
-`v0.4.0` 起推送匹配 `VERSION` 的 tag 会触发
-`.github/workflows/windows-release.yml`，创建真实 GitHub Release 并上传：
+`v0.4.1` 起的双 EXE release workflow 会校验 tag/VERSION，构建并 smoke 两个 EXE，
+再在同一 GitHub Release 上传：
 
-- `QQBotStudioWindows.exe`
-- `SHA256SUMS.txt`
+- `QQBotStudioWindows.exe`（Docker edition）
+- `QQBotStudioWindowsNative.exe`（Native bootstrap/guide）
+- `SHA256SUMS.txt`（两个 EXE 的 SHA256）
+- `README.md`、`VALIDATION.md`
 
-v0.4.0 Release 已实际使用 run `40997401439` 成功发布：
-`QQBotStudioWindows.exe` 为 `10,803,066` bytes，SHA256
+历史 v0.4.0 Release（run `40997401439`）只有单 EXE，不含 Native EXE 或
+`--move-data`；最新 v0.4.0 EXE 为 `10,803,066` bytes，SHA256
 `9bd92a299839fd3ec4a4c0c089356c98505fb17995edfee8d279e2b831e53f3b`。
-本地预发布 EXE 为 `8,461,717` bytes / SHA256
-`2d44225206473101ca2a3a03f462afef86b5a0b2e47b8d6cddcbee4fe4d240db`；
-两者不保证逐字节一致。只上传 Actions artifact 不算正式发布；参见根 README
-的下载/校验示例。
+v0.4.1 尚未按本任务 tag/发布；不要宣称双 EXE Release 已运行，先用最新 CI
+artifact 或本地构建验证。只上传 Actions artifact 不算正式发布。
 
 ## 7. 已知限制与未验证项
 

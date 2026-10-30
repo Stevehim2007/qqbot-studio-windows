@@ -1,12 +1,13 @@
 #requires -Version 5.1
 <#
 .SYNOPSIS
-  Build the standalone QQ Bot Studio Windows one-file launcher.
+  Build the Docker-edition and native-bootstrap Windows one-file EXEs.
 
 .DESCRIPTION
-  Creates .venv-build, installs pinned PyInstaller, runs the checked-in spec
-  and smoke-tests the resulting EXE with --version/--help. Docker Desktop is
-  not required to build or smoke-test the launcher.
+  Creates .venv-build, installs pinned PyInstaller, builds both the stable
+  Docker-edition launcher and the native-edition bootstrap/guide EXE, then
+  smoke-tests both with --version/--help. Docker Desktop and native NTQQ are
+  not required to build or smoke-test the executables.
 #>
 [CmdletBinding()]
 param(
@@ -106,38 +107,64 @@ try {
     }
 
     $env:QQBOT_WINDOWS_ROOT = $RootDir
-    Write-Host 'Running PyInstaller...'
-    Invoke-VenvPythonChecked -Arguments @(
-        '-m', 'PyInstaller',
-        '--noconfirm',
-        '--clean',
-        (Join-Path $RootDir 'windows\qqbot-studio-windows.spec')
-    ) -Operation 'PyInstaller'
+    $buildTargets = @(
+        [pscustomobject]@{
+            Name = 'Docker edition'
+            Spec = (Join-Path $RootDir 'windows\qqbot-studio-windows.spec')
+            ExeName = 'QQBotStudioWindows.exe'
+        },
+        [pscustomobject]@{
+            Name = 'Native bootstrap edition'
+            Spec = (Join-Path $RootDir 'windows\qqbot-studio-windows-native.spec')
+            ExeName = 'QQBotStudioWindowsNative.exe'
+        }
+    )
 
-    $exePath = Join-Path $RootDir 'dist\QQBotStudioWindows.exe'
-    if (-not (Test-Path -LiteralPath $exePath -PathType Leaf)) {
-        throw "Expected build artifact was not produced: $exePath"
+    $results = @()
+    foreach ($target in $buildTargets) {
+        Write-Host ''
+        Write-Host ("Running PyInstaller for {0}..." -f $target.Name) -ForegroundColor Cyan
+        Invoke-VenvPythonChecked -Arguments @(
+            '-m', 'PyInstaller',
+            '--noconfirm',
+            '--clean',
+            $target.Spec
+        ) -Operation ("PyInstaller " + $target.Name)
+
+        $exePath = Join-Path $RootDir ('dist\' + $target.ExeName)
+        if (-not (Test-Path -LiteralPath $exePath -PathType Leaf)) {
+            throw "Expected build artifact was not produced: $exePath"
+        }
+
+        Write-Host ("Smoke-testing {0} (does not require Docker Desktop)..." -f $target.ExeName)
+        & $exePath --version
+        if ($LASTEXITCODE -ne 0) {
+            throw ("{0} --version failed with exit code {1}" -f $target.ExeName, $LASTEXITCODE)
+        }
+        & $exePath --help | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            throw ("{0} --help failed with exit code {1}" -f $target.ExeName, $LASTEXITCODE)
+        }
+
+        $results += [pscustomobject]@{
+            Name = $target.Name
+            ExeName = $target.ExeName
+            Path = $exePath
+            Size = (Get-Item -LiteralPath $exePath).Length
+            Hash = (Get-FileHash -LiteralPath $exePath -Algorithm SHA256).Hash.ToLowerInvariant()
+        }
     }
 
-    Write-Host 'Smoke-testing EXE (does not require Docker Desktop)...'
-    & $exePath --version
-    if ($LASTEXITCODE -ne 0) {
-        throw "EXE --version failed with exit code $LASTEXITCODE"
-    }
-    & $exePath --help | Out-Null
-    if ($LASTEXITCODE -ne 0) {
-        throw "EXE --help failed with exit code $LASTEXITCODE"
-    }
-
-    $hash = (Get-FileHash -LiteralPath $exePath -Algorithm SHA256).Hash.ToLowerInvariant()
-    $size = (Get-Item -LiteralPath $exePath).Length
     $checksumPath = Join-Path $RootDir 'dist\SHA256SUMS.txt'
-    Set-Content -LiteralPath $checksumPath -Value ("{0}  QQBotStudioWindows.exe" -f $hash) -Encoding Ascii
+    $checksumLines = @($results | ForEach-Object { "{0}  {1}" -f $_.Hash, $_.ExeName })
+    Set-Content -LiteralPath $checksumPath -Value $checksumLines -Encoding Ascii
     Write-Host ''
-    Write-Host ("Artifact : {0}" -f $exePath) -ForegroundColor Green
-    Write-Host ("Size     : {0} bytes" -f $size)
-    Write-Host ("SHA256   : {0}" -f $hash)
-    Write-Host ("Checksum : {0}" -f $checksumPath)
+    foreach ($result in $results) {
+        Write-Host ("{0} artifact : {1}" -f $result.Name, $result.Path) -ForegroundColor Green
+        Write-Host ("  Size       : {0} bytes" -f $result.Size)
+        Write-Host ("  SHA256     : {0}" -f $result.Hash)
+    }
+    Write-Host ("Checksum     : {0}" -f $checksumPath) -ForegroundColor Green
 } finally {
     Pop-Location
 }

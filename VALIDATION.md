@@ -1,10 +1,72 @@
 # Validation record
 
-## v0.4.1 / Windows file locations + safe data migration (latest)
+## v0.4.1 / data migration + dual-edition sync/release pipeline (latest)
 
-This development version adds the Windows data-location documentation and the
-`--move-data <NEW_DIR>` migration command. Core remains `3.5.0`; plugin remains
-`1.5.0`.
+This development version adds:
+
+- Windows file-location documentation and safe `--move-data <NEW_DIR>`;
+- allowlisted Linux-upstream synchronization (`sync-upstream`) with
+  `.upstream-commit` and `UPSTREAM.md` recording;
+- Docker and Native bootstrap one-file EXE builds in one release workflow.
+
+Committed upstream snapshot used for this validation:
+`06536c4aadd2b68c5123aabd60946fa18883a264` (Linux `main`).
+Bundled versions: core `3.5.1`, qqbot_enhancer `1.5.0`. Windows version:
+`0.4.1` (development; not tagged/released by this task).
+
+### Upstream sync workflow and local verification
+
+Implemented:
+
+- `.github/workflows/sync-upstream.yml`: `workflow_dispatch` with dry-run input,
+  daily schedule, `contents: write`, checkout of public
+  `Stevehim2007/qqbot-studio@main`, tests before commit, and no empty commit;
+  workflow URL:
+  https://github.com/Stevehim2007/qqbot-studio-windows/actions/workflows/sync-upstream.yml;
+- `scripts/sync_upstream.py`: allowlist mirrors `qqbot_studio/` (including
+  static), `plugins/qqbot_enhancer/`, `assets/`; copies only allowlisted docs;
+  preserves Windows launcher/PowerShell/build/spec/VERSION/release workflows
+  and Windows-specific `docs/README.md` + `docs/FAQ.md`;
+- `.upstream-commit` stores the full upstream SHA; `UPSTREAM.md` is updated with
+  snapshot date, core/plugin versions, and Linux commit.
+
+Local verification (actual script, clean upstream worktree at the committed
+SHA):
+
+- dry-run reported the expected allowlisted changes without writing;
+- actual sync copied core `3.5.1`, plugin `1.5.0`, assets, and the upstream
+  Windows-editions research doc;
+- `.upstream-commit` = `06536c4aadd2b68c5123aabd60946fa18883a264`;
+- second run reported `no changes` and did not modify files;
+- Windows-owned launcher/build/spec/VERSION/release workflow files were
+  preserved;
+- local tests passed after sync.
+
+The GitHub Actions `workflow_dispatch`/schedule run itself was **not executed**
+in this task (workflow files and local script were validated; no authenticated
+remote dispatch was available). Manual trigger:
+`Actions -> Sync upstream Linux snapshot -> Run workflow`.
+
+### Dual EXE build
+
+`windows/build.ps1 -Clean` on Windows Python 3.10.9 + PyInstaller 6.10.0 built
+and smoke-tested both EXEs:
+
+- Docker edition `QQBotStudioWindows.exe`:
+  - size `8,469,437` bytes;
+  - SHA256 `5f5e9d4038b6485fb0b37163f18de7776b9f3bf2fdd34d59cad56ad67ec0591c`;
+  - `--version`: `QQBot Studio Windows launcher 0.4.1 (core 3.5.1)`;
+  - `--help` exit 0.
+- Native bootstrap/guide `QQBotStudioWindowsNative.exe`:
+  - size `6,405,958` bytes;
+  - SHA256 `1d51bdc03df7bd705a6400cf2fde67661d15db2d341bdacf3bb1768aad605cf7`;
+  - `--version`: `QQ Bot Studio Windows Native bootstrap 0.4.1 (bundled core 3.5.1)`;
+  - `--help`, `--guide`, `--check` exit 0; guide/check explicitly report
+    `NATIVE_E2E=NOT_VERIFIED` and `NATIVE_INTEGRATION=NOT_IMPLEMENTED_IN_BOOTSTRAP`.
+
+`dist/SHA256SUMS.txt` contains both EXEs. These are local development builds;
+v0.4.1 has not been tagged/released, so no published dual-release digest is
+claimed.
 
 ### Migration behavior and tests
 
@@ -23,64 +85,71 @@ Implemented behavior:
 - `windows-data-move.json` and `studio.json` migration fields are written;
 - `%LOCALAPPDATA%\QQBotStudio\data-location.json` is updated atomically;
 - the service and containers are deliberately not auto-restarted;
-- failure cleans the staging/published target and keeps the old directory;
+- failure cleans staging/published target and keeps the old directory;
 - PowerShell fallback `Resolve-StudioDataDir` reads the same pointer file.
 
 Tests:
 
-- Linux Python: `python3 -m unittest discover -s tests -v` -> **59 tests OK
+- Linux Python: `python3 -m unittest discover -s tests -v` -> **67 tests OK
   (1 Windows-drive test skipped)**.
-- Windows Python 3.10.9: same suite -> **59 tests OK** (including drive-type
-  checks).
-- New tests cover copy/pointer/record, empty-target conflict, nested/same source
-  and target, WSL/UNC/OneDrive path rejection, fixed-vs-remote drive type,
-  confirmation cancellation, service/container stop order, copy failure and
-  pointer-update failure rollback, PowerShell pointer parsing, CLI argument
-  validation, and documentation contents.
-- Windows `compileall` and existing static/Node/PowerShell checks remain green.
+- Windows Python 3.10.9: same suite -> **67 tests OK**.
+- New tests cover migration copy/pointer/record/conflict/failure rollback,
+  WSL/UNC/OneDrive drive-type validation, stop ordering, sync allowlist and
+  preserve rules, dry-run/no-op behavior, dual workflow assets, and Native
+  spec/build files.
+- Windows `compileall`, PowerShell AST, static UI and YAML checks passed.
 
-### Local Windows PyInstaller build
+### Real Docker-edition EXE smoke (current build)
 
-- Windows Python 3.10.9 + PyInstaller 6.10.0, `build.ps1 -Clean` exit 0.
-- EXE: `8,466,834` bytes.
-- SHA256: `8f12df1d3a2a5126a71fb7f4e776767b75190a13e33c1fd081cbf230dfc830e2`.
-- `--version`: `QQBot Studio Windows launcher 0.4.1 (core 3.5.0)`.
-- This is a local development build; v0.4.1 has not been tagged/released by this
-  task, so no published release digest is claimed for it.
+Executed with the locally built `QQBotStudioWindows.exe` and isolated
+`%LOCALAPPDATA%`:
 
-### Real EXE + Docker migration smoke
+- start with `--assistant` + new instance; `/healthz` returned
+  `{"ok":true,"version":"3.5.1"}`;
+- `/console` and `/assistant` both HTTP 200;
+- `/console` contains the plugin editor and `/assistant` link;
+- `--move-data` to a new empty local target exited 0;
+- old data directory retained; target contains `studio.json`,
+  `instances\bot-1\instance.json`, and `windows-data-move.json`;
+- pointer file points at target; restarting with no `--data-dir` through the
+  pointer succeeds; target `/healthz` is `3.5.1`; `--stop` makes health
+  unreachable;
+- token-protected plugin config API using the real 88-field schema:
+  - GET HTTP 200, defaults `reply_probability=0.12`,
+    `user_sticker_reaction_enabled=true`;
+  - POST `reply_probability=0.57`,
+    `user_sticker_reaction_probability=0.72` returns `ok=true`,
+    `restart_required=true`;
+  - second GET reads `0.57`/`0.72`.
+- An earlier current-launcher migration run also used a real busybox Compose
+  project and confirmed `compose down` removed the container before publish.
 
-Executed on the same Windows host with an isolated `%LOCALAPPDATA%`:
+### Dual release workflow status
 
-- Started the EXE with explicit source data directory and a new `bot-1`
-  instance; source `/healthz` returned
-  `{"ok":true,"version":"3.5.0"}`.
-- Started a real busybox Compose service under the instance with
-  `container_name=qqbot-bot-1-astrbot`; `docker ps` showed it running.
-- Ran:
-  `QQBotStudioWindows.exe --move-data <target> --data-dir <source> --non-interactive`
-- Result:
-  - move exit 0; old directory retained;
-  - target contains `studio.json`, `instances\bot-1\instance.json`, and
-    `windows-data-move.json`;
-  - source container is gone after Compose `down`;
-  - pointer file exists and points at the target;
-  - copied `studio.json` contains `windows_data_dir=<target>`;
-  - service start from the target via the pointer succeeds;
-  - target `/healthz` returns version `3.5.0`; `/assistant` returns HTTP 200;
-  - `--stop` succeeds and health becomes unreachable.
+- `windows-build.yml` now builds, smoke-tests, and uploads both EXEs and
+  `SHA256SUMS.txt`.
+- `windows-release.yml` now validates tag/VERSION and publishes both EXEs plus
+  SHA/README/VALIDATION in one GitHub Release. Workflow URL:
+  https://github.com/Stevehim2007/qqbot-studio-windows/actions/workflows/windows-release.yml.
+- The dual `v*` release workflow was **not executed** because this development
+  task did not push a v0.4.1 tag. A future tag run must be treated as unverified
+  until CI/Live Release results are checked.
+- No Native AstrBot/SnowLuma/NTQQ E2E claim is made.
 
 ### Not verified for v0.4.1
 
+- GitHub Actions `sync-upstream` dispatch/schedule run was not executed; only
+  local script and workflow-file validation.
+- Dual-EXE `v*` Release run was not executed; no v0.4.1 tag/Release exists.
 - No real AstrBot/SnowLuma deployment, QQ login, noVNC verification, DeepSeek
-  call or AI assistant B install/start.
-- Migration was tested with a synthetic Compose container, not a full QQ bot.
-- OneDrive/UNC/WSL actual host paths were covered by validation unit tests and
-  path logic; no real OneDrive/network-share mount was used for the smoke.
+  call, or AI assistant B install/start.
+- Native edition is a bootstrap/guide placeholder: no real NTQQ/SnowLuma hook,
+  no AstrBot process management, no native OneBot connection, no multi-instance
+  or noVNC implementation.
+- Migration was tested with a synthetic busybox Compose project, not a full QQ
+  bot; no real OneDrive/UNC/WSL mount or second physical disk was used.
 - Browser auto-open, Windows Defender/firewall/cloud security-group access,
   long-running multi-instance migration and actual user ACLs were not tested.
-- The migration smoke used `C:` fixed storage; a physical second disk was not
-  available for this host test.
 
 ---
 

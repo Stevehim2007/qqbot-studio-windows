@@ -1,4 +1,4 @@
-name: Windows EXE build
+name: Windows dual EXE build
 
 on:
   push:
@@ -46,22 +46,27 @@ jobs:
           }
           if ($failed) { throw 'PowerShell syntax validation failed.' }
 
-      - name: Build one-file EXE
+      - name: Build Docker and native one-file EXEs
         shell: powershell
         run: .\windows\build.ps1 -Clean
 
-      - name: Smoke-test EXE
+      - name: Smoke-test both EXEs
         shell: powershell
         run: |
           .\dist\QQBotStudioWindows.exe --version
           .\dist\QQBotStudioWindows.exe --help | Out-Null
+          .\dist\QQBotStudioWindowsNative.exe --version
+          .\dist\QQBotStudioWindowsNative.exe --help | Out-Null
+          .\dist\QQBotStudioWindowsNative.exe --guide | Out-Null
+          .\dist\QQBotStudioWindowsNative.exe --check | Out-Null
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
-          name: QQBotStudioWindows-${{ github.sha }}
+          name: QQBotStudioWindows-dual-${{ github.sha }}
           path: |
             dist/QQBotStudioWindows.exe
+            dist/QQBotStudioWindowsNative.exe
             dist/SHA256SUMS.txt
             README.md
             VERSION
@@ -71,6 +76,8 @@ jobs:
             docs/**
             windows/build.ps1
             windows/qqbot-studio-windows.spec
+            windows/qqbot-studio-windows-native.spec
+            windows/native_launcher.py
             windows/install.ps1
             windows/start.ps1
             windows/console.ps1

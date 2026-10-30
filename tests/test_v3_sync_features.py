@@ -12,7 +12,13 @@ STATIC = ROOT / "qqbot_studio" / "static"
 class V3SyncFeatureTests(unittest.TestCase):
     def test_core_version_is_synced(self):
         init_text = (ROOT / "qqbot_studio" / "__init__.py").read_text(encoding="utf-8")
-        self.assertIn('__version__ = "3.5.0"', init_text)
+        match = re.search(r'__version__\s*=\s*"([^"]+)"', init_text)
+        self.assertIsNotNone(match)
+        commit = (ROOT / ".upstream-commit").read_text(encoding="ascii").strip()
+        self.assertRegex(commit, r"^[0-9a-f]{40}$")
+        upstream = (ROOT / "UPSTREAM.md").read_text(encoding="utf-8")
+        self.assertIn(commit, upstream)
+        self.assertIn(f"qqbot_studio.__version__ == {match.group(1)}", upstream)
 
     def test_assistant_page_exists_and_has_token_placeholder(self):
         path = STATIC / "assistant.html"
@@ -67,7 +73,8 @@ class V3SyncFeatureTests(unittest.TestCase):
         )
         match = re.search(r"^version:\s*(\S+)", metadata, re.MULTILINE)
         self.assertIsNotNone(match)
-        self.assertTrue(match.group(1).startswith("1.5."), match.group(1))
+        version_tuple = tuple(int(part) for part in match.group(1).split("."))
+        self.assertGreaterEqual(version_tuple, (1, 5, 0), match.group(1))
         main = (ROOT / "plugins" / "qqbot_enhancer" / "main.py").read_text(
             encoding="utf-8"
         )
@@ -141,8 +148,27 @@ class V3SyncFeatureTests(unittest.TestCase):
 
     def test_upstream_metadata_is_updated(self):
         upstream = (ROOT / "UPSTREAM.md").read_text(encoding="utf-8")
-        self.assertIn("d87f96561cd9167a0279584fffee7cc366564208", upstream)
-        self.assertIn("3.5.0", upstream)
+        commit = (ROOT / ".upstream-commit").read_text(encoding="ascii").strip()
+        core_match = re.search(
+            r'__version__\s*=\s*"([^"]+)"',
+            (ROOT / "qqbot_studio" / "__init__.py").read_text(encoding="utf-8"),
+        )
+        plugin_match = re.search(
+            r"^version:\s*(\S+)",
+            (ROOT / "plugins" / "qqbot_enhancer" / "metadata.yaml").read_text(
+                encoding="utf-8"
+            ),
+            re.MULTILINE,
+        )
+        self.assertIsNotNone(core_match)
+        self.assertIsNotNone(plugin_match)
+        for expected in (
+            commit,
+            f"v{core_match.group(1)}",
+            f"qqbot_studio.__version__ == {core_match.group(1)}",
+            f"qqbot_enhancer` {plugin_match.group(1)}",
+        ):
+            self.assertIn(expected, upstream)
 
 
 if __name__ == "__main__":

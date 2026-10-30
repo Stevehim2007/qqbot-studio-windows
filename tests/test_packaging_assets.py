@@ -16,9 +16,14 @@ class PackagingAssetTests(unittest.TestCase):
             "requirements-build.txt",
             "windows/build.ps1",
             "windows/qqbot-studio-windows.spec",
+            "windows/qqbot-studio-windows-native.spec",
             "windows/launcher.py",
+            "windows/native_launcher.py",
             ".github/workflows/windows-build.yml",
             ".github/workflows/windows-release.yml",
+            ".github/workflows/sync-upstream.yml",
+            "scripts/sync_upstream.py",
+            ".upstream-commit",
         ):
             self.assertTrue((ROOT / relative).is_file(), relative)
 
@@ -36,6 +41,19 @@ class PackagingAssetTests(unittest.TestCase):
         ):
             self.assertIn(expected, text, expected)
 
+    def test_native_spec_builds_bootstrap_guide_exe(self):
+        path = WINDOWS / "qqbot-studio-windows-native.spec"
+        text = path.read_text(encoding="utf-8")
+        compile(text, str(path), "exec")
+        for expected in (
+            'windows_dir / "native_launcher.py"',
+            'ROOT / "VERSION"',
+            'ROOT / "UPSTREAM.md"',
+            "QQBotStudioWindowsNative",
+            "console=True",
+        ):
+            self.assertIn(expected, text, expected)
+
     def test_build_script_uses_pinned_requirements_and_smokes_exe(self):
         text = (WINDOWS / "build.ps1").read_text(encoding="ascii")
         for expected in (
@@ -43,6 +61,8 @@ class PackagingAssetTests(unittest.TestCase):
             "requirements-build.txt",
             "PyInstaller",
             "QQBotStudioWindows.exe",
+            "qqbot-studio-windows-native.spec",
+            "QQBotStudioWindowsNative.exe",
             "--version",
             "--help",
             "SHA256SUMS.txt",
@@ -60,6 +80,20 @@ class PackagingAssetTests(unittest.TestCase):
             "build.ps1 -Clean",
             "actions/upload-artifact@v4",
             "dist/QQBotStudioWindows.exe",
+            "dist/QQBotStudioWindowsNative.exe",
+            "build.ps1 -Clean",
+        ):
+            self.assertIn(expected, text, expected)
+
+    def test_native_bootstrap_is_explicitly_non_e2e(self):
+        text = (WINDOWS / "native_launcher.py").read_text(encoding="utf-8")
+        for expected in (
+            "bootstrap/guide placeholder",
+            "does not bundle or launch",
+            "NATIVE_E2E=NOT_VERIFIED",
+            "NATIVE_INTEGRATION=NOT_IMPLEMENTED_IN_BOOTSTRAP",
+            "snowluma.github.io",
+            "shares the whole interactive Windows desktop",
         ):
             self.assertIn(expected, text, expected)
 
@@ -74,6 +108,7 @@ class PackagingAssetTests(unittest.TestCase):
             "windows-latest",
             "softprops/action-gh-release@v2",
             "dist/QQBotStudioWindows.exe",
+            "dist/QQBotStudioWindowsNative.exe",
             "dist/SHA256SUMS.txt",
             "fail_on_unmatched_files: true",
         ):
@@ -94,6 +129,9 @@ class PackagingAssetTests(unittest.TestCase):
             "1.4",
             "GitHub Release",
             "reply_probability",
+            "Native",
+            "Docker",
+            "sync-upstream",
             "真实 Windows",
             "未验证",
         ):

@@ -1,4 +1,4 @@
-name: Windows Release
+name: Windows Dual Release
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   release:
-    name: Build and publish Windows EXE
+    name: Build and publish dual Windows EXEs
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
@@ -59,22 +59,27 @@ jobs:
           }
           if ($failed) { throw 'PowerShell syntax validation failed.' }
 
-      - name: Build one-file EXE
+      - name: Build Docker and native one-file EXEs
         shell: powershell
         run: .\windows\build.ps1 -Clean
 
-      - name: Smoke-test EXE
+      - name: Smoke-test both EXEs
         shell: powershell
         run: |
           .\dist\QQBotStudioWindows.exe --version
           .\dist\QQBotStudioWindows.exe --help | Out-Null
+          .\dist\QQBotStudioWindowsNative.exe --version
+          .\dist\QQBotStudioWindowsNative.exe --help | Out-Null
+          .\dist\QQBotStudioWindowsNative.exe --guide | Out-Null
+          .\dist\QQBotStudioWindowsNative.exe --check | Out-Null
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: QQBotStudioWindows-${{ github.ref_name }}
+          name: QQBotStudioWindows-dual-${{ github.ref_name }}
           path: |
             dist/QQBotStudioWindows.exe
+            dist/QQBotStudioWindowsNative.exe
             dist/SHA256SUMS.txt
             README.md
             VALIDATION.md
@@ -90,6 +95,7 @@ jobs:
           fail_on_unmatched_files: true
           files: |
             dist/QQBotStudioWindows.exe
+            dist/QQBotStudioWindowsNative.exe
             dist/SHA256SUMS.txt
             README.md
             VALIDATION.md

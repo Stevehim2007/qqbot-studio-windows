@@ -5,10 +5,10 @@ reusable Python/UI core from the Linux project instead of fetching code at
 runtime or build time.
 
 - Upstream project: `git@github.com:Stevehim2007/qqbot-studio.git`
-- Upstream snapshot commit: `d87f96561cd9167a0279584fffee7cc366564208`
-- Snapshot date: 2026-10-29
-- Upstream release line: v3.5.0
-- Bundled core version: `qqbot_studio.__version__ == 3.5.0`
+- Upstream snapshot commit: `06536c4aadd2b68c5123aabd60946fa18883a264`
+- Snapshot date: 2026-10-30
+- Upstream release line: v3.5.1
+- Bundled core version: `qqbot_studio.__version__ == 3.5.1`
 - Windows launcher version: `0.4.1`
 - Plugin snapshot: `qqbot_enhancer` 1.5.0
 

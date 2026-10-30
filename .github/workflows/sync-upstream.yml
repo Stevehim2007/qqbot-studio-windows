@@ -1,0 +1,76 @@
+name: Sync upstream Linux snapshot
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Preview the allowlisted upstream sync without committing"
+        required: false
+        default: false
+        type: boolean
+  schedule:
+    # Daily safety net; the release process may also dispatch this manually.
+    - cron: '17 3 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream-main
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync allowlisted upstream into Windows main
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout Windows repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout Linux upstream main
+        uses: actions/checkout@v4
+        with:
+          repository: Stevehim2007/qqbot-studio
+          ref: main
+          path: upstream
+          fetch-depth: 1
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Sync allowlisted core/plugins/assets/docs
+        shell: bash
+        run: |
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            python scripts/sync_upstream.py --upstream-dir upstream --target-dir . --dry-run
+          else
+            python scripts/sync_upstream.py --upstream-dir upstream --target-dir .
+          fi
+
+      - name: Validate synced tree before commit
+        if: ${{ github.event_name == 'schedule' || inputs.dry_run != true }}
+        shell: bash
+        run: |
+          python -m unittest discover -s tests -v
+          python -m compileall -q qqbot_studio windows
+
+      - name: Commit and push if upstream changed
+        if: ${{ github.event_name == 'schedule' || inputs.dry_run != true }}
+        shell: bash
+        run: |
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "No allowlisted upstream changes; no commit created."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          upstream_sha="$(cat .upstream-commit)"
+          core_version="$(python -c 'from qqbot_studio import __version__; print(__version__)')"
+          git add -A
+          git commit -m "chore: sync upstream ${upstream_sha} (core ${core_version})"
+          git push origin HEAD:main
