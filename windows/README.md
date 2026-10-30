@@ -8,9 +8,9 @@
 > 直接共用。完整说明见根目录 [`README.md`](../README.md) 和
 > [`UPSTREAM.md`](../UPSTREAM.md)。
 >
-> **状态：Windows 开发版 v0.4.2（最新正式 Release 为 v0.4.0），已同步 upstream core 3.5.1。** 双发行版开发中：Docker edition 稳定，Native edition 为 bootstrap/guide 占位。已包含独立
+> **状态：Windows 开发版 v0.4.2（最新正式 Release 为 v0.4.0），已同步 upstream core 3.6.0。** 双发行版开发中：Docker edition 稳定，Native edition 为 bootstrap/guide 占位。已包含独立
 > `/assistant` 页面、AI 助手 B 本机/公网配置、30 分钟刷新、控制台插件参数编辑和
-> qqbot_enhancer 1.5.0。发布由 `v*` tag 触发 GitHub Release，上传 EXE 和 SHA256。
+> qqbot_enhancer 1.5.2。发布由 `v*` tag 触发 GitHub Release，上传 EXE 和 SHA256。
 > 基础 Docker Desktop/Linux engine、Compose、EXE 构建和管理服务生命周期已实际测试；
 > 完整 AstrBot/SnowLuma 部署、noVNC 扫码和 QQ 验证仍未测试。详见根目录
 > [`VALIDATION.md`](../VALIDATION.md) 和 [`docs/FAQ.md`](../docs/FAQ.md)。
@@ -197,10 +197,13 @@ New-NetFirewallRule `
 
 ---
 
-## 6.1 v3.5.1 同步后的新入口
+## 6.1 v3.6.0 同步后的新入口
 
-- 新增平台感知部署向导（Windows/Ubuntu/其它 Linux 分支检查与命令）；
-- Windows 双发行版可行性/同步规则文档已同步。
+- core 3.6.0、qqbot_enhancer 1.5.2；
+- `/收藏表情` 支持引用消息和会话最近图片缓存，收藏流程更可靠；
+- AI 语境选表情（`sticker_ai_select_enabled`）：direct 模式私有标记，memory 模式本地匹配；
+- 自动收藏用户表情默认关闭；
+- 平台感知部署向导和 Windows 双发行版/同步规则文档继续保留。
 
 - 主控制台不再有离线“使用助手”A 面板或内嵌 AI 助手 B 卡片；
 - 点击控制台顶部 **AI 助手**，或运行 `QQBotStudioWindows.exe --assistant`，进入
@@ -209,7 +212,7 @@ New-NetFirewallRule `
 - 显式使用 `0.0.0.0 + public_host` 时才生成公网 URL，且 B 没有认证，必须由
   Windows 防火墙、云安全组、VPN 或带认证的反向代理保护；
 - 控制台自动刷新为 30 分钟，手动刷新会立即生效并重新计时；
-- 插件 1.5.0 支持自然语言找图、图片下载后本地发送、唱歌/点歌、`/option` 和记忆模式。
+- 插件 1.5.2 支持自然语言找图、图片下载后本地发送、唱歌/点歌、`/option` 和记忆模式。
 
 详细操作见 [`../docs/FAQ.md`](../docs/FAQ.md) 与
 [`../docs/ui-api-contract-v2.md`](../docs/ui-api-contract-v2.md)。
@@ -222,7 +225,7 @@ New-NetFirewallRule `
 
 ### v3.5.0 表情功能
 
-qqbot_enhancer 1.5.0 新增：
+qqbot_enhancer 1.5.0 新增（v3.5.0 历史）：
 
 - 用户 @/私聊发送纯 Image/Face 时按概率自然短句反应，不调用 LLM；
 - `/收藏表情 [分类]`、`/表情分类`、`/表情列表 [分类]`、`/发表情 [分类]`；

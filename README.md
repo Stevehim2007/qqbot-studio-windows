@@ -12,11 +12,11 @@ QQ Bot Studio 的**独立 Windows 10/11 双发行版项目**：
 本仓库不是 Linux 项目的打包目录，也不是它的自动更新分支。它拥有自己的启动器、
 Windows 服务生命周期实现、版本号、数据目录约定、测试和发布流水线。
 
-> **状态：Windows 开发版 v0.4.2（最新正式 Release 为 v0.4.0），已同步主项目 core 3.5.1。**
+> **状态：Windows 开发版 v0.4.2（最新正式 Release 为 v0.4.0），已同步主项目 core 3.6.0。**
 >
 > 已包含独立 `/assistant` AI 助手页面、控制台 30 分钟刷新 + 手动刷新、
 > AI 助手 B 本机/公网配置、控制台插件参数编辑（`reply_probability` 等）、
-> qqbot_enhancer 1.5.0 用户表情自动反应/收藏分类/发表情和最新 API/FAQ 文档；
+> qqbot_enhancer 1.5.2 用户表情自动反应/AI 语境选表情/收藏分类/发表情和最新 API/FAQ 文档；
 > v0.4.1 新增 Windows 文件位置说明和 CLI 安全迁移；v0.4.2 新增
 > token 保护的控制台“存储文件夹”迁移入口、后台 helper 自动停服/复制/重启，
 > 以及 Docker/Native 双 EXE 构建与 `sync-upstream` 同步流水线。
@@ -51,6 +51,16 @@ websockify，共享整个交互式 Windows 桌面，不承诺每实例独立屏�
 `plugins/qqbot_enhancer/`。这不是符号链接，也不会在运行时从 Linux 主项目拉取代码。
 快照来源与更新方法见 [`UPSTREAM.md`](UPSTREAM.md)。
 
+### v3.6.0 同步内容
+
+- core `3.6.0`、qqbot_enhancer `1.5.2`；
+- `/收藏表情` 支持引用消息与最近图片缓存，收藏流程更可靠；
+- 新增 AI 语境选表情：direct 模式使用私有 `[[sticker:标签]]` 标记，memory 模式
+  使用本地关键词/情绪/收藏分类匹配；
+- 自动收藏用户表情默认关闭，需显式开启；
+- 同步最新插件 README/schema/docs；
+- Windows 双 EXE/上游同步流程继续保留。
+
 ### v3.5.1 同步内容
 
 - core `3.5.1`、qqbot_enhancer `1.5.0`；
@@ -60,7 +70,7 @@ websockify，共享整个交互式 Windows 桌面，不承诺每实例独立屏�
 
 ### v3.5.0 同步内容
 
-- qqbot_enhancer 1.5.0；
+- qqbot_enhancer 1.5.2；
 - 用户 @/私聊发送纯 Image/Face 时按概率自然短句反应，不调用 LLM；
 - `/收藏表情 [分类]`、`/表情分类`、`/表情列表 [分类]`、`/发表情 [分类]`；
 - 收藏表情参与正常回复，可与内置表情包混合使用；
@@ -99,7 +109,7 @@ websockify，共享整个交互式 Windows 桌面，不承诺每实例独立屏�
 ### 升级边界
 
 - 本仓库独立维护版本：当前开发版 `VERSION = 0.4.1`，bundled core 版本为
-  `qqbot_studio.__version__ = 3.5.1`。
+  `qqbot_studio.__version__ = 3.6.0`。
 - Linux 主项目的自动更新、`scripts/auto-update.sh` 和网页内“更新并重启”不适用于
   本仓库。
 - Windows 版升级方式是：下载新的 EXE / PowerShell 发行包，停止旧管理服务，保留
@@ -193,10 +203,10 @@ docker info --format "{{.OSType}}"
 
 本地 v0.4.2 双 EXE 开发构建（Windows Python 3.10 + PyInstaller 6.10.0）：
 
-- Docker `QQBotStudioWindows.exe`：`8,482,596` bytes，SHA256
-  `ecaecac39771196531b1c958a86d39718a8ffddc4b21141bcbfea2bbfa04fe0f`；
-- Native `QQBotStudioWindowsNative.exe`：`6,405,961` bytes，SHA256
-  `71f8d7c5ec612622f1e83411a45c6c3de8abe6348c3fb7a25fa71a03e785428e`。
+- Docker `QQBotStudioWindows.exe`：`8,489,153` bytes，SHA256
+  `4116523ad859e6f3da74e30e5fcf56b4481cf5e24b1bb0a442d81383512b566e`；
+- Native `QQBotStudioWindowsNative.exe`：`6,405,962` bytes，SHA256
+  `656860fa478d9e4b4cc4f49532b175f976b93395e9cafd7a821e9b6f687afce5`。
 
 这些是未 tag 的本地开发构建；正式 Release 的 EXE/SHA 以 GitHub Release 和
 `SHA256SUMS.txt` 为准。
@@ -616,22 +626,22 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 - 最小 busybox Compose `config/up/down` 全部 exit 0，容器实际输出
   `qqbot-windows-v040-compose-smoke` 后清理；
 - PyInstaller 6.10.0 实际构建出 Docker/Native 两个 one-file EXE：
-  - Docker：`8,482,596` bytes，SHA256
-    `ecaecac39771196531b1c958a86d39718a8ffddc4b21141bcbfea2bbfa04fe0f`；
-  - Native bootstrap：`6,405,961` bytes，SHA256
-    `71f8d7c5ec612622f1e83411a45c6c3de8abe6348c3fb7a25fa71a03e785428e`；
-- Docker EXE `--assistant` 启动后 `/healthz` 返回 version `3.5.1`，`/console` 与
+  - Docker：`8,489,153` bytes，SHA256
+    `4116523ad859e6f3da74e30e5fcf56b4481cf5e24b1bb0a442d81383512b566e`；
+  - Native bootstrap：`6,405,962` bytes，SHA256
+    `656860fa478d9e4b4cc4f49532b175f976b93395e9cafd7a821e9b6f687afce5`；
+- Docker EXE `--assistant` 启动后 `/healthz` 返回 version `3.6.0`，`/console` 与
   `/assistant` 均 HTTP 200；
 - Native bootstrap `--version`/`--help`/`--guide`/`--check` 实际退出 0，但明确
   `NATIVE_E2E=NOT_VERIFIED`、`NATIVE_INTEGRATION=NOT_IMPLEMENTED_IN_BOOTSTRAP`；
 - `--move-data` 最终 EXE smoke 通过：旧目录保留、目标数据/迁移记录/pointer 写入，
-  可通过 pointer 在目标目录重启 `/healthz` 3.5.1，`--stop` 后 health 不可达；
-- 最终插件配置 API 实测 88 字段；POST `reply_probability=0.57` /
+  可通过 pointer 在目标目录重启 `/healthz` 3.6.0，`--stop` 后 health 不可达；
+- 最终插件配置 API 实测 99 字段；POST `reply_probability=0.57` /
   `user_sticker_reaction_probability=0.72` 后读取持久化值，`restart_required=true`；
 - `sync-upstream` 本地 dry-run + 实际同步通过；上游记录为
-  `06536c4aadd2b68c5123aabd60946fa18883a264`，第二次同步 no-op；
+  `c726d1290d43c4b6b702249783d48ba26a4bf7f6`，第二次同步 no-op；
 - 通过 token API 创建实例 `bot-1`，并使用插件 schema 实测插件参数配置：
-  - GET 返回 88 个 schema 字段；`reply_probability=0.12`，
+  - GET 返回 99 个 schema 字段；`reply_probability=0.12`，
     `user_sticker_reaction_enabled=true`；
   - POST 保存 `reply_probability=0.57` 和
     `user_sticker_reaction_probability=0.72`，离线返回
@@ -665,10 +675,10 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 ## 8. 文档与 FAQ
 
 - [`docs/README.md`](docs/README.md)：Windows 文档索引；
-- [`docs/FAQ.md`](docs/FAQ.md)：`/assistant`、AI 助手 B 公网、30 分钟刷新、插件 1.5.0、
+- [`docs/FAQ.md`](docs/FAQ.md)：`/assistant`、AI 助手 B 公网、30 分钟刷新、插件 1.5.2、
   EXE、端口和升级问题；
 - [`docs/ui-api-contract-v2.md`](docs/ui-api-contract-v2.md)：最新管理 API 契约；
-- [`docs/plugin-qqbot-enhancer.md`](docs/plugin-qqbot-enhancer.md)：qqbot_enhancer 1.5.0；
+- [`docs/plugin-qqbot-enhancer.md`](docs/plugin-qqbot-enhancer.md)：qqbot_enhancer 1.5.2；
 - [`VALIDATION.md`](VALIDATION.md)：真实执行和未验证项；
 - [`UPSTREAM.md`](UPSTREAM.md)：vendor 来源与下次同步步骤；
 - [Linux 主项目 README](https://github.com/Stevehim2007/qqbot-studio/blob/main/README.md)：

@@ -81,6 +81,7 @@ class V3SyncFeatureTests(unittest.TestCase):
         for marker in (
             "/找图", "/唱歌", "/点歌", "/option", "memory_mode",
             "/收藏表情", "/表情分类", "/表情列表", "/发表情",
+            "sticker_ai_select_enabled", "auto_collect_user_sticker_enabled",
         ):
             self.assertIn(marker, main)
         schema = json.loads(
@@ -93,6 +94,8 @@ class V3SyncFeatureTests(unittest.TestCase):
             "user_sticker_reaction_probability",
             "collected_sticker_enabled",
             "collected_sticker_use_probability",
+            "sticker_ai_select_enabled",
+            "auto_collect_user_sticker_enabled",
         ):
             self.assertIn(field, schema)
 
@@ -112,6 +115,7 @@ class V3SyncFeatureTests(unittest.TestCase):
         for marker in (
             "自然语言", "本地唱歌", "/option", "memory_mode",
             "/收藏表情", "/表情分类", "/表情列表", "/发表情",
+            "sticker_ai_select_enabled", "auto_collect_user_sticker_enabled",
         ):
             self.assertIn(marker, plugin_doc)
 

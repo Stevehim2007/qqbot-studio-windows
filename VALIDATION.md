@@ -10,9 +10,10 @@ This development version adds:
 - Docker and Native bootstrap one-file EXE builds in one release workflow.
 
 Committed upstream snapshot used for this validation:
-`06536c4aadd2b68c5123aabd60946fa18883a264` (Linux `main`).
-Bundled versions: core `3.5.1`, qqbot_enhancer `1.5.0`. Windows version:
-`0.4.2` (development; not tagged/released by this task).
+`c726d1290d43c4b6b702249783d48ba26a4bf7f6` (Linux `main`).
+Bundled versions after the final 3.6.0 sync: core `3.6.0`,
+qqbot_enhancer `1.5.2`. Windows version `0.4.2` (development; not
+tagged/released by this task).
 
 ### Upstream sync workflow and local verification
 
@@ -34,9 +35,9 @@ Local verification (actual script, clean upstream worktree at the committed
 SHA):
 
 - dry-run reported the expected allowlisted changes without writing;
-- actual sync copied core `3.5.1`, plugin `1.5.0`, assets, and the upstream
+- actual sync copied core `3.6.0`, plugin `1.5.2`, assets, and the upstream
   Windows-editions research doc;
-- `.upstream-commit` = `06536c4aadd2b68c5123aabd60946fa18883a264`;
+- `.upstream-commit` = `c726d1290d43c4b6b702249783d48ba26a4bf7f6`;
 - second run reported `no changes` and did not modify files;
 - Windows-owned launcher/build/spec/VERSION/release workflow files were
   preserved;
@@ -53,14 +54,14 @@ remote dispatch was available). Manual trigger:
 and smoke-tested both EXEs:
 
 - Docker edition `QQBotStudioWindows.exe`:
-  - size `8,482,596` bytes;
-  - SHA256 `ecaecac39771196531b1c958a86d39718a8ffddc4b21141bcbfea2bbfa04fe0f`;
-  - `--version`: `QQBot Studio Windows launcher 0.4.2 (core 3.5.1)`;
+  - size `8,489,153` bytes;
+  - SHA256 `4116523ad859e6f3da74e30e5fcf56b4481cf5e24b1bb0a442d81383512b566e`;
+  - `--version`: `QQBot Studio Windows launcher 0.4.2 (core 3.6.0)`;
   - `--help` exit 0.
 - Native bootstrap/guide `QQBotStudioWindowsNative.exe`:
-  - size `6,405,961` bytes;
-  - SHA256 `71f8d7c5ec612622f1e83411a45c6c3de8abe6348c3fb7a25fa71a03e785428e`;
-  - `--version`: `QQ Bot Studio Windows Native bootstrap 0.4.2 (bundled core 3.5.1)`;
+  - size `6,405,962` bytes;
+  - SHA256 `656860fa478d9e4b4cc4f49532b175f976b93395e9cafd7a821e9b6f687afce5`;
+  - `--version`: `QQ Bot Studio Windows Native bootstrap 0.4.2 (bundled core 3.6.0)`;
   - `--help`, `--guide`, `--check` exit 0; guide/check explicitly report
     `NATIVE_E2E=NOT_VERIFIED` and `NATIVE_INTEGRATION=NOT_IMPLEMENTED_IN_BOOTSTRAP`.
 
@@ -115,16 +116,16 @@ Executed with the locally built `QQBotStudioWindows.exe` and isolated
 `%LOCALAPPDATA%`:
 
 - start with `--assistant` + new instance; `/healthz` returned
-  `{"ok":true,"version":"3.5.1"}`;
+  `{"ok":true,"version":"3.6.0"}`;
 - `/console` and `/assistant` both HTTP 200;
 - `/console` contains the plugin editor and `/assistant` link;
 - `--move-data` to a new empty local target exited 0;
 - old data directory retained; target contains `studio.json`,
   `instances\bot-1\instance.json`, and `windows-data-move.json`;
 - pointer file points at target; restarting with no `--data-dir` through the
-  pointer succeeds; target `/healthz` is `3.5.1`; `--stop` makes health
+  pointer succeeds; target `/healthz` is `3.6.0`; `--stop` makes health
   unreachable;
-- token-protected plugin config API using the real 88-field schema:
+- token-protected plugin config API using the real 99-field schema:
   - GET HTTP 200, defaults `reply_probability=0.12`,
     `user_sticker_reaction_enabled=true`;
   - POST `reply_probability=0.57`,
@@ -136,7 +137,7 @@ Executed with the locally built `QQBotStudioWindows.exe` and isolated
 
 ### Console storage-folder migration smoke (current EXE)
 
-Executed against the locally built v0.4.2 Docker EXE with isolated
+Executed against the final v0.4.2/core 3.6.0 Docker EXE with isolated
 `%LOCALAPPDATA%` and a real HTTP server:
 
 - `/console` contained `/windows-console-move.js` and
@@ -148,7 +149,12 @@ Executed against the locally built v0.4.2 Docker EXE with isolated
   `scheduled` then `completed`; the restarted `/console` returned HTTP 200;
 - target contained `studio.json` and `windows-data-move.json`; target request
   marker was removed; source/old directory was retained; pointer pointed at
-  target; `--stop` after the move made health unreachable.
+  target; `--stop` after the move made health unreachable;
+- the actual 99-field v3.6.0 plugin schema was used: GET defaults returned
+  `reply_probability=0.12` and `sticker_ai_select_enabled` present; POST
+  `reply_probability=0.57` / `user_sticker_reaction_probability=0.72` set
+  `restart_required=true`; after migration and service restart, the new server
+  GET still read `0.57`/`0.72` from the moved data directory.
 - The test did not run a real browser click flow; UI static/asset and HTTP API
   behavior were verified. Browser automation remains a limitation.
 
