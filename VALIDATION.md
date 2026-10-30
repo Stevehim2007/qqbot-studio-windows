@@ -1,6 +1,105 @@
 # Validation record
 
-## v0.3.0 / core 3.4.0 sync (latest)
+## v0.4.0 / core 3.5.0 / plugin 1.5.0 (latest)
+
+Sync source: Linux main `d87f96561cd9167a0279584fffee7cc366564208`, clean
+working tree, core `3.5.0`, plugin `1.5.0`, Windows launcher `0.4.0`.
+
+New in this sync:
+
+- qqbot_enhancer 1.5.0;
+- pure Image/Face user reaction with `user_sticker_reaction_*` settings;
+- `/收藏表情 [分类]`, `/表情分类`, `/表情列表 [分类]`, `/发表情 [分类]`;
+- collected stickers participate in normal replies alongside built-in stickers;
+- plugin schema expanded to 88 fields and remains editable through the Windows
+  console/API.
+
+### Test and static checks
+
+- Linux Python: `python3 -m unittest discover -s tests -v` -> **45 tests OK**.
+- Windows Python 3.10.9: same suite -> **45 tests OK**.
+- Windows `python -m compileall -q qqbot_studio windows` -> OK.
+- Windows PowerShell 5.1 AST parser: all `.ps1` files -> OK.
+- `node --check` for `app.js`, `console.js`, and both `assistant.html` inline
+  scripts -> OK.
+- Both Windows workflow YAML files parsed successfully.
+- Static checks verified plugin 1.5.0 metadata, new sticker commands, schema
+  fields, docs, version `0.4.0`, and the release workflow `v*`/EXE/SHA256 path.
+
+### Local Windows PyInstaller build
+
+Command:
+
+```powershell
+.\windows\build.ps1 -Python C:\Users\<user>\AppData\Local\Programs\Python\Python310\python.exe -Clean
+```
+
+Result:
+
+- Build exited 0.
+- Local pre-release EXE: `8,461,717` bytes
+- SHA256: `2d44225206473101ca2a3a03f462afef86b5a0b2e47b8d6cddcbee4fe4d240db`
+- `--version`: `QQBot Studio Windows launcher 0.4.0 (core 3.5.0)`
+- `--help` exited 0.
+- Local pre-release EXE is not expected to be byte-identical to the CI release
+  EXE; the release SHA256 is authoritative.
+
+### Real EXE / Windows Docker Desktop / API smoke
+
+Executed with the locally built EXE on Windows 10/11 host:
+
+- Docker Desktop 4.93.0, Engine 29.8.1, `OSType=linux`, Compose `v5.5.1`.
+- `docker version`, `docker info`, `docker compose version` all exit 0.
+- Minimal Compose fixture:
+  - `config` exit 0;
+  - `up --abort-on-container-exit --exit-code-from smoke` exit 0 and printed
+    `qqbot-windows-v040-compose-smoke`;
+  - `down --remove-orphans` exit 0; test container/network removed.
+- EXE `--assistant` start:
+  - start output selected `/assistant`;
+  - `/healthz` -> `{"ok":true,"version":"3.5.0"}`;
+  - `/console` and `/assistant` both HTTP 200;
+  - `/console` has the plugin editor and `/assistant` link, and none of the old
+    A/B DOM markers;
+  - `/assistant` has public-host controls.
+- Token-protected API:
+  - `POST /api/instances` created `bot-1`;
+  - GET `/api/instances/bot-1/plugins/qqbot_enhancer/config` returned HTTP 200,
+    `ok=true`, 88 fields, defaults `reply_probability=0.12`,
+    `user_sticker_reaction_enabled=true`, `collected_sticker_enabled=true`;
+  - POST values `reply_probability=0.55`,
+    `user_sticker_reaction_probability=0.7` returned HTTP 200, `ok=true`,
+    `restart_required=true`;
+  - a second GET returned `0.55` and `0.7`;
+  - local plugin config JSON was written.
+- EXE `--status` returned healthy and `--stop` exited 0; health became
+  unreachable afterward.
+
+### GitHub Release v0.4.0
+
+- Tag intended by this commit: `v0.4.0`
+- Release workflow: `.github/workflows/windows-release.yml`
+- Release URL and final CI EXE size/SHA256 are recorded in the final task report
+  and, when available, in the repository docs after the tag run.
+- Release workflow must create a real GitHub Release with
+  `QQBotStudioWindows.exe`, `SHA256SUMS.txt`, `README.md`, and `VALIDATION.md`.
+  An Actions-only artifact is not sufficient.
+
+### Not verified for v0.4.0
+
+- No actual AstrBot + SnowLuma deployment through the wizard.
+- No real DeepSeek API or QQ account login.
+- No noVNC QR scan, device/SMS/email/slider verification.
+- No AI assistant B installation/update/start beyond the status/page path.
+- No browser auto-open test (`--no-open` was used).
+- No Windows Defender firewall/cloud security-group remote-access test.
+- No long-duration multi-instance or bind-mount ownership test.
+- The new sticker reaction/collection commands were validated by static tests
+  and plugin tests/schema, not against a live QQ/AstrBot session.
+
+---
+
+## v0.3.0 / core 3.4.0 sync (previous)
 
 Sync source: Linux main commit `1e9d4a46b0aba7f89519066693f95b5939c7732e`,
 clean working tree, core `3.4.0`, plugin `1.4.1`, launcher `0.3.0`.

@@ -5,12 +5,12 @@ reusable Python/UI core from the Linux project instead of fetching code at
 runtime or build time.
 
 - Upstream project: `git@github.com:Stevehim2007/qqbot-studio.git`
-- Upstream snapshot commit: `1e9d4a46b0aba7f89519066693f95b5939c7732e`
+- Upstream snapshot commit: `d87f96561cd9167a0279584fffee7cc366564208`
 - Snapshot date: 2026-10-29
-- Upstream release line: v3.4.0
-- Bundled core version: `qqbot_studio.__version__ == 3.4.0`
-- Windows launcher version: `0.3.0`
-- Plugin snapshot: `qqbot_enhancer` 1.4.1
+- Upstream release line: v3.5.0
+- Bundled core version: `qqbot_studio.__version__ == 3.5.0`
+- Windows launcher version: `0.4.0`
+- Plugin snapshot: `qqbot_enhancer` 1.5.0
 
 The upstream working tree was clean at the snapshot commit. This repository is
 now the source of truth for the Windows distribution; do not point it at a
@@ -28,8 +28,10 @@ Linux data directory or the Linux auto-update pipeline.
   - schema-driven bool/int/float/string/text/list validation;
   - `reply_probability` highlighted editor and offline restart guidance;
   - sensitive Key/token/password fields excluded;
-- `qqbot_enhancer` 1.4.1 with natural-language image search, downloaded image
-  sending, local song playback, `/option`, and memory-mode support;
+- `qqbot_enhancer` 1.5.0 with natural-language image search, downloaded image
+  sending, local song playback, `/option`, memory-mode support, pure Image/Face
+  automatic reactions, collected-sticker categories, and
+  `/收藏表情`, `/表情分类`, `/表情列表`, `/发表情` commands;
 - latest API contract, plugin documentation, troubleshooting and QA references
   under `docs/`;
 - Windows launcher/services/PowerShell/PyInstaller/CI files maintained here,

@@ -8,9 +8,9 @@
 > 直接共用。完整说明见根目录 [`README.md`](../README.md) 和
 > [`UPSTREAM.md`](../UPSTREAM.md)。
 >
-> **状态：Windows 独立发行版 v0.3.0，已同步 upstream core 3.4.0。** 已包含独立
+> **状态：Windows 独立发行版 v0.4.0，已同步 upstream core 3.5.0。** 已包含独立
 > `/assistant` 页面、AI 助手 B 本机/公网配置、30 分钟刷新、控制台插件参数编辑和
-> qqbot_enhancer 1.4.1。发布由 `v*` tag 触发 GitHub Release，上传 EXE 和 SHA256。
+> qqbot_enhancer 1.5.0。发布由 `v*` tag 触发 GitHub Release，上传 EXE 和 SHA256。
 > 基础 Docker Desktop/Linux engine、Compose、EXE 构建和管理服务生命周期已实际测试；
 > 完整 AstrBot/SnowLuma 部署、noVNC 扫码和 QQ 验证仍未测试。详见根目录
 > [`VALIDATION.md`](../VALIDATION.md) 和 [`docs/FAQ.md`](../docs/FAQ.md)。
@@ -197,7 +197,7 @@ New-NetFirewallRule `
 
 ---
 
-## 6.1 v3.4.0 同步后的新入口
+## 6.1 v3.5.0 同步后的新入口
 
 - 主控制台不再有离线“使用助手”A 面板或内嵌 AI 助手 B 卡片；
 - 点击控制台顶部 **AI 助手**，或运行 `QQBotStudioWindows.exe --assistant`，进入
@@ -206,7 +206,7 @@ New-NetFirewallRule `
 - 显式使用 `0.0.0.0 + public_host` 时才生成公网 URL，且 B 没有认证，必须由
   Windows 防火墙、云安全组、VPN 或带认证的反向代理保护；
 - 控制台自动刷新为 30 分钟，手动刷新会立即生效并重新计时；
-- 插件 1.4.1 支持自然语言找图、图片下载后本地发送、唱歌/点歌、`/option` 和记忆模式。
+- 插件 1.5.0 支持自然语言找图、图片下载后本地发送、唱歌/点歌、`/option` 和记忆模式。
 
 详细操作见 [`../docs/FAQ.md`](../docs/FAQ.md) 与
 [`../docs/ui-api-contract-v2.md`](../docs/ui-api-contract-v2.md)。
@@ -217,17 +217,27 @@ New-NetFirewallRule `
 `qqbot_enhancer` 参数可读取/编辑并保存；离线时提示 `restart_required`，在线时尽量
 通过 AstrBot 热重载。Key/token/password 类字段不会返回或提交。
 
+### v3.5.0 表情功能
+
+qqbot_enhancer 1.5.0 新增：
+
+- 用户 @/私聊发送纯 Image/Face 时按概率自然短句反应，不调用 LLM；
+- `/收藏表情 [分类]`、`/表情分类`、`/表情列表 [分类]`、`/发表情 [分类]`；
+- 收藏表情参与正常回复，和内置 8 张表情包可混合使用；
+- WebUI/API 可编辑 `user_sticker_reaction_*`、`collected_sticker_*` schema 参数。
+
 ### 正式 EXE Release
 
-`v0.3.0` 起推送匹配 `VERSION` 的 tag 会触发
+`v0.4.0` 起推送匹配 `VERSION` 的 tag 会触发
 `.github/workflows/windows-release.yml`，创建真实 GitHub Release 并上传：
 
-- `QQBotStudioWindows.exe`（v0.3.0 release 为 `10,795,114` bytes，
-  SHA256 `e676ded2bc78ca5b65ac45a11f98e9c1bbb11cd325d39791592242385aca08d0`）
+- `QQBotStudioWindows.exe`
 - `SHA256SUMS.txt`
 
-实际 release workflow run `40995684732` 已成功。只上传 Actions artifact 不算正式
-发布；参见根 README 的下载/校验示例。
+v0.4.0 的本地预发布 EXE 为 `8,461,717` bytes，SHA256
+`2d44225206473101ca2a3a03f462afef86b5a0b2e47b8d6cddcbee4fe4d240db`；正式
+Release EXE 由 tag workflow 重新构建，大小/SHA 以 Release 页面为准。只上传
+Actions artifact 不算正式发布；参见根 README 的下载/校验示例。
 
 ## 7. 已知限制与未验证项
 

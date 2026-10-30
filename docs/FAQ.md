@@ -78,11 +78,14 @@ Get-NetTCPConnection -LocalPort 8765 -State Listen
 - 云 Windows 主机还需要在云安全组放行；
 - 修改 `public_host` 只影响打印 URL，不会改变监听或防火墙。
 
-## 7. 插件 1.4.1 有哪些新命令？
+## 7. 插件 1.5.0 有哪些新命令？
 
 - `/找图 关键词`、`/搜图 关键词`，以及插件支持的自然语言找图意图；
 - 图片会先安全下载到本地临时文件，再通过 AstrBot 官方本地图片组件发送；
 - `/唱歌`、`/点歌`：发送 `songs/` 中用户自行提供的授权音频，不调用 LLM；
+- `/收藏表情 [分类]`、`/表情分类`、`/表情列表 [分类]`、`/发表情 [分类]`：
+  收藏/分类/列表/发送用户表情，收藏表情也会参与正常回复；
+- 用户 @/私聊发送纯 Image/Face 可按 `user_sticker_reaction_*` 配置自动短句反应；
 - `/option`：查看/进入插件配置说明；
 - `memory_mode=direct/astrbot`：选择省 token 直连或 AstrBot 会话记忆。
 
@@ -129,7 +132,7 @@ POST /api/instances/<id>/plugins/<plugin_id>/config
 
 <https://github.com/Stevehim2007/qqbot-studio-windows/releases>
 
-正式 tag 示例：`v0.3.0`。Release 应包含：
+正式 tag 示例：`v0.4.0`。Release 应包含：
 
 - `QQBotStudioWindows.exe`
 - `SHA256SUMS.txt`
