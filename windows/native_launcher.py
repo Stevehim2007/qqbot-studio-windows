@@ -214,6 +214,13 @@ def _open(url: str) -> None:
 
 
 def run(argv: list[str] | None = None) -> int:
+    # Windows legacy consoles may use a code page that cannot encode emoji
+    # present in AstrBot/SnowLuma logs. Never crash while tailing logs.
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(errors="replace")  # type: ignore[attr-defined]
+        except (AttributeError, OSError, ValueError):
+            pass
     parser = build_parser()
     args = parser.parse_args(argv)
     root = native_runtime.native_root(args.data_dir)

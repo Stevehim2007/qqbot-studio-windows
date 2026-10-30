@@ -299,15 +299,19 @@ CLI 高级入口：
 | 文件 | 用途 | 状态 |
 |---|---|---|
 | `QQBotStudioWindows.exe` | Docker Desktop + WSL2，QQBotStudio 管理控制台 | 稳定推荐 |
-| `QQBotStudioWindowsNative.exe` | Native Windows 单实例 POC：官方 SnowLuma Windows + 本机 NTQQ | 本地进程/PID/日志/端口/health/OneBot 管理已实现；真实 AstrBot/SnowLuma/NTQQ/QQ 登录未验证 |
+| `QQBotStudioWindowsNative.exe` | Native Windows 单实例 POC：官方 SnowLuma Windows + 本机 NTQQ | 真实 AstrBot 4.29.3/SnowLuma 2.2.1 启动、HTTP 200、OneBot listener、PID/log/stop 已验证；QQ EULA/登录 ENV_BLOCKED |
 
 Native 版官方推荐路径是本机安装桌面 QQ、官方 AstrBot Windows 运行时和官方
 SnowLuma Windows x64 包，直接在本机 QQ 窗口扫码；noVNC 仅是可选高级增强，需要
 Windows VNC Server + websockify 并共享整个交互桌面，不承诺每实例独立屏幕。
 Native POC 管理本地 AstrBot/SnowLuma 进程，但不下载、不安装、不注入、不登录第三方组件。
-当前主机只检测到 NTQQ；AstrBot CLI 和 SnowLuma Windows 包缺失时 `--start` 明确返回
-`NATIVE_START=BLOCKED`，不会伪造成功。QQ 登录只使用官方本机 NTQQ 窗口，不使用 noVNC，
-也不自动输入密码/验证码。日常稳定使用请选 Docker edition。
+临时 Windows 数据目录真实安装验证已通过：AstrBot 4.29.3 + SnowLuma 2.2.1
+win-x64-lite + Node 26.13.0 + NTQQ 9.9.19.35469；AstrBot/SnowLuma HTTP 200、
+OneBot `ws://127.0.0.1:16199/ws` listener=true、health OK、stop 后端口关闭。
+SnowLuma EULA/PRIVACY 和 QQ 扫码/设备验证是人工步骤，未完成，因此
+SnowLuma→AstrBot 握手和 QQ 消息 E2E 标记 ENV_BLOCKED。QQ 登录只使用官方本机
+NTQQ 窗口，不使用 noVNC，也不自动输入密码/验证码。详细记录见
+[`../docs/native-e2e-validation.md`](../docs/native-e2e-validation.md)。
 
 ```powershell
 .\QQBotStudioWindowsNative.exe --configure --non-interactive --ntqq-path "D:\Program Files\Tencent\QQ.exe" --astrbot-command "astrbot run" --snowluma-dir "D:\SnowLuma"
@@ -320,12 +324,12 @@ Native POC 管理本地 AstrBot/SnowLuma 进程，但不下载、不安装、不
 .\QQBotStudioWindowsNative.exe --stop
 ```
 
-Native POC 开发构建：Docker `8,567,123` bytes / SHA256
-`968579ba6cc016ac0d15fa40df71e96a0878b35c6f490c47f6b70f4f5b7193cb`；
-Native POC `6,965,443` bytes / SHA256
-`ea144b4ae802146d36ff732d13e45196cdaa09802fdca2fdb3730069f10f9822`。
-Linux/Windows 各 89 tests OK。当前真实主机 NTQQ 可用，但 AstrBot/SnowLuma 缺失，
-`--check --strict-check` 退出 1、`--start` 退出 2，明确阻塞。
+Native POC 开发构建：Docker `8,567,126` bytes / SHA256
+`7478d9581fa9963e92b58b3cf5e4db7e37a810562e0384fd8bcef0407fdae76f`；
+Native POC `6,965,919` bytes / SHA256
+`53950b2a57498523a1076e47ad47d7f76c8959718055b3b9cd58c78eac340fea`。
+Linux/Windows 各 90 tests OK。真实 AstrBot/SnowLuma 启动和 health 已验证；
+QQ EULA/扫码人工步骤仍为 ENV_BLOCKED。
 
 
 #### 每次上游更新必须同步双版本

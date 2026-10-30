@@ -59,6 +59,21 @@ class NativeRuntimeConfigTests(unittest.TestCase):
 
 
 class NativeOneBotConfigTests(unittest.TestCase):
+    def test_snowluma_runtime_port_overrides_configured_port(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "native"
+            snowluma = Path(tmp) / "snowluma"
+            (snowluma / "config").mkdir(parents=True)
+            (snowluma / "config" / "runtime.json").write_text(
+                json.dumps({"webuiPort": 5099}), encoding="utf-8"
+            )
+            cfg = native_runtime.load_config(root)
+            cfg["snowluma_dir"] = str(snowluma)
+            cfg["snowluma_webui_port"] = 5099
+            self.assertEqual(native_runtime.snowluma_effective_webui_port(cfg), 5099)
+            cfg["snowluma_webui_port"] = 15099
+            self.assertEqual(native_runtime.snowluma_effective_webui_port(cfg), 5099)
+
     def test_writer_uses_loopback_and_disables_sl(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "native"

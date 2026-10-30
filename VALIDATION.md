@@ -23,7 +23,8 @@ This is a development/POC addition, not a new tagged Release. Bundled core remai
 
 ### Tests and smoke
 
-- Linux and Windows Python: **89 tests OK** (Linux skips 1 Windows-only test).
+- Linux and Windows Python: **90 tests OK** (Linux skips 1 Windows-only test).
+- Real-component validation summary: `docs/native-e2e-validation.md`.
 - Native POC process smoke on Windows using the built Native EXE and two real
   local fake Python service processes:
   - configure with fake NTQQ path and explicit AstrBot/SnowLuma commands;
@@ -41,29 +42,40 @@ This is a development/POC addition, not a new tagged Release. Bundled core remai
   - status showed both processes running and `onebot.listening=true`;
   - logs contained both service-ready markers;
   - after `--stop`, no managed process remained.
-- Real host prerequisite check (no fake component paths):
-  - NTQQ found: `D:\Program Files\Tencent\QQ.exe` and QQ process present;
-  - AstrBot CLI absent: blocker;
-  - SnowLuma Windows package directory absent: blocker;
-  - `--check --strict-check` exit 1;
-  - `--start` exit 2 and printed `NATIVE_START=BLOCKED`.
-- Native EXE build:
-  - Docker `QQBotStudioWindows.exe`: `8,567,123` bytes, SHA256
-    `968579ba6cc016ac0d15fa40df71e96a0878b35c6f490c47f6b70f4f5b7193cb`;
-  - Native `QQBotStudioWindowsNative.exe`: `6,965,443` bytes, SHA256
-    `ea144b4ae802146d36ff732d13e45196cdaa09802fdca2fdb3730069f10f9822`.
+- Real-component validation in a temporary Windows data directory:
+  - installed AstrBot 4.29.3 via uv/Python 3.12.14 and official SnowLuma 2.2.1
+    win-x64-lite + official Node 26.13.0;
+  - configured NTQQ `D:\Program Files\Tencent\QQ.exe` (9.9.19.35469);
+  - `--check --strict-check` exit 0 and `--write-onebot-config` exit 0;
+  - `--start` exit 0 with real AstrBot/SnowLuma PIDs;
+  - AstrBot WebUI HTTP 200 at 16185; SnowLuma WebUI HTTP 200 at 5099
+    (effective port read from SnowLuma `config/runtime.json`);
+  - OneBot `ws://127.0.0.1:16199/ws` TCP listener=true; health
+    `NATIVE_HEALTH_OK=True`;
+  - `--logs` exit 0 with AstrBot started/SnowLuma listening markers;
+  - `--stop` exit 0 and all three ports closed.
+- Real-component blockers: SnowLuma EULA/PRIVACY consent and QQ
+  scan/device/SMS/slider verification were not automated; no QQ login,
+  SnowLuma→AstrBot handshake or QQ message E2E is claimed.
+- Native EXE build after the Native POC fixes:
+  - Docker `QQBotStudioWindows.exe`: `8,567,126` bytes, SHA256
+    `7478d9581fa9963e92b58b3cf5e4db7e37a810562e0384fd8bcef0407fdae76f`;
+  - Native `QQBotStudioWindowsNative.exe`: `6,965,919` bytes, SHA256
+    `53950b2a57498523a1076e47ad47d7f76c8959718055b3b9cd58c78eac340fea`.
 - `--version`: `QQ Bot Studio Windows Native POC 0.7.1 (bundled core 3.9.0)`.
 
 ### Native POC limitations / blockers
 
-- Real AstrBot CLI and SnowLuma Windows package are not installed on this host;
-  no real native AstrBot/SnowLuma process was started.
-- Real NTQQ is installed/running, but QQ scan login, device/SMS/email/slider
-  verification, SnowLuma hook compatibility and OneBot connection were not
-  performed. No WSL/Docker/noVNC path is used.
-- No real AstrBot WebUI/SnowLuma WebUI health response was observed because
-  those components are absent; the process manager smoke used fake local
-  services, not a real bot.
+- Real AstrBot/SnowLuma were installed in a temporary directory, not into the
+  user's persistent profile or a formal instance. The 90-test suite was run
+  against the Windows repo, but this is not a production install.
+- SnowLuma EULA/PRIVACY consent and QQ scan/device/SMS/slider verification were
+  not automated. No real QQ login, SnowLuma hook compatibility or
+  SnowLuma→AstrBot OneBot handshake is claimed; only AstrBot's OneBot TCP
+  listener was verified.
+- AstrBot needs a user/WebUI-provided `cmd_config.json`; the Native POC does not
+  generate the complete AstrBot config. SnowLuma WebUI port is taken from its
+  own `config/runtime.json`.
 - Single-instance only. Multi-instance, NTQQ multi-open, desktop isolation,
   QQ version compatibility and long-running stability are not supported/claimed.
 - `--open-qq` was not invoked in automation to avoid disturbing the user's real

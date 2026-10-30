@@ -28,10 +28,11 @@ Windows 服务生命周期实现、版本号、数据目录约定、测试和发
 > 统一 AI tool marker、#sl 关闭、提示词换行保留和最新 UI/backend。
 > Docker EXE、隐藏管理服务、Docker Desktop/Linux engine 和本机 smoke 已做部分
 > 真实验证；发布使用 `v*` tag 触发的 GitHub Release。
-> **Native EXE 已从 bootstrap 升级为单实例 POC 进程管理器，但真实 AstrBot/SnowLuma/
-> NTQQ 联调和 QQ 登录仍未验证。** 当前主机只检测到 NTQQ；AstrBot/SnowLuma 未安装，
-> Native `--start` 会明确返回阻塞，不会伪装成功。
-> 不能把本仓库当作已完成完整 Windows QQ 扫码生产联调的版本。
+> **Native EXE 已是单实例 POC 进程管理器，并在临时目录用真实 AstrBot 4.29.3 +
+> SnowLuma 2.2.1 + Node 26.13 + 本机 NTQQ 完成启动/HTTP/OneBot listener 验证。**
+> SnowLuma EULA/PRIVACY 和 QQ 扫码/验证仍需人工完成，当前标记
+> `ENV_BLOCKED`；不宣称 QQ 已登录或消息 E2E 通过。
+> 详见 [`docs/native-e2e-validation.md`](docs/native-e2e-validation.md)。
 
 ---
 
@@ -47,7 +48,7 @@ Windows 服务生命周期实现、版本号、数据目录约定、测试和发
 | 发行版 | EXE | 运行时 | 当前状态 |
 |---|---|---|---|
 | Docker edition | `QQBotStudioWindows.exe` | Docker Desktop + WSL2 + Linux containers | **稳定推荐**；EXE/API/Compose smoke 已验证，真实 QQ/noVNC E2E 未验证 |
-| Native edition | `QQBotStudioWindowsNative.exe` | 官方 SnowLuma Windows + 本机桌面 NTQQ | **单实例 Native POC**；真实进程/PID/日志/端口/health/OneBot 配置管理；AstrBot/SnowLuma 未安装，真实 QQ 登录 E2E 阻塞 |
+| Native edition | `QQBotStudioWindowsNative.exe` | 官方 SnowLuma Windows + 本机桌面 NTQQ | **单实例 Native POC**；真实 AstrBot/SnowLuma 启动、HTTP 200、OneBot listener、PID/log/stop 已验证；QQ 登录/EULA 人工步骤 ENV_BLOCKED |
 
 Native 版优先使用官方 SnowLuma Windows 发行包和本机 NTQQ 桌面扫码；官方路径不要求
 Docker/WSL，也不要求 noVNC。noVNC 仅作为可选高级增强：需要 Windows VNC Server +
@@ -87,19 +88,24 @@ Native POC 当前实现（`VERSION=0.7.1`，不作为已发布稳定版）：
 .\QQBotStudioWindowsNative.exe --stop
 ```
 
-当前主机实际检测到 NTQQ（`D:\Program Files\Tencent\QQ.exe`，进程运行中），但
-AstrBot CLI 和 SnowLuma Windows 包均未找到；因此真实 AstrBot/SnowLuma/QQ 登录、
-OneBot 连接和 QQ 消息 E2E 不能声明通过。进程管理使用两个真实本地模拟服务进程和
-真实 PID/日志/stop 生命周期验证；不是只交 bootstrap/guide。
+真实组件验证已在一台 Windows 主机临时目录完成：AstrBot 4.29.3（uv/Python
+3.12.14）与 SnowLuma 2.2.1 win-x64-lite + Node 26.13.0 均真实启动；AstrBot
+WebUI `127.0.0.1:16185` HTTP 200、SnowLuma WebUI `127.0.0.1:5099` HTTP 200、
+AstrBot OneBot `ws://127.0.0.1:16199/ws` TCP listening=true、health
+`NATIVE_HEALTH_OK=True`；NTQQ `D:\Program Files\Tencent\QQ.exe`（9.9.19.35469）
+进程和主窗口存在。SnowLuma 等待 EULA/PRIVACY 同意，QQ 扫码/设备验证未执行，
+所以 SnowLuma→AstrBot 实际 OneBot 握手和 QQ 消息收发标记 `ENV_BLOCKED`，
+没有伪造登录成功。完整证据、版本、日志摘要和清理见
+[`docs/native-e2e-validation.md`](docs/native-e2e-validation.md)。
 
 Native POC 开发构建（`VERSION=0.7.1`，未 tag/Release）：
 
-- Docker `QQBotStudioWindows.exe`：`8,567,123` bytes，SHA256
-  `968579ba6cc016ac0d15fa40df71e96a0878b35c6f490c47f6b70f4f5b7193cb`；
-- Native POC `QQBotStudioWindowsNative.exe`：`6,965,443` bytes，SHA256
-  `ea144b4ae802146d36ff732d13e45196cdaa09802fdca2fdb3730069f10f9822`；
-- Linux/Windows 各 89 tests OK；真实 Windows 环境检查：NTQQ found，AstrBot/SnowLuma
-  missing，`--check --strict-check` exit 1、`--start` exit 2 并输出 blockers。
+- Docker `QQBotStudioWindows.exe`：`8,567,126` bytes，SHA256
+  `7478d9581fa9963e92b58b3cf5e4db7e37a810562e0384fd8bcef0407fdae76f`；
+- Native POC `QQBotStudioWindowsNative.exe`：`6,965,919` bytes，SHA256
+  `53950b2a57498523a1076e47ad47d7f76c8959718055b3b9cd58c78eac340fea`；
+- Linux/Windows 各 90 tests OK；真实组件启动、health、OneBot listener、logs、stop
+  已验证；QQ EULA/扫码人工步骤 ENV_BLOCKED。
 
 本仓库 vendor 了主项目的 `qqbot_studio/` Python 核心、静态 UI、`assets/` 和
 `plugins/qqbot_enhancer/`。这不是符号链接，也不会在运行时从 Linux 主项目拉取代码。
@@ -698,23 +704,23 @@ Windows 文档同步规则与 Linux 主项目 `docs/windows-editions-research.md
 本仓库已在同一台 Windows 主机上通过 WSL interop 使用 Windows PowerShell 5.1、
 Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 
-- 独立测试套件 **89 tests** 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
+- 独立测试套件 **90 tests** 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
 - Windows Python `compileall`、PowerShell 5.1 AST、Node JS 检查通过；
 - Docker Desktop 4.93.0 / Engine 29.8.1 / `OSType=linux` / Compose v5.5.1；
 - 最小 busybox Compose `config/up/down` 全部 exit 0，容器实际输出
   `qqbot-windows-v070-compose-smoke` 后清理；
 - PyInstaller 6.10.0 实际构建出 Docker/Native 两个 one-file EXE：
-  - Docker：`8,567,123` bytes，SHA256
-    `968579ba6cc016ac0d15fa40df71e96a0878b35c6f490c47f6b70f4f5b7193cb`；
-  - Native POC：`6,965,443` bytes，SHA256
-    `ea144b4ae802146d36ff732d13e45196cdaa09802fdca2fdb3730069f10f9822`；
+  - Docker：`8,567,126` bytes，SHA256
+    `7478d9581fa9963e92b58b3cf5e4db7e37a810562e0384fd8bcef0407fdae76f`；
+  - Native POC：`6,965,919` bytes，SHA256
+    `53950b2a57498523a1076e47ad47d7f76c8959718055b3b9cd58c78eac340fea`；
 - Docker EXE `--assistant` 启动后 `/healthz` 返回 version `3.9.0`，`/console` 与
   `/assistant` 均 HTTP 200；
-- Native POC `--version/--help/--guide/--check` 实际通过；fake 进程 smoke 验证
-  `--configure/--start/--status/--logs/--stop` 和真实 PID 生命周期，OneBot loopback
-  config、#sl disabled；另用真实本地 fake HTTP 服务验证 `--health` 返回
-  `NATIVE_HEALTH_OK=True`、OneBot 端口 listening，stop 后进程消失；真实主机 NTQQ
-  可用但 AstrBot/SnowLuma 缺失，strict check/start 明确阻断，不伪造 E2E；
+- Native POC `--version/--help/--guide/--check` 实际通过；fake 进程和 fake HTTP
+  smoke 验证过 `--configure/--start/--status/--logs/--stop/--health`；随后在临时
+  目录安装真实 AstrBot 4.29.3 + SnowLuma 2.2.1 + Node 26.13 并启动通过；
+  AstrBot/SnowLuma HTTP 200、OneBot listener=true、health OK；QQ EULA/扫码未完成，
+  明确标记 ENV_BLOCKED；
 - `--move-data` 最终 EXE smoke 通过：旧目录保留、目标数据/迁移记录/pointer 写入，
   可通过 pointer 在目标目录重启 `/healthz` 3.9.0，`--stop` 后 health 不可达；
 - 最终插件配置 API 实测 **169 字段**；`safe_tools_marker_enabled`、
@@ -763,10 +769,12 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
   gh/GH_TOKEN/GITHUB_TOKEN）；当前 v0.7.0 是本地执行同一 sync 脚本手动同步。
   请在 Actions 页面手动点一次 `Sync upstream Linux snapshot` 做远端流程验证。
 - 双 EXE `v*` Release workflow 已实际执行并成功；Release URL 和两个资产 SHA 见上。
-- Native POC 已实现真实本地进程管理，但当前主机没有 AstrBot/SnowLuma 安装，真实
-  NTQQ 扫码、SnowLuma hook、OneBot 连接和 QQ 消息 E2E 未验证；noVNC 不使用。
+- Native POC 已在临时目录真实安装/启动 AstrBot 4.29.3 + SnowLuma 2.2.1 + Node
+  26.13，验证 WebUI/OneBot listener/health/stop；但 SnowLuma EULA/PRIVACY 同意、
+  QQ 扫码/设备/短信/滑块验证未执行，SnowLuma→AstrBot 实际握手和 QQ 消息 E2E
+  仍为 ENV_BLOCKED；noVNC 不使用。
 - Native POC 使用 loopback-only 设计，公网访问未实现/未验证。
-- 真实 AstrBot + SnowLuma 向导部署、DeepSeek API 和 QQ 账号登录未测试。
+- AstrBot/SnowLuma 自动向导安装、DeepSeek API 和 QQ 账号登录未测试。
 - noVNC 扫码、设备验证、短信/邮箱验证和滑块验证未测试。
 - 长时间多实例稳定性、bind mount 属主和容器写权限未测试。
 

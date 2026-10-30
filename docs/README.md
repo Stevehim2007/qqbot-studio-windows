@@ -9,6 +9,7 @@
 |---|---|
 | [`../README.md`](../README.md) | Windows 独立项目安装、EXE 使用、Docker Desktop/WSL2、数据与升级边界 |
 | [`../VALIDATION.md`](../VALIDATION.md) | 真实执行过的测试、构建和 EXE smoke；Native POC 进程/health/PID 结果和未验证项 |
+| [`native-e2e-validation.md`](native-e2e-validation.md) | 真实 AstrBot 4.29.3 + SnowLuma 2.2.1 + NTQQ 临时目录安装/启动/health/OneBot/stop 验证及人工阻塞 |
 | [`FAQ.md`](FAQ.md) | Windows 常见问题：Docker Desktop、端口、AI 助手 B、EXE、扫码与更新 |
 | [`../UPSTREAM.md`](../UPSTREAM.md) | vendor 来源、上游 commit、同步和升级流程 |
 

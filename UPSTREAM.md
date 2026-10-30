@@ -59,6 +59,7 @@ syncs:
 - `.github/workflows/windows-release.yml`
 - `windows/native_launcher.py` and `windows/native_runtime.py` (Windows Native POC
   process manager, not present upstream)
+- `docs/native-e2e-validation.md` (Windows-only real-component validation record)
 - Windows-specific README/UPSTREAM/VALIDATION/tests
 
 ## Updating from upstream

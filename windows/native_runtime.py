@@ -498,19 +498,50 @@ def onebot_connection_hint(config: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+
+def snowluma_effective_webui_port(config: dict[str, Any]) -> int:
+    """Return the port SnowLuma will actually use.
+
+    SnowLuma's official Windows package reads its own ``config/runtime.json``
+    and does not accept the native launcher port as a CLI override. After its
+    first start that file is authoritative; the configured fallback is used
+    before it exists.
+    """
+
+    fallback = int(config.get("snowluma_webui_port") or DEFAULT_SNOWLUMA_WEBUI_PORT)
+    snowluma_dir = Path(str(config.get("snowluma_dir") or "")).expanduser()
+    if not str(snowluma_dir):
+        return fallback
+    runtime = _read_json(snowluma_dir / "config" / "runtime.json")
+    if runtime:
+        try:
+            port = int(runtime.get("webuiPort") or 0)
+        except (TypeError, ValueError):
+            port = 0
+        if 1 <= port <= 65535:
+            return port
+    return fallback
+
+
 def health_payload(root: Path, config: dict[str, Any] | None = None) -> dict[str, Any]:
     root = Path(root).resolve()
     cfg = dict(config or load_config(root))
     host = str(cfg.get("bind_host") or DEFAULT_BIND_HOST)
     astrbot_url = f"http://{host}:{int(cfg.get('astrbot_webui_port') or 6185)}/"
-    snowluma_url = f"http://{host}:{int(cfg.get('snowluma_webui_port') or 5099)}/"
+    snowluma_port = snowluma_effective_webui_port(cfg)
+    snowluma_url = f"http://{host}:{snowluma_port}/"
     astrbot_http = probe_http(astrbot_url)
     snowluma_http = probe_http(snowluma_url)
     onebot_port = int(cfg.get("astrbot_onebot_port") or 6199)
     return {
         "ok": bool(astrbot_http["ok"] and snowluma_http["ok"]),
         "astrbot": {"alive": service_alive(root, "astrbot"), "http": astrbot_http, "url": astrbot_url},
-        "snowluma": {"alive": service_alive(root, "snowluma"), "http": snowluma_http, "url": snowluma_url},
+        "snowluma": {
+            "alive": service_alive(root, "snowluma"),
+            "http": snowluma_http,
+            "url": snowluma_url,
+            "effective_webui_port": snowluma_port,
+        },
         "onebot": {"url": str(cfg.get("onebot_url") or ""), "port": onebot_port, "listening": port_listening(onebot_port, host)},
         "no_vnc_used": True,
         "qq_login": "Use the official local Windows QQ/NTQQ window; noVNC is not used by Native POC.",
@@ -633,7 +664,7 @@ def start_native(
         )
         start_process(root, "astrbot", command, cwd=astrbot_dir, env=env)
     if not service_alive(root, "snowluma"):
-        if not is_port_free(int(cfg.get("snowluma_webui_port") or 5099), str(cfg.get("bind_host") or "127.0.0.1")):
+        if not is_port_free(snowluma_effective_webui_port(cfg), str(cfg.get("bind_host") or "127.0.0.1")):
             raise NativePOCError("SnowLuma WebUI port is already in use")
         command = list(cfg.get("snowluma_command") or find_snowluma_launcher(snowluma_dir))
         if not command:
@@ -699,6 +730,7 @@ def status_payload(root: Path, config: dict[str, Any] | None = None) -> dict[str
             "login": "official local Windows QQ window; noVNC not used",
         },
         "services": services,
+        "snowluma_webui_port_effective": snowluma_effective_webui_port(cfg),
         "health": health_payload(root, cfg),
         "no_vnc_used": True,
     }

@@ -214,6 +214,8 @@ Docker/WSL/noVNC：
 
 数据默认在 `%LOCALAPPDATA%\QQBotStudio\data\native`。OneBot 固定 loopback URL
 `ws://127.0.0.1:<port>/ws`；SnowLuma `config/onebot.json` 会关闭 `#sl`。QQ 扫码和
-设备/短信/滑块验证必须在本机官方 NTQQ 窗口完成。当前主机只确认 NTQQ 存在；
-AstrBot/SnowLuma 未安装时 `--check --strict-check` 和 `--start` 会明确返回阻塞，
-不能声称真实原生 E2E 已通过。
+设备/短信/滑块验证必须在本机官方 NTQQ 窗口完成。真实临时环境已验证 AstrBot 4.29.3 + SnowLuma 2.2.1 + NTQQ 可同时启动，
+AstrBot/SnowLuma WebUI HTTP 200、OneBot listener=true、health OK；但 SnowLuma
+EULA/PRIVACY 和 QQ 扫码/设备验证是人工步骤，未完成时标记 `ENV_BLOCKED`，
+不能声称 QQ 已登录或消息 E2E 已通过。完整记录见
+[`native-e2e-validation.md`](native-e2e-validation.md)。
