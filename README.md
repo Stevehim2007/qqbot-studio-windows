@@ -146,18 +146,19 @@ docker info --format "{{.OSType}}"
 - Releases: <https://github.com/Stevehim2007/qqbot-studio-windows/releases>
 - Tag: `v0.4.0`
 - Release URL: <https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.4.0>
-- 发布 workflow: `windows-release.yml`，tag 推送后生成真实 Release
-- Release assets：
-  - `QQBotStudioWindows.exe`
-  - `SHA256SUMS.txt`
+- 发布 workflow: `windows-release.yml` run `40997401439`，conclusion `success`
+- Release assets 已确认：
+  - `QQBotStudioWindows.exe`：`10,803,066` bytes，
+    SHA256 `9bd92a299839fd3ec4a4c0c089356c98505fb17995edfee8d279e2b831e53f3b`
+  - `SHA256SUMS.txt`（内容与上述 digest 一致）
   - `README.md`
   - `VALIDATION.md`
 
-v0.4.0 的本地预发布构建（Windows Python 3.10 + PyInstaller 6.10.0）为
+本地预发布构建（Windows Python 3.10 + PyInstaller 6.10.0）为
 `8,461,717` bytes，SHA256
-`2d44225206473101ca2a3a03f462afef86b5a0b2e47b8d6cddcbee4fe4d240db`。正式
-Release EXE 由 tag workflow 在 windows-latest 重新构建，最终大小/SHA256 应以
-Release 页面和 `SHA256SUMS.txt` 为准。
+`2d44225206473101ca2a3a03f462afef86b5a0b2e47b8d6cddcbee4fe4d240db`；它与 CI
+Release EXE 不保证逐字节一致，正式 SHA 以 Release 的
+`9bd92a299839fd3ec4a4c0c089356c98505fb17995edfee8d279e2b831e53f3b` 为准。
 
 下载与校验示例：
 
@@ -380,8 +381,9 @@ AI 助手 B 默认端口为 `8766`，但实际值以 `/assistant` 页面配置�
 [`.github/workflows/windows-build.yml`](.github/workflows/windows-build.yml) 会在
 push/PR 时构建并上传测试 artifact。正式发布由
 [`.github/workflows/windows-release.yml`](.github/workflows/windows-release.yml)
-在 `v*` tag 上执行。v0.3.0 的 release 机制已验证；v0.4.0 的 release run 在
-tag 推送后记录在 [`VALIDATION.md`](VALIDATION.md)。构建 workflow 会：
+在 `v*` tag 上执行。v0.4.0 的 Release run `40997401439` 已实际成功；全部
+steps（tag/VERSION 校验、45 tests、compileall、PowerShell AST、PyInstaller
+构建、EXE smoke、artifact upload、Release 创建）均通过。构建 workflow 会：
 
 1. 安装 Python 3.12；
 2. 跑独立测试；
@@ -407,12 +409,14 @@ Artifact 包括 EXE、SHA256、README、VERSION、LICENSE、UPSTREAM、VALIDATIO
 
 只上传 Actions artifact 不算发布；Release assets 必须存在。
 
-v0.4.0 Release 状态：
+v0.4.0 实际结果：
 
-- 正式 Release 由 tag `v0.4.0` 触发 `windows-release.yml` 生成；
-- workflow 成功后会确认 Release assets 包含 EXE、SHA256、README、VALIDATION；
-- 本地执行过的核心验证、Docker compose 结果和限制见 `VALIDATION.md`；
-- 正式 Release EXE 在 CI Windows runner 重新构建，字节可能与本地预发布 EXE 不同。
+- Run: <https://github.com/Stevehim2007/qqbot-studio-windows/actions/runs/40997401439>
+- Release: <https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.4.0>
+- Release assets：`QQBotStudioWindows.exe`（`10,803,066` bytes，
+  SHA256 `9bd92a299839fd3ec4a4c0c089356c98505fb17995edfee8d279e2b831e53f3b`）、
+  `SHA256SUMS.txt`、`README.md`、`VALIDATION.md`。
+- 本地执行过的核心验证、Docker compose 结果和限制见 `VALIDATION.md`。
 
 ---
 

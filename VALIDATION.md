@@ -75,15 +75,28 @@ Executed with the locally built EXE on Windows 10/11 host:
 - EXE `--status` returned healthy and `--stop` exited 0; health became
   unreachable afterward.
 
-### GitHub Release v0.4.0
+### GitHub Release v0.4.0 (actual)
 
-- Tag intended by this commit: `v0.4.0`
-- Release workflow: `.github/workflows/windows-release.yml`
-- Release URL and final CI EXE size/SHA256 are recorded in the final task report
-  and, when available, in the repository docs after the tag run.
-- Release workflow must create a real GitHub Release with
-  `QQBotStudioWindows.exe`, `SHA256SUMS.txt`, `README.md`, and `VALIDATION.md`.
-  An Actions-only artifact is not sufficient.
+- Release tag: `v0.4.0`
+- Tagged code commit: `6ef56ec6b1185a438f4451fb0066f113c7e697fe`
+- Release workflow run: `40997401439`
+- Run URL: https://github.com/Stevehim2007/qqbot-studio-windows/actions/runs/40997401439
+- Conclusion: `success`
+- All workflow steps succeeded, including tag/VERSION verification, 45 tests,
+  compileall, PowerShell AST, PyInstaller build, EXE smoke, artifact upload, and
+  Create GitHub Release.
+- Release URL: https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.4.0
+- Public GitHub API reported these release assets:
+  - `QQBotStudioWindows.exe`: `10,803,066` bytes,
+    digest `sha256:9bd92a299839fd3ec4a4c0c089356c98505fb17995edfee8d279e2b831e53f3b`;
+  - `SHA256SUMS.txt`: downloaded, containing the same SHA256;
+  - `README.md`;
+  - `VALIDATION.md`.
+- The local pre-release EXE differs by design from the CI release EXE:
+  `8,461,717` bytes / `2d44225206473101ca2a3a03f462afef86b5a0b2e47b8d6cddcbee4fe4d240db`.
+  The Release digest is authoritative for the published binary.
+- An Actions-only artifact is not the release deliverable; the GitHub Release
+  assets were confirmed.
 
 ### Not verified for v0.4.0
 

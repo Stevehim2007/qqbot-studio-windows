@@ -234,10 +234,13 @@ qqbot_enhancer 1.5.0 新增：
 - `QQBotStudioWindows.exe`
 - `SHA256SUMS.txt`
 
-v0.4.0 的本地预发布 EXE 为 `8,461,717` bytes，SHA256
-`2d44225206473101ca2a3a03f462afef86b5a0b2e47b8d6cddcbee4fe4d240db`；正式
-Release EXE 由 tag workflow 重新构建，大小/SHA 以 Release 页面为准。只上传
-Actions artifact 不算正式发布；参见根 README 的下载/校验示例。
+v0.4.0 Release 已实际使用 run `40997401439` 成功发布：
+`QQBotStudioWindows.exe` 为 `10,803,066` bytes，SHA256
+`9bd92a299839fd3ec4a4c0c089356c98505fb17995edfee8d279e2b831e53f3b`。
+本地预发布 EXE 为 `8,461,717` bytes / SHA256
+`2d44225206473101ca2a3a03f462afef86b5a0b2e47b8d6cddcbee4fe4d240db`；
+两者不保证逐字节一致。只上传 Actions artifact 不算正式发布；参见根 README
+的下载/校验示例。
 
 ## 7. 已知限制与未验证项
 
