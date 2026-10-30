@@ -98,6 +98,9 @@ class V3SyncFeatureTests(unittest.TestCase):
             "sticker_ai_auto_collect_enabled",
             "safe_tools_marker_enabled",
             "auto_collect_user_sticker_enabled",
+            "sticker_semantic_tags_enabled",
+            "collected_sticker_multi_category_enabled",
+            "safe_tools_allow_search_images",
         ):
             self.assertIn(field, schema)
 
@@ -149,6 +152,47 @@ class V3SyncFeatureTests(unittest.TestCase):
         ):
             self.assertIn(marker, plugin_doc)
 
+    def test_v3_8_sticker_semantics_permissions_and_partial_stats(self):
+        for relative in (
+            "plugins/qqbot_enhancer/sticker_intent.py",
+            "plugins/qqbot_enhancer/sticker_reclassify.py",
+        ):
+            self.assertTrue((ROOT / relative).is_file(), relative)
+        schema = json.loads(
+            (ROOT / "plugins" / "qqbot_enhancer" / "_conf_schema.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        for marker in (
+            "sticker_semantic_tags_enabled",
+            "collected_sticker_multi_category_enabled",
+            "safe_tools_allow_search_images",
+            "sticker_natural_language_enabled",
+        ):
+            self.assertIn(marker, schema)
+        console = (ROOT / "qqbot_studio" / "static" / "console.js").read_text(
+            encoding="utf-8"
+        )
+        for marker in (
+            "AI 工具权限",
+            "safe_tools_allow_search_images",
+            "AI 自动表情",
+            "保存 AI 工具与表情设置",
+        ):
+            self.assertIn(marker, console)
+        stats = (ROOT / "qqbot_studio" / "resource_stats.py").read_text(
+            encoding="utf-8"
+        )
+        for marker in ("permission_denied", "partial", "parse_docker_stats_output"):
+            self.assertIn(marker, stats)
+        plugin_doc = (ROOT / "docs" / "plugin-qqbot-enhancer.md").read_text(
+            encoding="utf-8"
+        )
+        for marker in ("全局收藏池", "多分类", "自然语言发表情", "语义"):
+            self.assertIn(marker, plugin_doc)
+        api_doc = (ROOT / "docs" / "ui-api-contract-v2.md").read_text(encoding="utf-8")
+        self.assertIn("permission_denied", api_doc)
+
     def test_plugin_parameter_config_api_and_ui_are_synced(self):
         server = (ROOT / "qqbot_studio" / "server.py").read_text(encoding="utf-8")
         console_html = (STATIC / "console.html").read_text(encoding="utf-8")
@@ -184,12 +228,12 @@ class V3SyncFeatureTests(unittest.TestCase):
         self.assertIn("/api/instances/<instance_id>/plugins/<plugin_id>/config", api_doc)
         self.assertIn("reply_probability", api_doc)
 
-    def test_windows_release_version_is_0_5_0(self):
-        self.assertEqual((ROOT / "VERSION").read_text(encoding="ascii").strip(), "0.5.0")
+    def test_windows_release_version_is_0_6_0(self):
+        self.assertEqual((ROOT / "VERSION").read_text(encoding="ascii").strip(), "0.6.0")
         launcher = (ROOT / "windows" / "launcher.py").read_text(encoding="utf-8")
-        self.assertIn('LAUNCHER_VERSION = "0.5.0"', launcher)
+        self.assertIn('LAUNCHER_VERSION = "0.6.0"', launcher)
         native = (ROOT / "windows" / "native_launcher.py").read_text(encoding="utf-8")
-        self.assertIn('NATIVE_LAUNCHER_VERSION = "0.5.0"', native)
+        self.assertIn('NATIVE_LAUNCHER_VERSION = "0.6.0"', native)
 
     def test_upstream_metadata_is_updated(self):
         upstream = (ROOT / "UPSTREAM.md").read_text(encoding="utf-8")

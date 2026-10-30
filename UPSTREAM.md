@@ -5,12 +5,12 @@ reusable Python/UI core from the Linux project instead of fetching code at
 runtime or build time.
 
 - Upstream project: `git@github.com:Stevehim2007/qqbot-studio.git`
-- Upstream snapshot commit: `6a7d9627e5779c2d422ed2b7d7a12c0598eb9dfd`
+- Upstream snapshot commit: `51238d33e5aebd4e7148aaba0bf45c6c71415567`
 - Snapshot date: 2026-10-30
-- Upstream release line: v3.7.0
-- Bundled core version: `qqbot_studio.__version__ == 3.7.0`
-- Windows launcher version: `0.5.0`
-- Plugin snapshot: `qqbot_enhancer` 1.7.0
+- Upstream release line: v3.8.0
+- Bundled core version: `qqbot_studio.__version__ == 3.8.0`
+- Windows launcher version: `0.6.0`
+- Plugin snapshot: `qqbot_enhancer` 1.12.0
 
 The upstream working tree was clean at the snapshot commit. This repository is
 now the source of truth for the Windows distribution; do not point it at a
@@ -28,7 +28,7 @@ Linux data directory or the Linux auto-update pipeline.
   - schema-driven bool/int/float/string/text/list validation;
   - `reply_probability` highlighted editor and offline restart guidance;
   - sensitive Key/token/password fields excluded;
-- `qqbot_enhancer` 1.7.0 with natural-language image search, downloaded image
+- `qqbot_enhancer` 1.12.0 with natural-language image search, downloaded image
   sending, local song playback, `/option`, memory-mode support, pure Image/Face
   automatic reactions, collected-sticker categories, and
   `/收藏表情`, `/表情分类`, `/表情列表`, `/发表情` commands;

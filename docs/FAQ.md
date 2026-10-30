@@ -78,7 +78,7 @@ Get-NetTCPConnection -LocalPort 8765 -State Listen
 - 云 Windows 主机还需要在云安全组放行；
 - 修改 `public_host` 只影响打印 URL，不会改变监听或防火墙。
 
-## 7. 插件 1.7.0 有哪些新命令？
+## 7. 插件 1.12.0 有哪些新命令？
 
 - `/找图 关键词`、`/搜图 关键词`，以及插件支持的自然语言找图意图；
 - 图片会先安全下载到本地临时文件，再通过 AstrBot 官方本地图片组件发送；
@@ -88,6 +88,8 @@ Get-NetTCPConnection -LocalPort 8765 -State Listen
 - AI 语境选表情（`sticker_ai_select_enabled`）和 AI 自动收藏
   （`sticker_ai_auto_collect_enabled`，默认关闭）；
 - 受限安全工具 marker：仅白名单图片搜索/发/收藏/分类，不开放 shell、任意路径或任意 URL；
+- 收藏表情 tags/meaning/tone 语义、多分类与全局收藏池；
+- 显式 @/私聊自然语言重分类最近收藏、自然语言发表情；
 - 图片搜索默认 Bing-only，并可通过 `image_search_relevance_enabled` 过滤不相关结果；
 - 用户 @/私聊发送纯 Image/Face 可按 `user_sticker_reaction_*` 配置自动短句反应；
 - `/option`：查看/进入插件配置说明；

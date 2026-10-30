@@ -20,7 +20,7 @@ import sys
 import webbrowser
 from pathlib import Path
 
-NATIVE_LAUNCHER_VERSION = "0.5.0"
+NATIVE_LAUNCHER_VERSION = "0.6.0"
 SNOWLUMA_WINDOWS_DOCS = "https://snowluma.github.io/zh/docs/guide/deploy/windows"
 SNOWLUMA_RELEASES = "https://github.com/SnowLuma/SnowLuma/releases"
 ASTRBOT_WINDOWS_DOCS = "https://docs.astrbot.app/deploy/astrbot/package.html"
