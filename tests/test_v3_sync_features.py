@@ -74,7 +74,7 @@ class V3SyncFeatureTests(unittest.TestCase):
         match = re.search(r"^version:\s*(\S+)", metadata, re.MULTILINE)
         self.assertIsNotNone(match)
         version_tuple = tuple(int(part) for part in match.group(1).split("."))
-        self.assertGreaterEqual(version_tuple, (1, 5, 0), match.group(1))
+        self.assertGreaterEqual(version_tuple, (1, 7, 0), match.group(1))
         main = (ROOT / "plugins" / "qqbot_enhancer" / "main.py").read_text(
             encoding="utf-8"
         )
@@ -95,9 +95,39 @@ class V3SyncFeatureTests(unittest.TestCase):
             "collected_sticker_enabled",
             "collected_sticker_use_probability",
             "sticker_ai_select_enabled",
+            "sticker_ai_auto_collect_enabled",
+            "safe_tools_marker_enabled",
             "auto_collect_user_sticker_enabled",
         ):
             self.assertIn(field, schema)
+
+    def test_v3_7_modular_static_and_plugin_files_are_present(self):
+        for relative in (
+            "qqbot_studio/contracts.py",
+            "qqbot_studio/resource_stats.py",
+            "qqbot_studio/static/components/instance-settings.js",
+            "qqbot_studio/static/services/api.js",
+            "qqbot_studio/static/services/plugin-config.js",
+            "plugins/qqbot_enhancer/config.py",
+            "plugins/qqbot_enhancer/image_search.py",
+            "plugins/qqbot_enhancer/interfaces.py",
+            "plugins/qqbot_enhancer/llm.py",
+            "plugins/qqbot_enhancer/media.py",
+            "plugins/qqbot_enhancer/safe_tools.py",
+            "plugins/qqbot_enhancer/songs.py",
+            "plugins/qqbot_enhancer/sticker_store.py",
+        ):
+            self.assertTrue((ROOT / relative).is_file(), relative)
+        server = (ROOT / "qqbot_studio" / "server.py").read_text(encoding="utf-8")
+        self.assertIn('path.startswith(("/services/", "/components/"))', server)
+        self.assertIn('if path == "/api/assistant/diagnose":', server)
+        assistant = (ROOT / "qqbot_studio" / "static" / "assistant.html").read_text(encoding="utf-8")
+        self.assertIn('id="diagnose-button"', assistant)
+        console = (ROOT / "qqbot_studio" / "static" / "console.html").read_text(encoding="utf-8")
+        self.assertIn("instance-settings-modal", console)
+        plugin_doc = (ROOT / "docs" / "plugin-qqbot-enhancer.md").read_text(encoding="utf-8")
+        for marker in ("安全工具", "AI 自动", "Bing", "相关性"):
+            self.assertIn(marker, plugin_doc)
 
     def test_synced_api_and_plugin_docs_cover_new_features(self):
         api = (ROOT / "docs" / "ui-api-contract-v2.md").read_text(encoding="utf-8")
@@ -123,8 +153,17 @@ class V3SyncFeatureTests(unittest.TestCase):
         server = (ROOT / "qqbot_studio" / "server.py").read_text(encoding="utf-8")
         console_html = (STATIC / "console.html").read_text(encoding="utf-8")
         console_js = (STATIC / "console.js").read_text(encoding="utf-8")
+        plugin_config_js = (STATIC / "services" / "plugin-config.js").read_text(
+            encoding="utf-8"
+        )
+        instance_settings_component = (
+            STATIC / "components" / "instance-settings.js"
+        ).read_text(encoding="utf-8")
         deployer = (ROOT / "qqbot_studio" / "deployer.py").read_text(encoding="utf-8")
         api_doc = (ROOT / "docs" / "ui-api-contract-v2.md").read_text(encoding="utf-8")
+        static_combined = "\n".join(
+            (console_js, plugin_config_js, instance_settings_component)
+        )
 
         self.assertIn("get_plugin_config", server)
         self.assertIn("set_plugin_config", server)
@@ -137,18 +176,20 @@ class V3SyncFeatureTests(unittest.TestCase):
         ):
             self.assertIn(marker, console_html)
         for marker in (
-            "/api/instances/${encodeURIComponent(instance.id)}/plugins/${encodeURIComponent(plugin.id)}/config",
-            "reply_probability",
-            "编辑参数",
+            "/api/instances/${encodeURIComponent(instanceId)}/plugins/${encodeURIComponent(pluginId)}/config",
         ):
+            self.assertIn(marker, static_combined)
+        for marker in ("reply_probability", "编辑参数"):
             self.assertIn(marker, console_js)
         self.assertIn("/api/instances/<instance_id>/plugins/<plugin_id>/config", api_doc)
         self.assertIn("reply_probability", api_doc)
 
-    def test_windows_development_version_is_0_4_2(self):
-        self.assertEqual((ROOT / "VERSION").read_text(encoding="ascii").strip(), "0.4.2")
+    def test_windows_release_version_is_0_5_0(self):
+        self.assertEqual((ROOT / "VERSION").read_text(encoding="ascii").strip(), "0.5.0")
         launcher = (ROOT / "windows" / "launcher.py").read_text(encoding="utf-8")
-        self.assertIn('LAUNCHER_VERSION = "0.4.2"', launcher)
+        self.assertIn('LAUNCHER_VERSION = "0.5.0"', launcher)
+        native = (ROOT / "windows" / "native_launcher.py").read_text(encoding="utf-8")
+        self.assertIn('NATIVE_LAUNCHER_VERSION = "0.5.0"', native)
 
     def test_upstream_metadata_is_updated(self):
         upstream = (ROOT / "UPSTREAM.md").read_text(encoding="utf-8")

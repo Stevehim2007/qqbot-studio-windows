@@ -8,9 +8,9 @@
 > 直接共用。完整说明见根目录 [`README.md`](../README.md) 和
 > [`UPSTREAM.md`](../UPSTREAM.md)。
 >
-> **状态：Windows 开发版 v0.4.2（最新正式 Release 为 v0.4.0），已同步 upstream core 3.6.0。** 双发行版开发中：Docker edition 稳定，Native edition 为 bootstrap/guide 占位。已包含独立
+> **状态：Windows v0.5.0 发布候选（最新正式 Release 为 v0.4.0），已同步 upstream core 3.7.0。** 双发行版开发中：Docker edition 稳定，Native edition 为 bootstrap/guide 占位。已包含独立
 > `/assistant` 页面、AI 助手 B 本机/公网配置、30 分钟刷新、控制台插件参数编辑和
-> qqbot_enhancer 1.5.2。发布由 `v*` tag 触发 GitHub Release，上传 EXE 和 SHA256。
+> qqbot_enhancer 1.7.0。发布由 `v*` tag 触发 GitHub Release，上传 EXE 和 SHA256。
 > 基础 Docker Desktop/Linux engine、Compose、EXE 构建和管理服务生命周期已实际测试；
 > 完整 AstrBot/SnowLuma 部署、noVNC 扫码和 QQ 验证仍未测试。详见根目录
 > [`VALIDATION.md`](../VALIDATION.md) 和 [`docs/FAQ.md`](../docs/FAQ.md)。
@@ -197,9 +197,16 @@ New-NetFirewallRule `
 
 ---
 
-## 6.1 v3.6.0 同步后的新入口
+## 6.1 v3.7.0 同步后的新入口
 
-- core 3.6.0、qqbot_enhancer 1.5.2；
+- core 3.7.0、qqbot_enhancer 1.7.0；插件/核心模块化；
+- 控制台实例设置 modal、services/components、`/assistant` 公网诊断；
+- 插件安全工具 marker、AI 自动收藏（默认关闭）、Bing-only 相关性搜索；
+- Windows launcher、console_move_ext、同步/双 EXE 流程保留。
+
+## 6.1 v3.6.0 同步后的历史入口
+
+- core 3.6.0、qqbot_enhancer 1.5.2（历史）；
 - `/收藏表情` 支持引用消息和会话最近图片缓存，收藏流程更可靠；
 - AI 语境选表情（`sticker_ai_select_enabled`）：direct 模式私有标记，memory 模式本地匹配；
 - 自动收藏用户表情默认关闭；
@@ -212,7 +219,7 @@ New-NetFirewallRule `
 - 显式使用 `0.0.0.0 + public_host` 时才生成公网 URL，且 B 没有认证，必须由
   Windows 防火墙、云安全组、VPN 或带认证的反向代理保护；
 - 控制台自动刷新为 30 分钟，手动刷新会立即生效并重新计时；
-- 插件 1.5.2 支持自然语言找图、图片下载后本地发送、唱歌/点歌、`/option` 和记忆模式。
+- 插件 1.7.0 支持自然语言找图、图片下载后本地发送、唱歌/点歌、`/option` 和记忆模式。
 
 详细操作见 [`../docs/FAQ.md`](../docs/FAQ.md) 与
 [`../docs/ui-api-contract-v2.md`](../docs/ui-api-contract-v2.md)。
@@ -306,7 +313,7 @@ python -m unittest discover -s tests -v
 ### 正式 EXE Release
 ### 正式 EXE Release
 
-`v0.4.2` 起的双 EXE release workflow 会校验 tag/VERSION，构建并 smoke 两个 EXE，
+`v0.5.0` 起的双 EXE release workflow 会校验 tag/VERSION，构建并 smoke 两个 EXE，
 再在同一 GitHub Release 上传：
 
 - `QQBotStudioWindows.exe`（Docker edition）
@@ -317,7 +324,7 @@ python -m unittest discover -s tests -v
 历史 v0.4.0 Release（run `40997401439`）只有单 EXE，不含 Native EXE 或
 `--move-data`；最新 v0.4.0 EXE 为 `10,803,066` bytes，SHA256
 `9bd92a299839fd3ec4a4c0c089356c98505fb17995edfee8d279e2b831e53f3b`。
-v0.4.2 尚未按本任务 tag/发布；不要宣称双 EXE Release 已运行，先用最新 CI
+v0.5.0 即将按本任务 tag/发布；不要宣称双 EXE Release 已运行，先用最新 CI
 artifact 或本地构建验证。只上传 Actions artifact 不算正式发布。
 
 ## 7. 已知限制与未验证项

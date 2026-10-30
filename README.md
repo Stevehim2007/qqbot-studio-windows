@@ -12,14 +12,16 @@ QQ Bot Studio 的**独立 Windows 10/11 双发行版项目**：
 本仓库不是 Linux 项目的打包目录，也不是它的自动更新分支。它拥有自己的启动器、
 Windows 服务生命周期实现、版本号、数据目录约定、测试和发布流水线。
 
-> **状态：Windows 开发版 v0.4.2（最新正式 Release 为 v0.4.0），已同步主项目 core 3.6.0。**
+> **状态：Windows v0.5.0 发布候选（最新正式 Release 为 v0.4.0），已同步主项目 core 3.7.0。**
 >
 > 已包含独立 `/assistant` AI 助手页面、控制台 30 分钟刷新 + 手动刷新、
 > AI 助手 B 本机/公网配置、控制台插件参数编辑（`reply_probability` 等）、
-> qqbot_enhancer 1.5.2 用户表情自动反应/AI 语境选表情/收藏分类/发表情和最新 API/FAQ 文档；
+> qqbot_enhancer 1.7.0 模块化、AI 自动收藏、受限安全工具、Bing-only 相关性搜索和最新 API/FAQ 文档；
 > v0.4.1 新增 Windows 文件位置说明和 CLI 安全迁移；v0.4.2 新增
 > token 保护的控制台“存储文件夹”迁移入口、后台 helper 自动停服/复制/重启，
 > 以及 Docker/Native 双 EXE 构建与 `sync-upstream` 同步流水线。
+> v0.5.0 同步 Linux 3.7.0：模块化 core/static/services/components、实例设置
+> modal、B 公网诊断、qqbot_enhancer 1.7.0 安全工具/AI 自动收藏/Bing-only 相关性过滤。
 > Docker EXE、隐藏管理服务、Docker Desktop/Linux engine 和本机 smoke 已做部分
 > 真实验证；发布使用 `v*` tag 触发的 GitHub Release。
 > **Native EXE 当前是 bootstrap/guide 占位，不包含完整 AstrBot/SnowLuma/NTQQ 集成。**
@@ -51,6 +53,17 @@ websockify，共享整个交互式 Windows 桌面，不承诺每实例独立屏�
 `plugins/qqbot_enhancer/`。这不是符号链接，也不会在运行时从 Linux 主项目拉取代码。
 快照来源与更新方法见 [`UPSTREAM.md`](UPSTREAM.md)。
 
+### v3.7.0 同步内容
+
+- core `3.7.0`、qqbot_enhancer `1.7.0`；
+- 核心/插件模块化：`contracts.py`、`resource_stats.py`，插件拆分 config/image_search/
+  media/llm/safe_tools/songs/sticker_store 等模块；
+- 控制台实例设置 modal、`static/services` 与 `static/components`；
+- `/assistant` 公网访问诊断 UI 与服务端诊断 API；
+- 插件受限安全工具 marker（白名单图片搜索/发/收藏/分类），不提供 shell/路径/URL 工具；
+- AI 自动收藏默认关闭；图片搜索默认 Bing-only，并增加结果相关性过滤；
+- 保留 Windows launcher、PowerShell、build/spec、console_move_ext 和 sync workflow。
+
 ### v3.6.0 同步内容
 
 - core `3.6.0`、qqbot_enhancer `1.5.2`；
@@ -70,7 +83,7 @@ websockify，共享整个交互式 Windows 桌面，不承诺每实例独立屏�
 
 ### v3.5.0 同步内容
 
-- qqbot_enhancer 1.5.2；
+- qqbot_enhancer 1.7.0；
 - 用户 @/私聊发送纯 Image/Face 时按概率自然短句反应，不调用 LLM；
 - `/收藏表情 [分类]`、`/表情分类`、`/表情列表 [分类]`、`/发表情 [分类]`；
 - 收藏表情参与正常回复，可与内置表情包混合使用；
@@ -109,7 +122,7 @@ websockify，共享整个交互式 Windows 桌面，不承诺每实例独立屏�
 ### 升级边界
 
 - 本仓库独立维护版本：当前开发版 `VERSION = 0.4.1`，bundled core 版本为
-  `qqbot_studio.__version__ = 3.6.0`。
+  `qqbot_studio.__version__ = 3.7.0`。
 - Linux 主项目的自动更新、`scripts/auto-update.sh` 和网页内“更新并重启”不适用于
   本仓库。
 - Windows 版升级方式是：下载新的 EXE / PowerShell 发行包，停止旧管理服务，保留
@@ -186,9 +199,9 @@ docker info --format "{{.OSType}}"
 - Releases: <https://github.com/Stevehim2007/qqbot-studio-windows/releases>
 - 最新正式 Release: `v0.4.0`
 - Release URL: <https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.4.0>
-- 当前源码/CI 构建为 `v0.4.2` 开发版（包含控制台/CLI 数据迁移和双 EXE）；在下一个
+- 当前源码/CI 构建为 `v0.5.0` 开发版（包含控制台/CLI 数据迁移、双 EXE 和 Linux 3.7.0）；在下一个
   tag 发布前，请从源码或最新 Actions artifact 获取。
-- v0.4.2+ 正式 Release 计划同一 Release 上传：
+- v0.5.0 正式 Release 计划同一 Release 上传：
   - `QQBotStudioWindows.exe`（Docker edition）
   - `QQBotStudioWindowsNative.exe`（Native bootstrap/guide）
   - `SHA256SUMS.txt`（同时包含两个 EXE）、`README.md`、`VALIDATION.md`
@@ -201,12 +214,12 @@ docker info --format "{{.OSType}}"
   - `README.md`
   - `VALIDATION.md`
 
-本地 v0.4.2 双 EXE 开发构建（Windows Python 3.10 + PyInstaller 6.10.0）：
+本地 v0.5.0 双 EXE 开发构建（Windows Python 3.10 + PyInstaller 6.10.0）：
 
-- Docker `QQBotStudioWindows.exe`：`8,489,153` bytes，SHA256
-  `4116523ad859e6f3da74e30e5fcf56b4481cf5e24b1bb0a442d81383512b566e`；
+- Docker `QQBotStudioWindows.exe`：`8,530,447` bytes，SHA256
+  `0935fd39cd28dc9c563b53df7bd18f68c3051cd769fa26afe6638d4270914c75`；
 - Native `QQBotStudioWindowsNative.exe`：`6,405,962` bytes，SHA256
-  `656860fa478d9e4b4cc4f49532b175f976b93395e9cafd7a821e9b6f687afce5`。
+  `581e7b46971c7a2ae3d465cd263bfac26c1f88f2088fa2a39282a73b54318333`。
 
 这些是未 tag 的本地开发构建；正式 Release 的 EXE/SHA 以 GitHub Release 和
 `SHA256SUMS.txt` 为准。
@@ -547,7 +560,7 @@ AI 助手 B 默认端口为 `8766`，但实际值以 `/assistant` 页面配置�
 push/PR 时构建并上传测试 artifact。正式发布由
 [`.github/workflows/windows-release.yml`](.github/workflows/windows-release.yml)
 在 `v*` tag 上执行。v0.4.0 的 Release run `40997401439` 是单 EXE 历史结果；
-v0.4.2+ 的 release workflow 已扩展为同一 Release 构建、smoke 并上传 Docker/Native
+v0.5.0 的 release workflow 已扩展为同一 Release 构建、smoke 并上传 Docker/Native
 两个 EXE。构建 workflow 会：
 
 1. 安装 Python 3.12；
@@ -567,7 +580,7 @@ Artifact 包括两个 EXE、SHA256、README、VERSION、LICENSE、UPSTREAM、VAL
 [`.github/workflows/windows-release.yml`](.github/workflows/windows-release.yml) 在
 推送 `v*` tag 时：
 
-1. 校验 `VERSION` 与 tag 一致（例如 `VERSION=0.4.2` 必须对应 `v0.4.2`）；
+1. 校验 `VERSION` 与 tag 一致（例如 `VERSION=0.5.0` 必须对应 `v0.5.0`）；
 2. 重新跑独立测试、compileall、PowerShell AST、PyInstaller 构建和 EXE smoke；
 3. 上传 Actions artifact；
 4. 通过 `softprops/action-gh-release@v2` 创建真实 GitHub Release；
@@ -622,28 +635,36 @@ Windows 文档同步规则与 Linux 主项目 `docs/windows-editions-research.md
 本仓库已在同一台 Windows 主机上通过 WSL interop 使用 Windows PowerShell 5.1、
 Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 
-- 独立测试套件 **79 tests** 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
+- 独立测试套件 **80 tests** 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
 - Windows Python `compileall`、PowerShell 5.1 AST、Node JS 检查通过；
 - Docker Desktop 4.93.0 / Engine 29.8.1 / `OSType=linux` / Compose v5.5.1；
 - 最小 busybox Compose `config/up/down` 全部 exit 0，容器实际输出
   `qqbot-windows-v040-compose-smoke` 后清理；
 - PyInstaller 6.10.0 实际构建出 Docker/Native 两个 one-file EXE：
-  - Docker：`8,489,153` bytes，SHA256
-    `4116523ad859e6f3da74e30e5fcf56b4481cf5e24b1bb0a442d81383512b566e`；
+  - Docker：`8,530,447` bytes，SHA256
+    `0935fd39cd28dc9c563b53df7bd18f68c3051cd769fa26afe6638d4270914c75`；
   - Native bootstrap：`6,405,962` bytes，SHA256
-    `656860fa478d9e4b4cc4f49532b175f976b93395e9cafd7a821e9b6f687afce5`；
-- Docker EXE `--assistant` 启动后 `/healthz` 返回 version `3.6.0`，`/console` 与
+    `581e7b46971c7a2ae3d465cd263bfac26c1f88f2088fa2a39282a73b54318333`；
+- Docker EXE `--assistant` 启动后 `/healthz` 返回 version `3.7.0`，`/console` 与
   `/assistant` 均 HTTP 200；
 - Native bootstrap `--version`/`--help`/`--guide`/`--check` 实际退出 0，但明确
   `NATIVE_E2E=NOT_VERIFIED`、`NATIVE_INTEGRATION=NOT_IMPLEMENTED_IN_BOOTSTRAP`；
 - `--move-data` 最终 EXE smoke 通过：旧目录保留、目标数据/迁移记录/pointer 写入，
-  可通过 pointer 在目标目录重启 `/healthz` 3.6.0，`--stop` 后 health 不可达；
-- 最终插件配置 API 实测 99 字段；POST `reply_probability=0.57` /
+  可通过 pointer 在目标目录重启 `/healthz` 3.7.0，`--stop` 后 health 不可达；
+- 最终插件配置 API 实测 **120 字段**；`safe_tools_marker_enabled`、
+  `sticker_ai_auto_collect_enabled` 存在，`image_search_second_source_enabled=false`
+  （默认 Bing-only）；POST `reply_probability=0.57` /
   `user_sticker_reaction_probability=0.72` 后读取持久化值，`restart_required=true`；
+- 控制台实例设置 modal、`/components/instance-settings.js`、
+  `/services/plugin-config.js` 实际 HTTP 200；插件列表 API 返回本地降级列表；
+  未部署实例的插件开关 API 返回可操作的 400（没有 AstrBot 运行）；
+- B 诊断 API `/api/assistant/diagnose` 实际 200，`healthy=false`、
+  `error_code=not_installed`，并返回 listener/local_health/public_probe 字段；
 - `sync-upstream` 本地 dry-run + 实际同步通过；上游记录为
-  `c726d1290d43c4b6b702249783d48ba26a4bf7f6`，第二次同步 no-op；
+  `6a7d9627e5779c2d422ed2b7d7a12c0598eb9dfd`（core 3.7.0/plugin 1.7.0），
+  第二次 dry-run 为 no changes；GitHub workflow_dispatch 因无 token/gh 未实际触发；
 - 通过 token API 创建实例 `bot-1`，并使用插件 schema 实测插件参数配置：
-  - GET 返回 99 个 schema 字段；`reply_probability=0.12`，
+  - GET 返回 120 个 schema 字段；`reply_probability=0.12`，
     `user_sticker_reaction_enabled=true`；
   - POST 保存 `reply_probability=0.57` 和
     `user_sticker_reaction_probability=0.72`，离线返回
@@ -663,7 +684,7 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 - Windows Defender 防火墙、云安全组、局域网/VPN 远程访问未测试。
 - GitHub Actions `sync-upstream` 实际 dispatch/schedule 未执行；只完成本地脚本、
   workflow YAML 和 dry-run 验证。
-- 双 EXE `v*` Release workflow 未实际执行；v0.4.2 尚未 tag/Release。
+- 双 EXE `v*` Release workflow 未实际执行；v0.5.0 即将 tag/Release。
 - Native EXE 仅为 bootstrap/guide 占位，不包含 AstrBot/SnowLuma/NTQQ 进程管理，
   未做真实 NTQQ 扫码、SnowLuma hook 或 native OneBot E2E；noVNC 仅是可选高级
   增强，不是 SnowLuma 自带登录二维码。
@@ -677,10 +698,10 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 ## 8. 文档与 FAQ
 
 - [`docs/README.md`](docs/README.md)：Windows 文档索引；
-- [`docs/FAQ.md`](docs/FAQ.md)：`/assistant`、AI 助手 B 公网、30 分钟刷新、插件 1.5.2、
+- [`docs/FAQ.md`](docs/FAQ.md)：`/assistant`、AI 助手 B 公网、30 分钟刷新、插件 1.7.0、
   EXE、端口和升级问题；
 - [`docs/ui-api-contract-v2.md`](docs/ui-api-contract-v2.md)：最新管理 API 契约；
-- [`docs/plugin-qqbot-enhancer.md`](docs/plugin-qqbot-enhancer.md)：qqbot_enhancer 1.5.2；
+- [`docs/plugin-qqbot-enhancer.md`](docs/plugin-qqbot-enhancer.md)：qqbot_enhancer 1.7.0；
 - [`VALIDATION.md`](VALIDATION.md)：真实执行和未验证项；
 - [`UPSTREAM.md`](UPSTREAM.md)：vendor 来源与下次同步步骤；
 - [Linux 主项目 README](https://github.com/Stevehim2007/qqbot-studio/blob/main/README.md)：

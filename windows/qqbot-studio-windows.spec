@@ -36,6 +36,8 @@ hiddenimports = [
     "qqbot_studio.server",
     "qqbot_studio.store",
     "qqbot_studio.studio",
+    "qqbot_studio.contracts",
+    "qqbot_studio.resource_stats",
     "qqbot_studio.updater",
     "windows.move_data_core",
     "windows.console_move_ext",
