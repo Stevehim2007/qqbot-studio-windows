@@ -67,14 +67,14 @@ class V3SyncFeatureTests(unittest.TestCase):
         self.assertIn("public_host", text)
         self.assertIn("没有可点击的浏览器 URL", text)
 
-    def test_plugin_is_1_5_x_and_has_sticker_features(self):
+    def test_plugin_is_1_15_x_and_has_extended_features(self):
         metadata = (ROOT / "plugins" / "qqbot_enhancer" / "metadata.yaml").read_text(
             encoding="utf-8"
         )
         match = re.search(r"^version:\s*(\S+)", metadata, re.MULTILINE)
         self.assertIsNotNone(match)
         version_tuple = tuple(int(part) for part in match.group(1).split("."))
-        self.assertGreaterEqual(version_tuple, (1, 7, 0), match.group(1))
+        self.assertGreaterEqual(version_tuple, (1, 15, 0), match.group(1))
         main = (ROOT / "plugins" / "qqbot_enhancer" / "main.py").read_text(
             encoding="utf-8"
         )
@@ -168,6 +168,10 @@ class V3SyncFeatureTests(unittest.TestCase):
             "collected_sticker_multi_category_enabled",
             "safe_tools_allow_search_images",
             "sticker_natural_language_enabled",
+            "food_enabled",
+            "group_persona_enabled",
+            "group_personas",
+            "ai_unified_tool_protocol_enabled",
         ):
             self.assertIn(marker, schema)
         console = (ROOT / "qqbot_studio" / "static" / "console.js").read_text(
@@ -192,6 +196,40 @@ class V3SyncFeatureTests(unittest.TestCase):
             self.assertIn(marker, plugin_doc)
         api_doc = (ROOT / "docs" / "ui-api-contract-v2.md").read_text(encoding="utf-8")
         self.assertIn("permission_denied", api_doc)
+
+    def test_v3_9_food_personas_schema_fallback_and_unified_tools(self):
+        for relative in (
+            "plugins/qqbot_enhancer/food.py",
+            "plugins/qqbot_enhancer/personas.py",
+        ):
+            self.assertTrue((ROOT / relative).is_file(), relative)
+        schema = json.loads(
+            (ROOT / "plugins" / "qqbot_enhancer" / "_conf_schema.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        for marker in (
+            "food_enabled",
+            "group_persona_enabled",
+            "group_personas",
+            "ai_unified_tool_protocol_enabled",
+        ):
+            self.assertIn(marker, schema)
+        deployer = (ROOT / "qqbot_studio" / "deployer.py").read_text(encoding="utf-8")
+        for marker in ("schema_source", "bundled"):
+            self.assertIn(marker, deployer)
+        api_doc = (ROOT / "docs" / "ui-api-contract-v2.md").read_text(encoding="utf-8")
+        for marker in ("schema_source", "bundled", "/api/persona", "\n"):
+            self.assertIn(marker, api_doc)
+        plugin_doc = (ROOT / "docs" / "plugin-qqbot-enhancer.md").read_text(
+            encoding="utf-8"
+        )
+        for marker in ("/food", "按群人格", "group_personas", "schema"):
+            self.assertIn(marker, plugin_doc)
+        console = (ROOT / "qqbot_studio" / "static" / "console.js").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("AI 工具权限", console)
 
     def test_plugin_parameter_config_api_and_ui_are_synced(self):
         server = (ROOT / "qqbot_studio" / "server.py").read_text(encoding="utf-8")
@@ -228,12 +266,12 @@ class V3SyncFeatureTests(unittest.TestCase):
         self.assertIn("/api/instances/<instance_id>/plugins/<plugin_id>/config", api_doc)
         self.assertIn("reply_probability", api_doc)
 
-    def test_windows_release_version_is_0_6_0(self):
-        self.assertEqual((ROOT / "VERSION").read_text(encoding="ascii").strip(), "0.6.0")
+    def test_windows_release_version_is_0_7_0(self):
+        self.assertEqual((ROOT / "VERSION").read_text(encoding="ascii").strip(), "0.7.0")
         launcher = (ROOT / "windows" / "launcher.py").read_text(encoding="utf-8")
-        self.assertIn('LAUNCHER_VERSION = "0.6.0"', launcher)
+        self.assertIn('LAUNCHER_VERSION = "0.7.0"', launcher)
         native = (ROOT / "windows" / "native_launcher.py").read_text(encoding="utf-8")
-        self.assertIn('NATIVE_LAUNCHER_VERSION = "0.6.0"', native)
+        self.assertIn('NATIVE_LAUNCHER_VERSION = "0.7.0"', native)
 
     def test_upstream_metadata_is_updated(self):
         upstream = (ROOT / "UPSTREAM.md").read_text(encoding="utf-8")

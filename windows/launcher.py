@@ -30,7 +30,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
-LAUNCHER_VERSION = "0.6.0"
+LAUNCHER_VERSION = "0.7.0"
 DEFAULT_SERVER_WAIT_SECONDS = 90
 
 if getattr(sys, "frozen", False):
