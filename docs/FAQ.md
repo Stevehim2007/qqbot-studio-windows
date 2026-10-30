@@ -128,6 +128,14 @@ POST /api/instances/<id>/plugins/<plugin_id>/config
 
 ## 10.1 如何安全更改 Windows 数据文件夹？
 
+推荐直接在校验通过的管理控制台操作：顶部 **存储文件夹** → 输入新的本机固定盘绝对
+路径 → 勾选备份/停止确认 → **开始安全迁移**。浏览器因安全限制不能直接获得本地绝对
+路径，所以使用安全文本输入；API `POST /api/system/move-data` 和
+`GET /api/system/move-data/status` 都要求 token。helper 会停止管理服务/相关 Compose
+容器，复制数据、写入迁移记录和 pointer，失败时保留旧目录并尝试恢复旧服务。
+成功后 helper 从新目录自动重启管理服务，刷新页面即可继续。CLI 仍可用：
+
+
 先停止使用并备份旧数据目录，然后运行：
 
 ```powershell

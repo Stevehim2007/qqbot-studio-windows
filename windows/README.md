@@ -8,7 +8,7 @@
 > 直接共用。完整说明见根目录 [`README.md`](../README.md) 和
 > [`UPSTREAM.md`](../UPSTREAM.md)。
 >
-> **状态：Windows 开发版 v0.4.1（最新正式 Release 为 v0.4.0），已同步 upstream core 3.5.1。** 双发行版开发中：Docker edition 稳定，Native edition 为 bootstrap/guide 占位。已包含独立
+> **状态：Windows 开发版 v0.4.2（最新正式 Release 为 v0.4.0），已同步 upstream core 3.5.1。** 双发行版开发中：Docker edition 稳定，Native edition 为 bootstrap/guide 占位。已包含独立
 > `/assistant` 页面、AI 助手 B 本机/公网配置、30 分钟刷新、控制台插件参数编辑和
 > qqbot_enhancer 1.5.0。发布由 `v*` tag 触发 GitHub Release，上传 EXE 和 SHA256。
 > 基础 Docker Desktop/Linux engine、Compose、EXE 构建和管理服务生命周期已实际测试；
@@ -246,7 +246,14 @@ qqbot_enhancer 1.5.0 新增：
   `data\astrbot\plugin_data\qqbot_enhancer\collected_stickers\`；点歌音频在插件目录
   `songs\`。
 
-安全迁移命令：
+控制台入口（推荐）：管理控制台顶部 **存储文件夹** → 输入本机绝对路径 → 勾选备份/
+停止确认 → **开始安全迁移**。后台 helper 停止服务和旧实例容器，复用同一套安全
+复制/回滚/pointer 逻辑，从新目录自动重启同端口服务；页面检测到重启后提示刷新。
+浏览器因安全限制不能读取本地绝对路径，所以使用安全文本输入而不是文件选择器。
+API 均要求 `X-QB-Token`：`POST /api/system/move-data`（`{target, confirm:true}`）和
+`GET /api/system/move-data/status`。
+
+CLI 高级入口：
 
 ```powershell
 .\QQBotStudioWindows.exe --move-data "D:\QQBotStudioData"
@@ -296,7 +303,7 @@ python -m unittest discover -s tests -v
 ### 正式 EXE Release
 ### 正式 EXE Release
 
-`v0.4.1` 起的双 EXE release workflow 会校验 tag/VERSION，构建并 smoke 两个 EXE，
+`v0.4.2` 起的双 EXE release workflow 会校验 tag/VERSION，构建并 smoke 两个 EXE，
 再在同一 GitHub Release 上传：
 
 - `QQBotStudioWindows.exe`（Docker edition）
@@ -307,7 +314,7 @@ python -m unittest discover -s tests -v
 历史 v0.4.0 Release（run `40997401439`）只有单 EXE，不含 Native EXE 或
 `--move-data`；最新 v0.4.0 EXE 为 `10,803,066` bytes，SHA256
 `9bd92a299839fd3ec4a4c0c089356c98505fb17995edfee8d279e2b831e53f3b`。
-v0.4.1 尚未按本任务 tag/发布；不要宣称双 EXE Release 已运行，先用最新 CI
+v0.4.2 尚未按本任务 tag/发布；不要宣称双 EXE Release 已运行，先用最新 CI
 artifact 或本地构建验证。只上传 Actions artifact 不算正式发布。
 
 ## 7. 已知限制与未验证项

@@ -12,13 +12,14 @@ QQ Bot Studio 的**独立 Windows 10/11 双发行版项目**：
 本仓库不是 Linux 项目的打包目录，也不是它的自动更新分支。它拥有自己的启动器、
 Windows 服务生命周期实现、版本号、数据目录约定、测试和发布流水线。
 
-> **状态：Windows 开发版 v0.4.1（最新正式 Release 为 v0.4.0），已同步主项目 core 3.5.1。**
+> **状态：Windows 开发版 v0.4.2（最新正式 Release 为 v0.4.0），已同步主项目 core 3.5.1。**
 >
 > 已包含独立 `/assistant` AI 助手页面、控制台 30 分钟刷新 + 手动刷新、
 > AI 助手 B 本机/公网配置、控制台插件参数编辑（`reply_probability` 等）、
 > qqbot_enhancer 1.5.0 用户表情自动反应/收藏分类/发表情和最新 API/FAQ 文档；
-> v0.4.1 新增 Windows 文件位置说明、安全 `--move-data` 数据目录迁移，以及
-> Docker/Native 双 EXE 构建与 `sync-upstream` 同步流水线。
+> v0.4.1 新增 Windows 文件位置说明和 CLI 安全迁移；v0.4.2 新增
+> token 保护的控制台“存储文件夹”迁移入口、后台 helper 自动停服/复制/重启，
+> 以及 Docker/Native 双 EXE 构建与 `sync-upstream` 同步流水线。
 > Docker EXE、隐藏管理服务、Docker Desktop/Linux engine 和本机 smoke 已做部分
 > 真实验证；发布使用 `v*` tag 触发的 GitHub Release。
 > **Native EXE 当前是 bootstrap/guide 占位，不包含完整 AstrBot/SnowLuma/NTQQ 集成。**
@@ -175,9 +176,9 @@ docker info --format "{{.OSType}}"
 - Releases: <https://github.com/Stevehim2007/qqbot-studio-windows/releases>
 - 最新正式 Release: `v0.4.0`
 - Release URL: <https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.4.0>
-- 当前源码/CI 构建为 `v0.4.1` 开发版（包含 `--move-data` 和双 EXE）；在下一个
+- 当前源码/CI 构建为 `v0.4.2` 开发版（包含控制台/CLI 数据迁移和双 EXE）；在下一个
   tag 发布前，请从源码或最新 Actions artifact 获取。
-- v0.4.1+ 正式 Release 计划同一 Release 上传：
+- v0.4.2+ 正式 Release 计划同一 Release 上传：
   - `QQBotStudioWindows.exe`（Docker edition）
   - `QQBotStudioWindowsNative.exe`（Native bootstrap/guide）
   - `SHA256SUMS.txt`（同时包含两个 EXE）、`README.md`、`VALIDATION.md`
@@ -190,12 +191,12 @@ docker info --format "{{.OSType}}"
   - `README.md`
   - `VALIDATION.md`
 
-本地 v0.4.1 双 EXE 开发构建（Windows Python 3.10 + PyInstaller 6.10.0）：
+本地 v0.4.2 双 EXE 开发构建（Windows Python 3.10 + PyInstaller 6.10.0）：
 
-- Docker `QQBotStudioWindows.exe`：`8,469,437` bytes，SHA256
-  `5f5e9d4038b6485fb0b37163f18de7776b9f3bf2fdd34d59cad56ad67ec0591c`；
-- Native `QQBotStudioWindowsNative.exe`：`6,405,958` bytes，SHA256
-  `1d51bdc03df7bd705a6400cf2fde67661d15db2d341bdacf3bb1768aad605cf7`。
+- Docker `QQBotStudioWindows.exe`：`8,482,596` bytes，SHA256
+  `ecaecac39771196531b1c958a86d39718a8ffddc4b21141bcbfea2bbfa04fe0f`；
+- Native `QQBotStudioWindowsNative.exe`：`6,405,961` bytes，SHA256
+  `71f8d7c5ec612622f1e83411a45c6c3de8abe6348c3fb7a25fa71a03e785428e`。
 
 这些是未 tag 的本地开发构建；正式 Release 的 EXE/SHA 以 GitHub Release 和
 `SHA256SUMS.txt` 为准。
@@ -382,6 +383,29 @@ Windows 版没有系统级安装目录：`QQBotStudioWindows.exe`、README、VER
 - 移动数据目录后，启动器会读取 `%LOCALAPPDATA%\QQBotStudio\data-location.json`；
   也可以始终显式传 `--data-dir <目录>`。
 
+#### 控制台入口（推荐）
+
+管理控制台的顶部有 **存储文件夹** 按钮，页面内也有同名设置卡片：
+
+1. 打开控制台，点击“存储文件夹”；
+2. 输入/粘贴新的 Windows 绝对路径（例如 `D:\QQBotStudioData`）；浏览器因安全限制
+   不能直接获取本地绝对路径，因此这里采用安全文本输入，不调用系统文件选择器；
+3. 勾选“我已备份/确认停止服务和容器”，点击“开始安全迁移”；
+4. 页面调用 token 保护的 `POST /api/system/move-data`。后台 helper（同一个 EXE 的
+   受控子进程）停止管理服务、对旧目录的 Compose 实例执行 `down`，再复用 CLI 的
+   安全复制/回滚/pointer 逻辑；
+5. 迁移完成后 helper 从新目录自动重启同端口管理服务，页面检测到服务恢复后提示刷新；
+   刷新后状态接口会显示 completed 或 failed 的可操作信息。
+
+如果 helper 失败，会尝试从旧目录重启服务，旧目录始终保留；可以继续用
+`--data-dir <旧目录>` 或 CLI 回滚。控制台 API：
+
+- `GET /api/system/move-data/status`：token 保护，查看 idle/scheduled/running/completed/failed；
+- `POST /api/system/move-data`：token 保护，JSON `{target, confirm:true}`，不会把路径拼接成
+  shell 命令。
+
+CLI 仍作为高级入口：
+
 #### 安全迁移命令
 
 ```powershell
@@ -513,7 +537,7 @@ AI 助手 B 默认端口为 `8766`，但实际值以 `/assistant` 页面配置�
 push/PR 时构建并上传测试 artifact。正式发布由
 [`.github/workflows/windows-release.yml`](.github/workflows/windows-release.yml)
 在 `v*` tag 上执行。v0.4.0 的 Release run `40997401439` 是单 EXE 历史结果；
-v0.4.1+ 的 release workflow 已扩展为同一 Release 构建、smoke 并上传 Docker/Native
+v0.4.2+ 的 release workflow 已扩展为同一 Release 构建、smoke 并上传 Docker/Native
 两个 EXE。构建 workflow 会：
 
 1. 安装 Python 3.12；
@@ -533,7 +557,7 @@ Artifact 包括两个 EXE、SHA256、README、VERSION、LICENSE、UPSTREAM、VAL
 [`.github/workflows/windows-release.yml`](.github/workflows/windows-release.yml) 在
 推送 `v*` tag 时：
 
-1. 校验 `VERSION` 与 tag 一致（例如 `VERSION=0.4.1` 必须对应 `v0.4.1`）；
+1. 校验 `VERSION` 与 tag 一致（例如 `VERSION=0.4.2` 必须对应 `v0.4.2`）；
 2. 重新跑独立测试、compileall、PowerShell AST、PyInstaller 构建和 EXE smoke；
 3. 上传 Actions artifact；
 4. 通过 `softprops/action-gh-release@v2` 创建真实 GitHub Release；
@@ -586,16 +610,16 @@ Windows 文档同步规则与 Linux 主项目 `docs/windows-editions-research.md
 本仓库已在同一台 Windows 主机上通过 WSL interop 使用 Windows PowerShell 5.1、
 Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 
-- 独立测试套件 **67 tests** 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
+- 独立测试套件 **77 tests** 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
 - Windows Python `compileall`、PowerShell 5.1 AST、Node JS 检查通过；
 - Docker Desktop 4.93.0 / Engine 29.8.1 / `OSType=linux` / Compose v5.5.1；
 - 最小 busybox Compose `config/up/down` 全部 exit 0，容器实际输出
   `qqbot-windows-v040-compose-smoke` 后清理；
 - PyInstaller 6.10.0 实际构建出 Docker/Native 两个 one-file EXE：
-  - Docker：`8,469,437` bytes，SHA256
-    `5f5e9d4038b6485fb0b37163f18de7776b9f3bf2fdd34d59cad56ad67ec0591c`；
-  - Native bootstrap：`6,405,958` bytes，SHA256
-    `1d51bdc03df7bd705a6400cf2fde67661d15db2d341bdacf3bb1768aad605cf7`；
+  - Docker：`8,482,596` bytes，SHA256
+    `ecaecac39771196531b1c958a86d39718a8ffddc4b21141bcbfea2bbfa04fe0f`；
+  - Native bootstrap：`6,405,961` bytes，SHA256
+    `71f8d7c5ec612622f1e83411a45c6c3de8abe6348c3fb7a25fa71a03e785428e`；
 - Docker EXE `--assistant` 启动后 `/healthz` 返回 version `3.5.1`，`/console` 与
   `/assistant` 均 HTTP 200；
 - Native bootstrap `--version`/`--help`/`--guide`/`--check` 实际退出 0，但明确
@@ -627,7 +651,7 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 - Windows Defender 防火墙、云安全组、局域网/VPN 远程访问未测试。
 - GitHub Actions `sync-upstream` 实际 dispatch/schedule 未执行；只完成本地脚本、
   workflow YAML 和 dry-run 验证。
-- 双 EXE `v*` Release workflow 未实际执行；v0.4.1 尚未 tag/Release。
+- 双 EXE `v*` Release workflow 未实际执行；v0.4.2 尚未 tag/Release。
 - Native EXE 仅为 bootstrap/guide 占位，不包含 AstrBot/SnowLuma/NTQQ 进程管理，
   未做真实 NTQQ 扫码、SnowLuma hook 或 native OneBot E2E；noVNC 仅是可选高级
   增强，不是 SnowLuma 自带登录二维码。

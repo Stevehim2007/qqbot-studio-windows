@@ -20,6 +20,8 @@ datas = [
     (str(ROOT / "qqbot_studio" / "static"), "qqbot_studio/static"),
     (str(ROOT / "plugins" / "qqbot_enhancer"), "plugins/qqbot_enhancer"),
     (str(ROOT / "assets"), "assets"),
+    (str(windows_dir / "console_move.js"), "windows"),
+    (str(windows_dir / "console_move.css"), "windows"),
 ]
 
 hiddenimports = [
@@ -35,6 +37,8 @@ hiddenimports = [
     "qqbot_studio.store",
     "qqbot_studio.studio",
     "qqbot_studio.updater",
+    "windows.move_data_core",
+    "windows.console_move_ext",
 ]
 
 a = Analysis(

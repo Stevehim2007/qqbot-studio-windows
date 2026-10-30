@@ -30,10 +30,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
-LAUNCHER_VERSION = "0.4.1"
+LAUNCHER_VERSION = "0.4.2"
 DEFAULT_SERVER_WAIT_SECONDS = 90
-DATA_LOCATION_POINTER_FILENAME = "data-location.json"
-MOVE_RECORD_FILENAME = "windows-data-move.json"
 
 if getattr(sys, "frozen", False):
     PROJECT_ROOT = Path(getattr(sys, "_MEIPASS", Path(sys.executable).resolve().parent))
@@ -53,6 +51,17 @@ from qqbot_studio.studio import (  # noqa: E402
     detect_public_host,
 )
 from qqbot_studio.store import default_data_dir  # noqa: E402
+from windows.move_data_core import (  # noqa: E402
+    DATA_LOCATION_POINTER_FILENAME,
+    MOVE_RECORD_FILENAME,
+    _read_json,
+    _read_data_location_pointer,
+    _write_data_location_pointer,
+    _write_json_atomic,
+    data_location_pointer_path,
+    resolve_data_dir,
+    validate_move_target,
+)
 
 PrintFunc = Callable[[str], None]
 
@@ -210,189 +219,13 @@ def build_parser() -> argparse.ArgumentParser:
         version=f"QQBot Studio Windows launcher {LAUNCHER_VERSION} (core {CORE_VERSION})",
     )
     parser.add_argument("--serve-management", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--apply-data-move", default=None, metavar="REQUEST_FILE", help=argparse.SUPPRESS)
     return parser
 
 
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-
-
-def data_location_pointer_path() -> Path:
-    """Stable pointer outside the data directory, used after --move-data."""
-
-    base = (
-        os.environ.get("LOCALAPPDATA", "").strip()
-        or os.environ.get("APPDATA", "").strip()
-        or str(Path.home())
-    )
-    return Path(base) / "QQBotStudio" / DATA_LOCATION_POINTER_FILENAME
-
-
-def _read_data_location_pointer(pointer_path: Path | None = None) -> Path | None:
-    path = pointer_path or data_location_pointer_path()
-    if not path.is_file():
-        return None
-    payload = _read_json(path)
-    if not isinstance(payload, dict) or not str(payload.get("data_dir") or "").strip():
-        raise ValueError(
-            f"Data location pointer is invalid: {path}. Repair it or pass --data-dir explicitly."
-        )
-    target = Path(str(payload["data_dir"])).expanduser().resolve()
-    if not target.is_dir():
-        raise ValueError(
-            f"Data location pointer points to a missing directory: {target}. "
-            "Restore the directory or pass --data-dir explicitly."
-        )
-    return target
-
-
-def _write_data_location_pointer(target: Path, pointer_path: Path | None = None) -> Path:
-    path = pointer_path or data_location_pointer_path()
-    _write_json_atomic(
-        path,
-        {
-            "schema_version": 1,
-            "data_dir": str(target.resolve()),
-            "updated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-        },
-    )
-    return path
-
-
-def resolve_data_dir(value: str | None, *, pointer_path: Path | None = None) -> Path:
-    if value:
-        return Path(value).expanduser().resolve()
-    env_value = os.environ.get("QQBOT_STUDIO_DATA_DIR", "").strip()
-    if env_value:
-        return Path(env_value).expanduser().resolve()
-    pointed = _read_data_location_pointer(pointer_path)
-    if pointed is not None:
-        return pointed
-    return default_data_dir().resolve()
-
-
-def _write_json_atomic(path: Path, payload: dict[str, Any]) -> None:
-    _write_text_atomic(path, json.dumps(payload, ensure_ascii=False, indent=2) + "\n")
-
-
-def _is_path_within(child: Path, parent: Path) -> bool:
-    try:
-        child.resolve().relative_to(parent.resolve())
-        return True
-    except ValueError:
-        return False
-
-
-def _lower_path_parts(value: str) -> list[str]:
-    return [part for part in re.split(r"[\\/]+", value.lower()) if part]
-
-
-def _windows_drive_type(path: Path) -> int:
-    """Return the Win32 drive type for a path, or 1 when unavailable."""
-
-    if os.name != "nt":
-        return 3
-    try:
-        import ctypes
-
-        drive = str(path.drive)
-        if not drive:
-            return 1
-        root = drive + "\\"
-        return int(ctypes.windll.kernel32.GetDriveTypeW(root))
-    except Exception:
-        return 1
-
-
-def validate_move_target(
-    source: Path,
-    target: Path,
-    *,
-    drive_type_func: Callable[[Path], int] | None = None,
-) -> Path:
-    """Validate a destination for the safe data-directory migration."""
-
-    raw_source = str(source)
-    raw_target = str(target)
-    lower_target = raw_target.lower().replace("/", "\\")
-    parts = _lower_path_parts(lower_target)
-
-    # Reject forbidden path kinds before resolve(): resolving a nonexistent UNC
-    # path on Windows raises FileNotFoundError before we can emit a clear error.
-    if (
-        lower_target.startswith("\\\\wsl$")
-        or lower_target.startswith("\\\\wsl.localhost")
-        or "\\wsl$\\" in lower_target
-        or "\\wsl.localhost\\" in lower_target
-        or any(part in {"wsl$", "wsl.localhost"} for part in parts)
-    ):
-        raise ValueError("Data directory cannot be placed in the Docker Desktop/WSL filesystem.")
-
-    if lower_target.startswith("\\\\") or lower_target.startswith("//"):
-        raise ValueError("Data directory cannot be a UNC/network share.")
-
-    if any(
-        part == "onedrive"
-        or part.startswith("onedrive ")
-        or part.startswith("onedrive-")
-        for part in parts
-    ):
-        raise ValueError("Data directory cannot be inside OneDrive; use a local fixed NTFS directory.")
-
-    source = Path(raw_source).expanduser().resolve()
-    target = Path(raw_target).expanduser().resolve()
-
-    for env_name in ("OneDrive", "OneDriveConsumer", "OneDriveCommercial"):
-        root_value = os.environ.get(env_name, "").strip()
-        if root_value:
-            try:
-                root = Path(root_value).expanduser().resolve()
-            except OSError:
-                continue
-            if _is_path_within(target, root):
-                raise ValueError(
-                    "Data directory cannot be inside OneDrive; choose a local non-synced directory."
-                )
-
-    if os.name == "nt":
-        if not target.drive:
-            raise ValueError("Data directory must be an absolute path on a local fixed drive.")
-        drive_type = (drive_type_func or _windows_drive_type)(target)
-        # 3 = DRIVE_FIXED. Reject remote/removable/unknown drives for migration.
-        if drive_type != 3:
-            raise ValueError(
-                "Data directory must be on a local fixed NTFS drive "
-                "(network, removable, CD-ROM, RAM and unknown drives are rejected)."
-            )
-
-    if target.parent == target:
-        raise ValueError("A filesystem/drive root cannot be used as the data directory.")
-    if target == source:
-        raise ValueError("New data directory must differ from the current data directory.")
-    if _is_path_within(target, source) or _is_path_within(source, target):
-        raise ValueError("New data directory cannot contain the old data directory or be nested inside it.")
-
-    if target.exists():
-        if not target.is_dir():
-            raise ValueError(f"New data path exists but is not a directory: {target}")
-        try:
-            if any(target.iterdir()):
-                raise ValueError(
-                    f"New data directory must be empty or absent; refusing to merge into: {target}"
-                )
-        except OSError as exc:
-            raise ValueError(f"Cannot inspect new data directory {target}: {exc}") from exc
-
-    try:
-        target.parent.mkdir(parents=True, exist_ok=True)
-        probe = target.parent / f".qqbot-move-write-test-{os.getpid()}"
-        probe.write_text("QQ Bot Studio data-directory write probe\n", encoding="utf-8")
-        probe.unlink()
-    except OSError as exc:
-        raise ValueError(f"New data directory is not writable: {target}: {exc}") from exc
-
-    return target
 
 
 def _stop_instance_containers(data_dir: Path, *, print_func: PrintFunc = _say) -> list[str]:
@@ -447,6 +280,7 @@ def move_data(
     non_interactive: bool = False,
     pointer_path: Path | None = None,
     stop_service_func: Callable[..., Any] | None = None,
+    kill_tree: bool = True,
     stop_containers_func: Callable[..., list[str]] | None = None,
     input_func: Callable[[str], str] = input,
     print_func: PrintFunc = _say,
@@ -493,7 +327,13 @@ def move_data(
 
     # Stop the management service before touching instance containers/data.
     if stop_service_func is None:
-        stop_management_server(source, bind_host=bind_host, port=bind_port, print_func=print_func)
+        stop_management_server(
+            source,
+            bind_host=bind_host,
+            port=bind_port,
+            print_func=print_func,
+            kill_tree=kill_tree,
+        )
     else:
         stop_service_func(
             source, bind_host=bind_host, port=bind_port, print_func=print_func
@@ -970,10 +810,13 @@ def _verified_server_pid(data_dir: Path, *, bind_host: str, port: int) -> int | 
     return None
 
 
-def _kill_pid_tree(pid: int) -> None:
+def _kill_pid_tree(pid: int, *, tree: bool = True) -> None:
     if os.name == "nt":
+        command = ["taskkill", "/PID", str(int(pid)), "/F"]
+        if tree:
+            command.insert(3, "/T")
         subprocess.run(
-            ["taskkill", "/PID", str(int(pid)), "/T", "/F"],
+            command,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             check=False,
@@ -985,7 +828,14 @@ def _kill_pid_tree(pid: int) -> None:
         return
 
 
-def stop_management_server(data_dir: Path, *, bind_host: str, port: int, print_func: PrintFunc = _say) -> bool:
+def stop_management_server(
+    data_dir: Path,
+    *,
+    bind_host: str,
+    port: int,
+    print_func: PrintFunc = _say,
+    kill_tree: bool = True,
+) -> bool:
     pid = _verified_server_pid(data_dir, bind_host=bind_host, port=port)
     pid_file = data_dir / "server.pid"
     runtime_file = data_dir / "server-runtime.json"
@@ -995,7 +845,7 @@ def stop_management_server(data_dir: Path, *, bind_host: str, port: int, print_f
         return False
 
     print_func(f"Stopping management service (PID {pid}); Docker containers keep running.")
-    _kill_pid_tree(pid)
+    _kill_pid_tree(pid, tree=kill_tree)
     deadline = time.monotonic() + 10
     while time.monotonic() < deadline:
         if not _pid_alive(pid):
@@ -1246,7 +1096,18 @@ def create_instance(studio: StudioManager, name: str | None = None, print_func: 
 
 
 def _run_management_server(args: argparse.Namespace) -> int:
+    from qqbot_studio import server as server_module
     from qqbot_studio.server import main as server_main
+
+    try:
+        from windows.console_move_ext import install_windows_console_extension
+
+        install_windows_console_extension(server_module)
+    except Exception as exc:  # noqa: BLE001 - optional Windows feature isolation
+        print(
+            f"WARNING: Windows console storage-migration extension disabled: {exc}",
+            file=sys.stderr,
+        )
 
     data_dir = resolve_data_dir(args.data_dir)
     host = str(args.ip or DEFAULT_BIND_HOST)
@@ -1372,6 +1233,17 @@ def cli(argv: Sequence[str] | None = None) -> int:
     _configure_parent_streams()
     parser = build_parser()
     args = parser.parse_args(list(argv) if argv is not None else None)
+    if getattr(args, "apply_data_move", None):
+        from windows.console_move_ext import apply_move_request
+
+        return int(
+            apply_move_request(
+                Path(args.apply_data_move),
+                move_data_func=move_data,
+                ensure_server_func=ensure_management_server,
+                print_func=_say,
+            )
+        )
     if args.serve_management:
         return _run_management_server(args)
     try:

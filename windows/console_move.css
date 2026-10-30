@@ -1,0 +1,25 @@
+.windows-storage-panel {
+  border-color: rgba(22, 131, 103, 0.32);
+  background: linear-gradient(135deg, rgba(236, 253, 248, 0.92), rgba(255, 255, 255, 0.94));
+}
+.windows-storage-panel .create-instance-icon {
+  font-size: 1.35rem;
+}
+.windows-storage-panel #windows-data-status[data-kind="ok"] {
+  color: #116149;
+  font-weight: 600;
+}
+.windows-storage-panel #windows-data-status[data-kind="error"] {
+  color: #a32020;
+  font-weight: 600;
+}
+.windows-storage-panel #windows-data-status[data-kind="busy"] {
+  color: #6b4b00;
+}
+.windows-storage-panel code {
+  overflow-wrap: anywhere;
+}
+.windows-storage-panel label.field-hint {
+  display: block;
+  margin-top: 0.6rem;
+}
