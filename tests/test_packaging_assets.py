@@ -41,7 +41,7 @@ class PackagingAssetTests(unittest.TestCase):
         ):
             self.assertIn(expected, text, expected)
 
-    def test_native_spec_builds_bootstrap_guide_exe(self):
+    def test_native_spec_builds_process_manager_exe(self):
         path = WINDOWS / "qqbot-studio-windows-native.spec"
         text = path.read_text(encoding="utf-8")
         compile(text, str(path), "exec")
@@ -85,17 +85,33 @@ class PackagingAssetTests(unittest.TestCase):
         ):
             self.assertIn(expected, text, expected)
 
-    def test_native_bootstrap_is_explicitly_non_e2e(self):
-        text = (WINDOWS / "native_launcher.py").read_text(encoding="utf-8")
+    def test_native_poc_has_process_manager_and_honest_blockers(self):
+        launcher = (WINDOWS / "native_launcher.py").read_text(encoding="utf-8")
+        runtime = (WINDOWS / "native_runtime.py").read_text(encoding="utf-8")
+        spec = (WINDOWS / "qqbot-studio-windows-native.spec").read_text(
+            encoding="utf-8"
+        )
         for expected in (
-            "bootstrap/guide placeholder",
-            "does not bundle or launch",
+            "Native single-instance Windows POC",
+            "native_runtime.start_native",
+            "native_runtime.check_prerequisites",
             "NATIVE_E2E=NOT_VERIFIED",
-            "NATIVE_INTEGRATION=NOT_IMPLEMENTED_IN_BOOTSTRAP",
+            "NoVNC was NOT started",
+            "official local NTQQ window",
             "snowluma.github.io",
-            "shares the whole interactive Windows desktop",
         ):
-            self.assertIn(expected, text, expected)
+            self.assertIn(expected, launcher, expected)
+        for expected in (
+            "def start_process",
+            "def stop_process",
+            "def start_native",
+            "def stop_native",
+            "def write_snowluma_onebot_config",
+            "ws://127.0.0.1:",
+            "no_vnc_used",
+        ):
+            self.assertIn(expected, runtime, expected)
+        self.assertIn("windows.native_runtime", spec)
 
     def test_release_workflow_publishes_exe_and_sha256(self):
         text = (ROOT / ".github/workflows/windows-release.yml").read_text(
@@ -132,7 +148,7 @@ class PackagingAssetTests(unittest.TestCase):
             "Native",
             "Docker",
             "sync-upstream",
-            "真实 Windows",
+            "Native POC",
             "未验证",
         ):
             self.assertIn(expected, text, expected)

@@ -8,7 +8,7 @@
 | 文档 | 内容 |
 |---|---|
 | [`../README.md`](../README.md) | Windows 独立项目安装、EXE 使用、Docker Desktop/WSL2、数据与升级边界 |
-| [`../VALIDATION.md`](../VALIDATION.md) | 真实执行过的测试、构建和 EXE smoke；明确未验证项 |
+| [`../VALIDATION.md`](../VALIDATION.md) | 真实执行过的测试、构建和 EXE smoke；Native POC 进程/health/PID 结果和未验证项 |
 | [`FAQ.md`](FAQ.md) | Windows 常见问题：Docker Desktop、端口、AI 助手 B、EXE、扫码与更新 |
 | [`../UPSTREAM.md`](../UPSTREAM.md) | vendor 来源、上游 commit、同步和升级流程 |
 
@@ -27,7 +27,7 @@
 
 ## v3.9.0 同步重点
 
-- core 3.8.0、qqbot_enhancer 1.15.0；
+- core 3.9.0、qqbot_enhancer 1.15.0；
 - 平台感知部署向导（Windows/Ubuntu/其它 Linux）；
 - 双发行版调研与同步规则 docs。
 

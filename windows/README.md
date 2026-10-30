@@ -8,7 +8,7 @@
 > 直接共用。完整说明见根目录 [`README.md`](../README.md) 和
 > [`UPSTREAM.md`](../UPSTREAM.md)。
 >
-> **状态：Windows v0.7.0（最新正式 Release 为 v0.7.0），已同步 upstream core 3.9.0。** 双发行版开发中：Docker edition 稳定，Native edition 为 bootstrap/guide 占位。已包含独立
+> **状态：Windows v0.7.1 Native POC 开发版（最新正式 Release 为 v0.7.0），已同步 upstream core 3.9.0。** Docker edition 稳定；Native edition 为单实例 POC 进程管理器。已包含独立
 > `/assistant` 页面、AI 助手 B 本机/公网配置、30 分钟刷新、控制台插件参数编辑和
 > qqbot_enhancer 1.15.0。发布由 `v*` tag 触发 GitHub Release，上传 EXE 和 SHA256。
 > 基础 Docker Desktop/Linux engine、Compose、EXE 构建和管理服务生命周期已实际测试；
@@ -299,13 +299,34 @@ CLI 高级入口：
 | 文件 | 用途 | 状态 |
 |---|---|---|
 | `QQBotStudioWindows.exe` | Docker Desktop + WSL2，QQBotStudio 管理控制台 | 稳定推荐 |
-| `QQBotStudioWindowsNative.exe` | Native Windows bootstrap/guide：官方 SnowLuma Windows + 本机 NTQQ 路径 | POC/占位；只做指南和只读检查，未集成完整进程管理，未做 native E2E |
+| `QQBotStudioWindowsNative.exe` | Native Windows 单实例 POC：官方 SnowLuma Windows + 本机 NTQQ | 本地进程/PID/日志/端口/health/OneBot 管理已实现；真实 AstrBot/SnowLuma/NTQQ/QQ 登录未验证 |
 
 Native 版官方推荐路径是本机安装桌面 QQ、官方 AstrBot Windows 运行时和官方
 SnowLuma Windows x64 包，直接在本机 QQ 窗口扫码；noVNC 仅是可选高级增强，需要
 Windows VNC Server + websockify 并共享整个交互桌面，不承诺每实例独立屏幕。
-Native bootstrap 当前不下载、不启动、不注入、不登录 AstrBot/SnowLuma/NTQQ，不能
-宣称原生版生产可用。日常稳定使用请选 Docker edition。
+Native POC 管理本地 AstrBot/SnowLuma 进程，但不下载、不安装、不注入、不登录第三方组件。
+当前主机只检测到 NTQQ；AstrBot CLI 和 SnowLuma Windows 包缺失时 `--start` 明确返回
+`NATIVE_START=BLOCKED`，不会伪造成功。QQ 登录只使用官方本机 NTQQ 窗口，不使用 noVNC，
+也不自动输入密码/验证码。日常稳定使用请选 Docker edition。
+
+```powershell
+.\QQBotStudioWindowsNative.exe --configure --non-interactive --ntqq-path "D:\Program Files\Tencent\QQ.exe" --astrbot-command "astrbot run" --snowluma-dir "D:\SnowLuma"
+.\QQBotStudioWindowsNative.exe --check --strict-check
+.\QQBotStudioWindowsNative.exe --write-onebot-config
+.\QQBotStudioWindowsNative.exe --start
+.\QQBotStudioWindowsNative.exe --status
+.\QQBotStudioWindowsNative.exe --health
+.\QQBotStudioWindowsNative.exe --logs --log-service all --lines 100
+.\QQBotStudioWindowsNative.exe --stop
+```
+
+Native POC 开发构建：Docker `8,567,123` bytes / SHA256
+`968579ba6cc016ac0d15fa40df71e96a0878b35c6f490c47f6b70f4f5b7193cb`；
+Native POC `6,965,443` bytes / SHA256
+`ea144b4ae802146d36ff732d13e45196cdaa09802fdca2fdb3730069f10f9822`。
+Linux/Windows 各 89 tests OK。当前真实主机 NTQQ 可用，但 AstrBot/SnowLuma 缺失，
+`--check --strict-check` 退出 1、`--start` 退出 2，明确阻塞。
+
 
 #### 每次上游更新必须同步双版本
 

@@ -5,14 +5,14 @@
 QQ Bot Studio 的**独立 Windows 10/11 双发行版项目**：
 
 - **Docker edition（稳定）**：Docker Desktop + WSL2 + Linux containers；
-- **Native edition（POC/bootstrap）**：官方 SnowLuma Windows + 本机 NTQQ 单实例路线；
-  当前 Native EXE 是安装/检查/指南占位，不是已完成的原生 AstrBot/SnowLuma 管理器，
-  也未做真机 E2E。
+- **Native edition（POC）**：官方 SnowLuma Windows + 本机 NTQQ 单实例路线；
+  Native EXE 已实现本地进程/PID/日志/端口/health/config/OneBot 管理，但真实
+  AstrBot/SnowLuma/NTQQ 安装与 QQ 登录 E2E 仍未验证。
 
 本仓库不是 Linux 项目的打包目录，也不是它的自动更新分支。它拥有自己的启动器、
 Windows 服务生命周期实现、版本号、数据目录约定、测试和发布流水线。
 
-> **状态：Windows v0.7.0（最新正式 Release 为 v0.7.0），已同步主项目 core 3.9.0。**
+> **状态：Windows v0.7.1 Native POC 开发版（最新正式 Release 为 v0.7.0），已同步主项目 core 3.9.0。**
 >
 > 已包含独立 `/assistant` AI 助手页面、控制台 30 分钟刷新 + 手动刷新、
 > AI 助手 B 本机/公网配置、控制台插件参数编辑（`reply_probability` 等）、
@@ -28,8 +28,9 @@ Windows 服务生命周期实现、版本号、数据目录约定、测试和发
 > 统一 AI tool marker、#sl 关闭、提示词换行保留和最新 UI/backend。
 > Docker EXE、隐藏管理服务、Docker Desktop/Linux engine 和本机 smoke 已做部分
 > 真实验证；发布使用 `v*` tag 触发的 GitHub Release。
-> **Native EXE 当前是 bootstrap/guide 占位，不包含完整 AstrBot/SnowLuma/NTQQ 集成。**
-> 真实 Windows 上完整 AstrBot/SnowLuma 部署、noVNC 扫码和 QQ 验证仍未测试，
+> **Native EXE 已从 bootstrap 升级为单实例 POC 进程管理器，但真实 AstrBot/SnowLuma/
+> NTQQ 联调和 QQ 登录仍未验证。** 当前主机只检测到 NTQQ；AstrBot/SnowLuma 未安装，
+> Native `--start` 会明确返回阻塞，不会伪装成功。
 > 不能把本仓库当作已完成完整 Windows QQ 扫码生产联调的版本。
 
 ---
@@ -46,12 +47,59 @@ Windows 服务生命周期实现、版本号、数据目录约定、测试和发
 | 发行版 | EXE | 运行时 | 当前状态 |
 |---|---|---|---|
 | Docker edition | `QQBotStudioWindows.exe` | Docker Desktop + WSL2 + Linux containers | **稳定推荐**；EXE/API/Compose smoke 已验证，真实 QQ/noVNC E2E 未验证 |
-| Native edition | `QQBotStudioWindowsNative.exe` | 官方 SnowLuma Windows + 本机桌面 NTQQ | **POC/bootstrap 占位**；支持官网指南和只读依赖检查，未集成 AstrBot/SnowLuma 进程，未做 native E2E |
+| Native edition | `QQBotStudioWindowsNative.exe` | 官方 SnowLuma Windows + 本机桌面 NTQQ | **单实例 Native POC**；真实进程/PID/日志/端口/health/OneBot 配置管理；AstrBot/SnowLuma 未安装，真实 QQ 登录 E2E 阻塞 |
 
 Native 版优先使用官方 SnowLuma Windows 发行包和本机 NTQQ 桌面扫码；官方路径不要求
 Docker/WSL，也不要求 noVNC。noVNC 仅作为可选高级增强：需要 Windows VNC Server +
 websockify，共享整个交互式 Windows 桌面，不承诺每实例独立屏幕，也不是 SnowLuma
 自带 QQ 登录二维码。需要简单稳定部署时继续使用 Docker edition。
+
+### Native Windows POC
+
+Native POC 当前实现（`VERSION=0.7.1`，不作为已发布稳定版）：
+
+- 数据根：`%LOCALAPPDATA%\QQBotStudio\data\native`；
+- `native.json` 保存 AstrBot 命令/`ASTRBOT_ROOT`、SnowLuma 目录/命令、NTQQ 路径、
+  loopback 端口和 OneBot token；
+- `--configure --non-interactive` 配置官方组件路径；缺组件时 `--check --strict-check`
+  非零，`--start` 明确 `NATIVE_START=BLOCKED`；
+- `--start/--restart/--stop/--status/--health/--logs` 管理两个原生进程，写 PID/运行
+  记录和日志；
+- `--write-onebot-config` 写入 SnowLuma `config/onebot.json`：
+  `ws://127.0.0.1:<onebot-port>/ws`，同样的 token，`statusCommand.enabled=false`（#sl 关闭）；
+- 默认只绑定 `127.0.0.1`；非 loopback 配置会被拒绝；
+- QQ 登录必须使用官方本机 NTQQ 窗口，Native POC 不使用 noVNC、不自动输入密码/验证码。
+
+典型命令：
+
+```powershell
+.\QQBotStudioWindowsNative.exe --configure --non-interactive ^
+  --ntqq-path "D:\Program Files\Tencent\QQ.exe" ^
+  --astrbot-command "astrbot run" ^
+  --snowluma-dir "D:\SnowLuma"
+.\QQBotStudioWindowsNative.exe --check --strict-check
+.\QQBotStudioWindowsNative.exe --write-onebot-config
+.\QQBotStudioWindowsNative.exe --start
+.\QQBotStudioWindowsNative.exe --status
+.\QQBotStudioWindowsNative.exe --health
+.\QQBotStudioWindowsNative.exe --logs --log-service all --lines 100
+.\QQBotStudioWindowsNative.exe --open-qq
+.\QQBotStudioWindowsNative.exe --stop
+```
+
+当前主机实际检测到 NTQQ（`D:\Program Files\Tencent\QQ.exe`，进程运行中），但
+AstrBot CLI 和 SnowLuma Windows 包均未找到；因此真实 AstrBot/SnowLuma/QQ 登录、
+OneBot 连接和 QQ 消息 E2E 不能声明通过。进程管理使用两个真实本地模拟服务进程和
+真实 PID/日志/stop 生命周期验证；不是只交 bootstrap/guide。
+
+Native POC 开发构建（`VERSION=0.7.1`，未 tag/Release）：
+
+- Docker `QQBotStudioWindows.exe`：`8,567,123` bytes，SHA256
+  `968579ba6cc016ac0d15fa40df71e96a0878b35c6f490c47f6b70f4f5b7193cb`；
+- Native POC `QQBotStudioWindowsNative.exe`：`6,965,443` bytes，SHA256
+  `ea144b4ae802146d36ff732d13e45196cdaa09802fdca2fdb3730069f10f9822`；
+- Linux/Windows 各 89 tests OK；真实 Windows 环境检查：NTQQ found，AstrBot/SnowLuma
+  missing，`--check --strict-check` exit 1、`--start` exit 2 并输出 blockers。
 
 本仓库 vendor 了主项目的 `qqbot_studio/` Python 核心、静态 UI、`assets/` 和
 `plugins/qqbot_enhancer/`。这不是符号链接，也不会在运行时从 Linux 主项目拉取代码。
@@ -143,7 +191,7 @@ websockify，共享整个交互式 Windows 桌面，不承诺每实例独立屏�
 
 ### 升级边界
 
-- 本仓库独立维护版本：当前开发版 `VERSION = 0.4.1`，bundled core 版本为
+- 本仓库独立维护版本：当前开发版 `VERSION = 0.7.1`，bundled core 版本为
   `qqbot_studio.__version__ = 3.9.0`。
 - Linux 主项目的自动更新、`scripts/auto-update.sh` 和网页内“更新并重启”不适用于
   本仓库。
@@ -172,7 +220,7 @@ websockify，共享整个交互式 Windows 桌面，不承诺每实例独立屏�
 - 建议至少 8 GB 内存；多实例建议 16 GB
 - 普通桌面用户运行；管理员权限只用于 WSL、Windows 防火墙等一次性操作
 - Native edition 另需官方 Windows 桌面 QQ（NTQQ）和 SnowLuma Windows x64 发行包；
-  当前 bootstrap 不会自动下载、注入或登录这些组件。原生单实例 POC 要求 QQ 与
+  Native POC 不会自动下载、注入或登录这些组件。原生单实例 POC 要求 QQ 与
   SnowLuma 使用同一 Windows 用户/权限级别，QQ 版本必须与 SnowLuma hook 匹配。
 
 ### WSL2
@@ -555,7 +603,7 @@ AI 助手 B 默认端口为 `8766`，但实际值以 `/assistant` 页面配置�
 - 创建 `.venv-build`；
 - 安装 `requirements-build.txt` 中固定的 PyInstaller；
 - 执行 `windows\qqbot-studio-windows.spec` 生成 Docker edition；
-- 执行 `windows\qqbot-studio-windows-native.spec` 生成 Native bootstrap edition；
+- 执行 `windows\qqbot-studio-windows-native.spec` 生成 Native POC edition；
 - 生成 `dist\QQBotStudioWindows.exe`、`dist\QQBotStudioWindowsNative.exe` 和
   `dist\SHA256SUMS.txt`（两个 EXE 都记录 SHA256）；
 - 用 `--version` / `--help` 对两个 EXE 做无需 Docker 的冒烟测试。
@@ -567,7 +615,7 @@ AI 助手 B 默认端口为 `8766`，但实际值以 `/assistant` 页面配置�
 ```
 
 构建产物是两个 console EXE：Docker 启动器显示配置/启动/错误信息，后台管理子进程隐藏
-运行；Native bootstrap 显示官方原生部署指南和只读依赖检查。日志保留在数据目录中，
+运行；Native POC 管理本地进程/PID/日志/health 并明确报告依赖阻塞。日志保留在数据目录中，
 不依赖父控制台存活。
 
 ### GitHub Actions
@@ -603,8 +651,7 @@ Artifact 包括两个 EXE、SHA256、README、VERSION、LICENSE、UPSTREAM、VAL
 5. 把 `QQBotStudioWindows.exe`、`QQBotStudioWindowsNative.exe`、
    `SHA256SUMS.txt`、`README.md`、`VALIDATION.md` 作为 Release assets 上传。
 
-只上传 Actions artifact 不算发布；Release assets 必须存在。Native EXE 是
-bootstrap/guide 占位，不得在 Release notes 中宣称已完成 AstrBot/SnowLuma/NTQQ E2E。
+只上传 Actions artifact 不算发布；Release assets 必须存在。Native EXE 是 POC；不得在 Release notes 中宣称已完成 AstrBot/SnowLuma/NTQQ E2E。
 
 v0.4.0 实际结果：
 
@@ -651,20 +698,23 @@ Windows 文档同步规则与 Linux 主项目 `docs/windows-editions-research.md
 本仓库已在同一台 Windows 主机上通过 WSL interop 使用 Windows PowerShell 5.1、
 Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 
-- 独立测试套件 **82 tests** 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
+- 独立测试套件 **89 tests** 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
 - Windows Python `compileall`、PowerShell 5.1 AST、Node JS 检查通过；
 - Docker Desktop 4.93.0 / Engine 29.8.1 / `OSType=linux` / Compose v5.5.1；
 - 最小 busybox Compose `config/up/down` 全部 exit 0，容器实际输出
-  `qqbot-windows-v040-compose-smoke` 后清理；
+  `qqbot-windows-v070-compose-smoke` 后清理；
 - PyInstaller 6.10.0 实际构建出 Docker/Native 两个 one-file EXE：
-  - Docker：`8,567,120` bytes，SHA256
-    `e277c8428751204fd7d39296c444aade16370a3b6a513d7cea16c90d24344154`；
-  - Native bootstrap：`6,405,952` bytes，SHA256
-    `5d6dd0f12adb531edf174d871d229cadba84f63744de2f9c9399648a43ce3da4`；
+  - Docker：`8,567,123` bytes，SHA256
+    `968579ba6cc016ac0d15fa40df71e96a0878b35c6f490c47f6b70f4f5b7193cb`；
+  - Native POC：`6,965,443` bytes，SHA256
+    `ea144b4ae802146d36ff732d13e45196cdaa09802fdca2fdb3730069f10f9822`；
 - Docker EXE `--assistant` 启动后 `/healthz` 返回 version `3.9.0`，`/console` 与
   `/assistant` 均 HTTP 200；
-- Native bootstrap `--version`/`--help`/`--guide`/`--check` 实际退出 0，但明确
-  `NATIVE_E2E=NOT_VERIFIED`、`NATIVE_INTEGRATION=NOT_IMPLEMENTED_IN_BOOTSTRAP`；
+- Native POC `--version/--help/--guide/--check` 实际通过；fake 进程 smoke 验证
+  `--configure/--start/--status/--logs/--stop` 和真实 PID 生命周期，OneBot loopback
+  config、#sl disabled；另用真实本地 fake HTTP 服务验证 `--health` 返回
+  `NATIVE_HEALTH_OK=True`、OneBot 端口 listening，stop 后进程消失；真实主机 NTQQ
+  可用但 AstrBot/SnowLuma 缺失，strict check/start 明确阻断，不伪造 E2E；
 - `--move-data` 最终 EXE smoke 通过：旧目录保留、目标数据/迁移记录/pointer 写入，
   可通过 pointer 在目标目录重启 `/healthz` 3.9.0，`--stop` 后 health 不可达；
 - 最终插件配置 API 实测 **169 字段**；`safe_tools_marker_enabled`、
@@ -713,9 +763,9 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
   gh/GH_TOKEN/GITHUB_TOKEN）；当前 v0.7.0 是本地执行同一 sync 脚本手动同步。
   请在 Actions 页面手动点一次 `Sync upstream Linux snapshot` 做远端流程验证。
 - 双 EXE `v*` Release workflow 已实际执行并成功；Release URL 和两个资产 SHA 见上。
-- Native EXE 仅为 bootstrap/guide 占位，不包含 AstrBot/SnowLuma/NTQQ 进程管理，
-  未做真实 NTQQ 扫码、SnowLuma hook 或 native OneBot E2E；noVNC 仅是可选高级
-  增强，不是 SnowLuma 自带登录二维码。
+- Native POC 已实现真实本地进程管理，但当前主机没有 AstrBot/SnowLuma 安装，真实
+  NTQQ 扫码、SnowLuma hook、OneBot 连接和 QQ 消息 E2E 未验证；noVNC 不使用。
+- Native POC 使用 loopback-only 设计，公网访问未实现/未验证。
 - 真实 AstrBot + SnowLuma 向导部署、DeepSeek API 和 QQ 账号登录未测试。
 - noVNC 扫码、设备验证、短信/邮箱验证和滑块验证未测试。
 - 长时间多实例稳定性、bind mount 属主和容器写权限未测试。

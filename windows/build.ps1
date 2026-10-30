@@ -1,11 +1,11 @@
 #requires -Version 5.1
 <#
 .SYNOPSIS
-  Build the Docker-edition and native-bootstrap Windows one-file EXEs.
+  Build the Docker-edition and Native POC Windows one-file EXEs.
 
 .DESCRIPTION
   Creates .venv-build, installs pinned PyInstaller, builds both the stable
-  Docker-edition launcher and the native-edition bootstrap/guide EXE, then
+  Docker-edition launcher and the Native POC process-manager EXE, then
   smoke-tests both with --version/--help. Docker Desktop and native NTQQ are
   not required to build or smoke-test the executables.
 #>
@@ -114,7 +114,7 @@ try {
             ExeName = 'QQBotStudioWindows.exe'
         },
         [pscustomobject]@{
-            Name = 'Native bootstrap edition'
+            Name = 'Native POC edition'
             Spec = (Join-Path $RootDir 'windows\qqbot-studio-windows-native.spec')
             ExeName = 'QQBotStudioWindowsNative.exe'
         }

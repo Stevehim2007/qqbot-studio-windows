@@ -1,5 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
-"""PyInstaller one-file build for the native-edition bootstrap/guide EXE."""
+"""PyInstaller one-file build for the Windows Native POC process-manager EXE."""
 
 from pathlib import Path
 
@@ -23,10 +23,10 @@ datas = [
 
 a = Analysis(
     [str(windows_dir / "native_launcher.py")],
-    pathex=[],
+    pathex=[str(ROOT)],
     binaries=[],
     datas=datas,
-    hiddenimports=[],
+    hiddenimports=["windows.native_runtime", "qqbot_studio.store"],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

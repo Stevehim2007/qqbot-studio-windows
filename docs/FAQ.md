@@ -191,3 +191,29 @@ tag 校验的 EXE。Release workflow 会校验 `VERSION` 与 `v*` tag 一致，�
 
 不建议。Windows/Linux 的 Docker 宿主、路径、容器发布端口、登录态和程序版本边界不同。
 迁移实例前必须停机、备份并逐项复验容器、插件、QQ 登录和 AI 助手 B。
+
+
+## 14. Native POC 如何配置和运行？
+
+Native POC（`VERSION=0.7.1` 开发版）与 Docker edition 独立，单实例，不使用
+Docker/WSL/noVNC：
+
+```powershell
+.\QQBotStudioWindowsNative.exe --configure --non-interactive ^
+  --ntqq-path "D:\Program Files\Tencent\QQ.exe" ^
+  --astrbot-command "astrbot run" ^
+  --snowluma-dir "D:\SnowLuma"
+.\QQBotStudioWindowsNative.exe --check --strict-check
+.\QQBotStudioWindowsNative.exe --write-onebot-config
+.\QQBotStudioWindowsNative.exe --start
+.\QQBotStudioWindowsNative.exe --status
+.\QQBotStudioWindowsNative.exe --health
+.\QQBotStudioWindowsNative.exe --logs --log-service all --lines 100
+.\QQBotStudioWindowsNative.exe --stop
+```
+
+数据默认在 `%LOCALAPPDATA%\QQBotStudio\data\native`。OneBot 固定 loopback URL
+`ws://127.0.0.1:<port>/ws`；SnowLuma `config/onebot.json` 会关闭 `#sl`。QQ 扫码和
+设备/短信/滑块验证必须在本机官方 NTQQ 窗口完成。当前主机只确认 NTQQ 存在；
+AstrBot/SnowLuma 未安装时 `--check --strict-check` 和 `--start` 会明确返回阻塞，
+不能声称真实原生 E2E 已通过。

@@ -266,12 +266,13 @@ class V3SyncFeatureTests(unittest.TestCase):
         self.assertIn("/api/instances/<instance_id>/plugins/<plugin_id>/config", api_doc)
         self.assertIn("reply_probability", api_doc)
 
-    def test_windows_release_version_is_0_7_0(self):
-        self.assertEqual((ROOT / "VERSION").read_text(encoding="ascii").strip(), "0.7.0")
+    def test_windows_version_constants_are_consistent(self):
+        version = (ROOT / "VERSION").read_text(encoding="ascii").strip()
+        self.assertRegex(version, r"^\d+\.\d+\.\d+$")
         launcher = (ROOT / "windows" / "launcher.py").read_text(encoding="utf-8")
-        self.assertIn('LAUNCHER_VERSION = "0.7.0"', launcher)
+        self.assertIn(f'LAUNCHER_VERSION = "{version}"', launcher)
         native = (ROOT / "windows" / "native_launcher.py").read_text(encoding="utf-8")
-        self.assertIn('NATIVE_LAUNCHER_VERSION = "0.7.0"', native)
+        self.assertIn(f'NATIVE_LAUNCHER_VERSION = "{version}"', native)
 
     def test_upstream_metadata_is_updated(self):
         upstream = (ROOT / "UPSTREAM.md").read_text(encoding="utf-8")

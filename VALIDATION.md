@@ -1,6 +1,78 @@
 # Validation record
 
-## v0.7.0 / core 3.9.0 / plugin 1.15.0 dual-edition release (latest)
+## v0.7.1 / Native Windows POC (latest development)
+
+This is a development/POC addition, not a new tagged Release. Bundled core remains
+`3.9.0` / plugin `1.15.0`; Windows VERSION is `0.7.1`.
+
+### Native process manager implemented
+
+- `windows/native_runtime.py` single-instance runtime manager:
+  - native root `%LOCALAPPDATA%\QQBotStudio\data\native` (override with `--data-dir`);
+  - `native.json` config, `run/*.json` PID/runtime records, `logs/*.log`;
+  - AstrBot `ASTRBOT_ROOT` and command, SnowLuma working directory/launcher,
+    NTQQ path, loopback WebUI/OneBot ports;
+  - `--start/--restart/--stop/--status/--health/--logs`;
+  - port conflict checks and loopback-only default;
+  - SnowLuma `config/onebot.json` writer with `ws://127.0.0.1:<port>/ws`, shared
+    token, and `statusCommand.enabled=false` (`#sl` disabled);
+  - `--open-qq` only opens the official local NTQQ; no password/captcha
+    automation and no noVNC.
+- Missing AstrBot/SnowLuma/NTQQ prerequisites produce explicit
+  `NATIVE_START=BLOCKED`; the old bootstrap-only behavior is removed.
+
+### Tests and smoke
+
+- Linux and Windows Python: **89 tests OK** (Linux skips 1 Windows-only test).
+- Native POC process smoke on Windows using the built Native EXE and two real
+  local fake Python service processes:
+  - configure with fake NTQQ path and explicit AstrBot/SnowLuma commands;
+  - strict prerequisite check exit 0;
+  - SnowLuma OneBot config written with URL `ws://127.0.0.1:19899/ws` and
+    `statusCommand.enabled=false`;
+  - `--start` exit 0, both processes reported running with real PIDs;
+  - logs contained the service marker;
+  - `--stop` exit 0 and both PIDs/processes disappeared;
+  - status after stop showed both services not running.
+- Additional Native EXE health smoke with two real local fake HTTP services:
+  - fake AstrBot returned HTTP 200 on its WebUI port and listened on the
+    OneBot TCP port; fake SnowLuma returned HTTP 200 on its WebUI port;
+  - `--health` exit 0 and printed `NATIVE_HEALTH_OK=True`;
+  - status showed both processes running and `onebot.listening=true`;
+  - logs contained both service-ready markers;
+  - after `--stop`, no managed process remained.
+- Real host prerequisite check (no fake component paths):
+  - NTQQ found: `D:\Program Files\Tencent\QQ.exe` and QQ process present;
+  - AstrBot CLI absent: blocker;
+  - SnowLuma Windows package directory absent: blocker;
+  - `--check --strict-check` exit 1;
+  - `--start` exit 2 and printed `NATIVE_START=BLOCKED`.
+- Native EXE build:
+  - Docker `QQBotStudioWindows.exe`: `8,567,123` bytes, SHA256
+    `968579ba6cc016ac0d15fa40df71e96a0878b35c6f490c47f6b70f4f5b7193cb`;
+  - Native `QQBotStudioWindowsNative.exe`: `6,965,443` bytes, SHA256
+    `ea144b4ae802146d36ff732d13e45196cdaa09802fdca2fdb3730069f10f9822`.
+- `--version`: `QQ Bot Studio Windows Native POC 0.7.1 (bundled core 3.9.0)`.
+
+### Native POC limitations / blockers
+
+- Real AstrBot CLI and SnowLuma Windows package are not installed on this host;
+  no real native AstrBot/SnowLuma process was started.
+- Real NTQQ is installed/running, but QQ scan login, device/SMS/email/slider
+  verification, SnowLuma hook compatibility and OneBot connection were not
+  performed. No WSL/Docker/noVNC path is used.
+- No real AstrBot WebUI/SnowLuma WebUI health response was observed because
+  those components are absent; the process manager smoke used fake local
+  services, not a real bot.
+- Single-instance only. Multi-instance, NTQQ multi-open, desktop isolation,
+  QQ version compatibility and long-running stability are not supported/claimed.
+- `--open-qq` was not invoked in automation to avoid disturbing the user's real
+  QQ session; NTQQ discovery was tested read-only.
+- Native POC is not part of v0.7.0 Release assets; it is a development build.
+
+---
+
+## v0.7.0 / core 3.9.0 / plugin 1.15.0 dual-edition release (previous)
 
 This development version adds:
 
