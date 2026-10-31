@@ -57,6 +57,27 @@
 - real `/food` helper request to `food.dlsz.top`: HTTP 200, 6 items,
   formatted output for max 5 succeeded (no QQ command execution).
 
+### Release publication
+
+- Pre-release dual build run `41153081309`: success; artifact
+  `QQBotStudioWindows-dual-b33dbd0...` size `19,813,918` bytes.
+- `v0.8.1` tag points at `b33dbd02f32b5892cd0637e580ff5b0fdf4f524f`.
+- Release workflow run `41153271187`: success, all release steps passed
+  (tag/VERSION, upstream metadata gate, 92 tests, compileall, PowerShell AST,
+  dual PyInstaller, both EXE smokes, artifact upload and Create GitHub Release).
+- Release URL:
+  https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.8.1
+- Public GitHub API confirmed:
+  - `QQBotStudioWindows.exe`: `10,958,104` bytes,
+    digest `sha256:03ad38545b57192ea8cb013a5d5dd6575dc5c030370f0e028051ec1ddfa49b4f`;
+  - `QQBotStudioWindowsNative.exe`: `9,042,861` bytes,
+    digest `sha256:434e7fc1476802a14e28baf2aa60cb0406809be2fcf2dd9a4f2ba10b733de99a`;
+  - `SHA256SUMS.txt` downloaded; both lines matched the GitHub API digests;
+  - `README.md` and `VALIDATION.md` present.
+- `sync-upstream.yml` workflow_dispatch was attempted unauthenticated and
+  returned HTTP 401 Requires authentication; remote workflow not triggered.
+  Manual local sync and no-op dry-run passed.
+
 ### Native POC preservation
 
 - `windows/native_runtime.py`, Native launcher, `docs/native-e2e-validation.md`
