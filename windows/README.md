@@ -8,9 +8,9 @@
 > 直接共用。完整说明见根目录 [`README.md`](../README.md) 和
 > [`UPSTREAM.md`](../UPSTREAM.md)。
 >
-> **状态：Windows v0.8.1（最新正式 Release 为 v0.8.1），已同步 upstream core 3.12.1。** Docker edition 稳定；Native edition 为单实例 POC 进程管理器。已包含独立
+> **状态：Windows v0.9.0 发布候选（最新正式 Release 为 v0.8.1），已同步 upstream core 3.13.0。** Docker edition 稳定；Native edition 为单实例 POC 进程管理器。已包含独立
 > `/assistant` 页面、AI 助手 B 本机/公网配置、30 分钟刷新、控制台插件参数编辑和
-> qqbot_enhancer 1.21.0。发布由 `v*` tag 触发 GitHub Release，上传 EXE 和 SHA256。
+> qqbot_enhancer 1.22.0。发布由 `v*` tag 触发 GitHub Release，上传 EXE 和 SHA256。
 > 基础 Docker Desktop/Linux engine、Compose、EXE 构建和管理服务生命周期已实际测试；
 > 完整 AstrBot/SnowLuma 部署、noVNC 扫码和 QQ 验证仍未测试。详见根目录
 > [`VALIDATION.md`](../VALIDATION.md) 和 [`docs/FAQ.md`](../docs/FAQ.md)。
@@ -197,14 +197,20 @@ New-NetFirewallRule `
 
 ---
 
-## 6.1 v3.12.1 同步后的新入口
+## 6.1 v3.13.0 同步后的新入口
+
+- core 3.13.0、qqbot_enhancer 1.22.0；
+- 会话级提示词模板/pinned 默认、`default_profile`、activate 不 pending；
+- `/新会话 [提示词标题]`、`/会话` 只切换已有、`/表情状态`、配置 backup 恢复；
+- Windows Native POC、console_move_ext、双 EXE、sync workflow 保留。
+
+## 6.2 v3.12.1 同步后的历史入口
 
 - core 3.12.1、qqbot_enhancer 1.21.0；
 - Ponytail phase 2：共享 gitutil/static api.js、HTML 依赖、E2E 脚本（排除 artifacts）；
-- 源码/测试净减，prompts/ambient/persona 功能保留；
-- Windows Native POC、console_move_ext、双 EXE、sync workflow 保留。
+- 源码/测试净减，prompts/ambient/persona 功能保留。
 
-## 6.2 v3.12.0 同步后的历史入口
+## 6.3 v3.12.0 同步后的历史入口
 
 - core 3.12.0、qqbot_enhancer 1.21.0；
 - 提示词 profiles/active/新会话、按名会话、AstrBot 每群 Persona/记忆；
@@ -212,27 +218,27 @@ New-NetFirewallRule `
 - prompt API/UI、stale/pending restart、容量上限、E2E/QA 文档；
 - Windows launcher、Native POC、console_move_ext、双 EXE、sync workflow 保留。
 
-## 6.3 v3.9.0 同步后的历史入口
+## 6.4 v3.9.0 同步后的历史入口
 
 - core 3.9.0、qqbot_enhancer 1.15.0；
 - `/food`、按群 direct persona、统一 AI tool marker、schema fallback；
 - `#sl` 关闭行为、提示词换行保留、最新 backend/UI。
 
-## 6.4 v3.8.0 同步后的历史入口
+## 6.5 v3.8.0 同步后的历史入口
 
 - core 3.8.0、qqbot_enhancer 1.12.0；
 - 收藏语义 tags/meaning/tone、多分类、全局收藏池；
 - 自然语言重分类/发表情、AI 工具权限/AI 自动表情 UI；
 - 配置并发重试、partial stats/permission_denied 降级。
 
-## 6.5 v3.7.0 同步后的历史入口
+## 6.6 v3.7.0 同步后的历史入口
 
 - core 3.7.0、qqbot_enhancer 1.7.0；插件/核心模块化；
 - 控制台实例设置 modal、services/components、`/assistant` 公网诊断；
 - 插件安全工具 marker、AI 自动收藏（默认关闭）、Bing-only 相关性搜索；
 - Windows launcher、console_move_ext、同步/双 EXE 流程保留。
 
-## 6.6 v3.6.0 同步后的历史入口
+## 6.7 v3.6.0 同步后的历史入口
 
 - core 3.6.0、qqbot_enhancer 1.5.2（历史）；
 - `/收藏表情` 支持引用消息和会话最近图片缓存，收藏流程更可靠；
@@ -338,11 +344,11 @@ NTQQ 窗口，不使用 noVNC，也不自动输入密码/验证码。详细记�
 .\QQBotStudioWindowsNative.exe --stop
 ```
 
-Native v0.8.1 本地候选构建：Docker `8,593,602` bytes / SHA256
-`8d61082c63065cc18b41c1278cdda6728539defc1b4be3265c7a1a17a56cc62f`；
-Native POC `6,965,968` bytes / SHA256
-`274b238547d7bb36e9a0a831452a8af85bb9345018fb2074bff89c28eeda487b`。
-Linux/Windows 各 92 tests OK。真实 AstrBot/SnowLuma 启动和 health 已验证；
+Native v0.9.0 本地候选构建：Docker `8,597,456` bytes / SHA256
+`2207209cae9c559d228132405c669f18e365ccf63a4930d34ea23be76dc9bf2e`；
+Native POC `6,966,079` bytes / SHA256
+`135aad620ab6e05fbda225e23964495ce9131fd2a61c527ed320e20f9e98460f`。
+Linux/Windows 各 93 tests OK。真实 AstrBot/SnowLuma 启动和 health 已验证；
 QQ EULA/扫码人工步骤仍为 ENV_BLOCKED。
 
 

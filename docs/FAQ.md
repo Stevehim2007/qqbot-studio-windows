@@ -78,7 +78,7 @@ Get-NetTCPConnection -LocalPort 8765 -State Listen
 - 云 Windows 主机还需要在云安全组放行；
 - 修改 `public_host` 只影响打印 URL，不会改变监听或防火墙。
 
-## 7. 插件 1.21.0 有哪些新命令？
+## 7. 插件 1.22.0 有哪些新命令？
 
 - `/找图 关键词`、`/搜图 关键词`，以及插件支持的自然语言找图意图；
 - 图片会先安全下载到本地临时文件，再通过 AstrBot 官方本地图片组件发送；
@@ -198,7 +198,7 @@ tag 校验的 EXE。Release workflow 会校验 `VERSION` 与 `v*` tag 一致，�
 
 ## 14. Native POC 如何配置和运行？
 
-Native POC（`VERSION=0.8.1`）与 Docker edition 独立，单实例，不使用
+Native POC（`VERSION=0.9.0`）与 Docker edition 独立，单实例，不使用
 Docker/WSL/noVNC：
 
 ```powershell

@@ -1,6 +1,84 @@
 # Validation record
 
-## v0.8.1 / core 3.12.1 / plugin 1.21.0 (latest)
+## v0.9.0 / core 3.13.0 / plugin 1.22.0 (latest)
+
+### Sync source
+
+- Linux upstream clean snapshot: `764b7caae4c6c80a8e1c5cc72c795e2656a36e08`
+  (tag `v3.13.0`);
+- bundled core: `qqbot_studio.__version__ == 3.13.0`;
+- plugin: `qqbot_enhancer` 1.22.0;
+- Windows VERSION: `0.9.0`;
+- manual sync from clean `764b7ca`; second dry-run was `no changes`;
+- sync preserves `tests/e2e` scripts and excludes `tests/e2e/artifacts`;
+- `sync-upstream.yml` dispatch attempt without token returned HTTP 401
+  Requires authentication; remote workflow not triggered.
+
+### Quality and builds
+
+- Linux Python: **93 tests OK** (1 Windows-only drive-type skip);
+- Windows Python 3.10.9: **93 tests OK**;
+- Windows `compileall`, PowerShell 5.1 AST, Node JS syntax, workflow YAML and
+  upstream metadata gate: passed;
+- PyInstaller 6.10.0 local dual build:
+  - Docker `QQBotStudioWindows.exe`: `8,597,456` bytes, SHA256
+    `2207209cae9c559d228132405c669f18e365ccf63a4930d34ea23be76dc9bf2e`;
+  - Native POC `QQBotStudioWindowsNative.exe`: `6,966,079` bytes, SHA256
+    `135aad620ab6e05fbda225e23964495ce9131fd2a61c527ed320e20f9e98460f`;
+- Docker Desktop 4.93.0 / Engine 29.8.1 / Compose v5.5.1: busybox
+  `config/up/down` all exit 0; output `qqbot-windows-v090-compose-smoke`;
+  container/network removed.
+
+### Docker EXE/API smoke
+
+- `/healthz` returned version `3.13.0`;
+- `/console`, `/assistant` HTTP 200; both load shared `/services/api.js`;
+  prompt template UI and shared API route present;
+- prompt profiles:
+  - initial count=1, `default_prompt_id=default`, `active_id=default`,
+    `conversation_pending=false`, `default_profile` object present;
+  - created Template A/B and activated B;
+  - activate response `conversation_pending=false`,
+    `conversation_created=false`, `restart_required=false`;
+  - `default_prompt_id` and `default_profile.id` equal activated profile;
+  - GET pinned profile first, exactly one pinned, pinned/default ids match,
+    multiline prompt preserved;
+  - after storage migration default/profile/newline/pinned still match;
+- plugin schema fallback: `schema_source=bundled`, 191 fields; prompt/ambient/
+  group persona/multi-category/semantic/food fields present; ambient default
+  false; `/表情状态` marker present in synced plugin source;
+- plugin POST offline: ok=true, restart_required=true, api_available=false,
+  source=local; GET persisted reply probability 0.63, ambient true, group
+  persona, food and semantic/multi-category settings;
+- partial stats ok=true, partial=true;
+- B diagnostics 200 with `error_code=not_installed` and listener field;
+- storage migration: no token 403, relative target 400, scheduled→completed,
+  old dir retained, target/pointer/record correct, request marker removed;
+- `--stop` exit 0 and health unreachable;
+- `/food` helper HTTP 200 from `food.dlsz.top`, 6 items and formatted max 5.
+
+### Native POC preservation
+
+- Native runtime/launcher, real-component validation document and Windows-only
+  fixes retained; Native EXE `--version/--help/--guide/--check` exit 0 and
+  reports 0.9.0 / core 3.13.0.
+- No Native QQ scan/login or message E2E is claimed.
+
+### Not verified for v0.9.0
+
+- No live QQ/OneBot test of `/新会话 名称 [提示词标题]`, existing-only `/会话`,
+  per-conversation persona/memory, ambient participation or `/表情状态` command.
+- Pinned/default/activate semantics verified on an undeployed instance and
+  offline local plugin save; live deployed AstrBot conversation/persona path not
+  executed.
+- No real browser DOM automation, QQ scan/device/slider, DeepSeek/LLM
+  generation, OneDrive/UNC/WSL mount or second physical disk.
+- `sync-upstream` remote workflow not triggered (401); manual local sync and
+  no-op dry-run passed.
+
+---
+
+## v0.8.1 / core 3.12.1 / plugin 1.21.0 (previous)
 
 ### Sync source
 

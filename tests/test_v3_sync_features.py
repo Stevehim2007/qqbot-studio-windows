@@ -67,14 +67,14 @@ class V3SyncFeatureTests(unittest.TestCase):
         self.assertIn("public_host", text)
         self.assertIn("没有可点击的浏览器 URL", text)
 
-    def test_plugin_is_1_21_x_and_has_extended_features(self):
+    def test_plugin_is_1_22_x_and_has_extended_features(self):
         metadata = (ROOT / "plugins" / "qqbot_enhancer" / "metadata.yaml").read_text(
             encoding="utf-8"
         )
         match = re.search(r"^version:\s*(\S+)", metadata, re.MULTILINE)
         self.assertIsNotNone(match)
         version_tuple = tuple(int(part) for part in match.group(1).split("."))
-        self.assertGreaterEqual(version_tuple, (1, 21, 0), match.group(1))
+        self.assertGreaterEqual(version_tuple, (1, 22, 0), match.group(1))
         main = (ROOT / "plugins" / "qqbot_enhancer" / "main.py").read_text(
             encoding="utf-8"
         )
@@ -106,6 +106,8 @@ class V3SyncFeatureTests(unittest.TestCase):
             "group_identity_context_enabled",
             "ambient_group_chat_enabled",
             "food_enabled",
+            "prompt_profiles",
+            "prompt_profile_active_id",
         ):
             self.assertIn(field, schema)
 
@@ -280,10 +282,10 @@ class V3SyncFeatureTests(unittest.TestCase):
         for marker in (
             "prompt-manager-modal",
             "新增提示词",
-            "旧会话历史不会自动带过去",
+            "这里保存的是提示词模板",
         ):
             self.assertIn(marker, console_html)
-        for marker in ("/prompts", "restart_required", "conversation_created", "提示词列表"):
+        for marker in ("/prompts", "restart_required", "pinned", "提示词列表"):
             self.assertIn(marker, console_js)
         api_doc = (ROOT / "docs" / "ui-api-contract-v2.md").read_text(encoding="utf-8")
         for marker in (
@@ -380,6 +382,75 @@ class V3SyncFeatureTests(unittest.TestCase):
             self.assertIn(marker, console_js)
         self.assertIn("/api/instances/<instance_id>/plugins/<plugin_id>/config", api_doc)
         self.assertIn("reply_probability", api_doc)
+
+    def test_v3_13_prompt_templates_pinned_default_activate_and_sticker_status(self):
+        deployer = (ROOT / "qqbot_studio" / "deployer.py").read_text(encoding="utf-8")
+        for marker in (
+            "default_profile",
+            "default_prompt_id",
+            "_sort_prompt_profiles",
+            "enhancer_config_backup_path",
+            "最近一次成功快照",
+            "conversation_pending",
+        ):
+            self.assertIn(marker, deployer)
+        console = (ROOT / "qqbot_studio" / "static" / "console.js").read_text(
+            encoding="utf-8"
+        )
+        for marker in (
+            "默认模板",
+            "设为默认/置顶",
+            "仅影响之后新建的会话",
+            "LEGACY_PROMPT_FIELD_KEYS",
+            "prompts.sort((left, right) => Number(right.pinned) - Number(left.pinned))",
+        ):
+            self.assertIn(marker, console)
+        plugin = (ROOT / "plugins" / "qqbot_enhancer" / "main.py").read_text(
+            encoding="utf-8"
+        )
+        for marker in (
+            "/表情状态",
+            "/表情诊断",
+            "pinned/default template",
+            "new_conversation",
+        ):
+            self.assertIn(marker, plugin)
+        schema = json.loads(
+            (ROOT / "plugins" / "qqbot_enhancer" / "_conf_schema.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertGreaterEqual(len(schema), 191)
+        for marker in (
+            "prompt_profiles",
+            "prompt_profile_active_id",
+            "ambient_group_chat_enabled",
+            "sticker_semantic_tags_enabled",
+            "collected_sticker_multi_category_enabled",
+            "food_enabled",
+        ):
+            self.assertIn(marker, schema)
+        api_doc = (ROOT / "docs" / "ui-api-contract-v2.md").read_text(encoding="utf-8")
+        for marker in (
+            "模板库",
+            "pinned",
+            "default_prompt_id",
+            "default_profile",
+            "activate 不再触发待创建会话",
+            "conversation_pending",
+            "backup",
+        ):
+            self.assertIn(marker, api_doc)
+        plugin_doc = (ROOT / "docs" / "plugin-qqbot-enhancer.md").read_text(
+            encoding="utf-8"
+        )
+        for marker in (
+            "/新会话 名称 [提示词标题]",
+            "pinned/default",
+            "/表情状态",
+            "/表情诊断",
+        ):
+            self.assertIn(marker, plugin_doc)
 
     def test_windows_version_constants_are_consistent(self):
         version = (ROOT / "VERSION").read_text(encoding="ascii").strip()
