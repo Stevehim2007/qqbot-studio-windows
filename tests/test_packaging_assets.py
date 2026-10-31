@@ -19,6 +19,9 @@ class PackagingAssetTests(unittest.TestCase):
             "windows/qqbot-studio-windows-native.spec",
             "windows/launcher.py",
             "windows/native_launcher.py",
+            "windows/app_shell.py",
+            "windows/native_setup.py",
+            "windows/native_app.py",
             ".github/workflows/windows-build.yml",
             ".github/workflows/windows-release.yml",
             ".github/workflows/sync-upstream.yml",
@@ -37,7 +40,9 @@ class PackagingAssetTests(unittest.TestCase):
             "plugins/qqbot_enhancer",
             "qqbot_studio.assistant_ext",
             "QQBotStudioWindows",
-            "console=True",
+            "windows.app_shell",
+            "webview",
+            "console=False",
         ):
             self.assertIn(expected, text, expected)
 
@@ -50,7 +55,10 @@ class PackagingAssetTests(unittest.TestCase):
             'ROOT / "VERSION"',
             'ROOT / "UPSTREAM.md"',
             "QQBotStudioWindowsNative",
-            "console=True",
+            "windows.native_app",
+            "windows.native_setup",
+            "webview",
+            "console=False",
         ):
             self.assertIn(expected, text, expected)
 
@@ -112,6 +120,42 @@ class PackagingAssetTests(unittest.TestCase):
         ):
             self.assertIn(expected, runtime, expected)
         self.assertIn("windows.native_runtime", spec)
+
+    def test_app_shell_and_native_one_click_installer_contracts(self):
+        app_shell = (WINDOWS / "app_shell.py").read_text(encoding="utf-8")
+        for marker in (
+            "webview.create_window",
+            "edgechromium",
+            "get_logs",
+            "copy_logs",
+            "open_log_folder",
+            "show_error_window",
+            "QQBOT_APP_AUTOCLOSE_SECONDS",
+        ):
+            self.assertIn(marker, app_shell)
+        setup = (WINDOWS / "native_setup.py").read_text(encoding="utf-8")
+        for marker in (
+            "ASTRBOT_WHEEL_URL",
+            "SNOWLUMA_URL",
+            "NODE_URL",
+            "UV_URL",
+            "expected_sha256",
+            "install_all",
+            "ntqq",
+            "EULA",
+        ):
+            self.assertIn(marker, setup)
+        native_app = (WINDOWS / "native_app.py").read_text(encoding="utf-8")
+        for marker in (
+            "一键安装/修复",
+            "启动 Native 服务",
+            "copy_logs",
+            "open_log_folder",
+            "QQ 扫码",
+        ):
+            self.assertIn(marker, native_app)
+        requirements = (ROOT / "requirements-build.txt").read_text(encoding="ascii")
+        self.assertIn("pywebview==6.2.1", requirements)
 
     def test_release_workflow_publishes_exe_and_sha256(self):
         text = (ROOT / ".github/workflows/windows-release.yml").read_text(

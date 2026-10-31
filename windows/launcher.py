@@ -14,7 +14,9 @@ the management server keeps running after the console window closes.
 from __future__ import annotations
 
 import argparse
+import ctypes
 import json
+import logging
 import os
 import re
 import shutil
@@ -25,13 +27,15 @@ import tempfile
 import time
 import traceback
 import urllib.request
-import webbrowser
 from datetime import datetime, timezone
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
-LAUNCHER_VERSION = "0.9.0"
+LAUNCHER_VERSION = "0.10.0"
 DEFAULT_SERVER_WAIT_SECONDS = 90
+LAUNCHER_LOG = "launcher.log"
+_LOGGER = logging.getLogger("qqbot.windows.launcher")
 
 if getattr(sys, "frozen", False):
     PROJECT_ROOT = Path(getattr(sys, "_MEIPASS", Path(sys.executable).resolve().parent))
@@ -42,6 +46,7 @@ else:
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from windows import app_shell  # noqa: E402
 from qqbot_studio import __version__ as CORE_VERSION  # noqa: E402
 from qqbot_studio.dockerctl import DockerController, DockerError  # noqa: E402
 from qqbot_studio.studio import (  # noqa: E402
@@ -67,8 +72,68 @@ PrintFunc = Callable[[str], None]
 
 
 # ---------------------------------------------------------------------------
-# Console and file helpers
+# Console, logging and file helpers
 # ---------------------------------------------------------------------------
+
+
+def _ensure_console_streams() -> None:
+    """Restore console output for windowed PyInstaller builds when attached."""
+
+    if os.name != "nt" or sys.stdout is not None and sys.stderr is not None:
+        return
+    attached = False
+    try:
+        attached = bool(ctypes.windll.kernel32.AttachConsole(-1))
+    except Exception:
+        attached = False
+    if attached:
+        try:
+            sys.stdin = open("CONIN$", "r", encoding="utf-8", errors="replace")
+            sys.stdout = open("CONOUT$", "w", encoding="utf-8", errors="replace", buffering=1)
+            sys.stderr = open("CONOUT$", "w", encoding="utf-8", errors="replace", buffering=1)
+            return
+        except Exception:
+            pass
+    try:
+        sys.stdout = open(os.devnull, "w", encoding="utf-8")
+        sys.stderr = open(os.devnull, "w", encoding="utf-8")
+    except Exception:
+        pass
+    if not attached:
+        # no parent console: keep streams non-None and rely on file logging
+        pass
+
+
+def _configure_launcher_logging() -> Path:
+    path = app_shell.logs_root() / LAUNCHER_LOG
+    path.parent.mkdir(parents=True, exist_ok=True)
+    _LOGGER.setLevel(logging.INFO)
+    if not any(
+        isinstance(handler, RotatingFileHandler)
+        and Path(getattr(handler, "baseFilename", "")) == path.resolve()
+        for handler in _LOGGER.handlers
+    ):
+        handler = RotatingFileHandler(
+            path, maxBytes=2 * 1024 * 1024, backupCount=3, encoding="utf-8"
+        )
+        handler.setFormatter(
+            logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+        )
+        _LOGGER.addHandler(handler)
+        _LOGGER.propagate = False
+    app_shell.configure_logger()
+    return path
+
+
+def _app_log_paths(data_dir: Path) -> list[Path]:
+    paths = [app_shell.app_log_path(), app_shell.logs_root() / LAUNCHER_LOG]
+    paths.extend(
+        [
+            data_dir / "studio-server.log",
+            data_dir / "studio-server.err.log",
+        ]
+    )
+    return paths
 
 
 def _configure_parent_streams() -> None:
@@ -1153,9 +1218,18 @@ def _validate_action_combination(parser: argparse.ArgumentParser, args: argparse
         parser.error("--assistant and --new-instance select different browser targets; use only one.")
 
 
+def _is_app_mode(args: argparse.Namespace) -> bool:
+    if args.no_open:
+        return False
+    if args.status or args.stop or args.logs is not None or args.move_data is not None:
+        return False
+    return True
+
+
 def run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
     _validate_action_combination(parser, args)
     data_dir = resolve_data_dir(args.data_dir)
+    _LOGGER.info("run start data_dir=%s args=%s", data_dir, vars(args))
 
     if args.move_data is not None:
         return move_data(
@@ -1183,7 +1257,7 @@ def run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
         ip=args.ip,
         port=args.port,
         public_host=args.public_host,
-        non_interactive=args.non_interactive,
+        non_interactive=bool(args.non_interactive or _is_app_mode(args)),
         force=args.configure,
         print_func=_say,
     )
@@ -1191,15 +1265,21 @@ def run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
     port = int(settings.get("bind_port") or DEFAULT_BIND_PORT)
 
     ensure_docker_ready(data_dir, print_func=_say)
-    ensure_management_server(
-        data_dir,
-        bind_host=bind_host,
-        port=port,
-        force_restart=args.restart,
-        print_func=_say,
-    )
-
+    _LOGGER.info("docker check complete; ensuring management server at %s:%s", bind_host, port)
+    try:
+        ensure_management_server(
+            data_dir,
+            bind_host=bind_host,
+            port=port,
+            force_restart=args.restart,
+            print_func=_say,
+        )
+    except Exception:
+        _LOGGER.exception("management server startup failed")
+        raise
+    _LOGGER.info("management server ready at %s:%s", bind_host, port)
     base_url = studio.public_base_url()
+    local_base_url = f"http://127.0.0.1:{port}"
     if args.new_instance is not None:
         meta = create_instance(studio, args.new_instance or None, print_func=_say)
         target_url = f"{base_url}/wizard?instance={meta['id']}"
@@ -1217,22 +1297,46 @@ def run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
 
     print("")
     print(f"Management console: {base_url}/console")
+    print(f"Local app URL     : {local_base_url}/console")
     print(f"Open URL          : {target_url}")
     print(f"Data directory    : {data_dir}")
-    print("The launcher exits now; the management service keeps running in the background.")
-    print("Use --status, --logs, or --stop to manage it.")
-    if not args.no_open:
-        try:
-            webbrowser.open_new_tab(target_url)
-        except Exception as exc:
-            _warn(f"Could not open the browser ({exc}); open the URL manually.")
-    return 0
+    if not _is_app_mode(args):
+        print("Headless mode: the launcher exits; the management service keeps running in the background.")
+        print("Use --status, --logs, or --stop to manage it.")
+        return 0
+
+    # Always load loopback in the App window. The public URL is only for
+    # display/remote access and may be unreachable from the local machine.
+    if args.new_instance is not None:
+        app_url = f"{local_base_url}/wizard?instance={meta['id']}"
+    elif args.assistant:
+        app_url = f"{local_base_url}/assistant"
+    else:
+        app_url = f"{local_base_url}/console"
+    _LOGGER.info("opening desktop app window url=%s", app_url)
+    print(f"Desktop app       : {app_url}")
+    print("Close the app window to exit the launcher; the management service stays running.")
+    return app_shell.run_app_window(
+        app_url,
+        title="QQ Bot Studio",
+        data_dir=data_dir,
+        log_paths=_app_log_paths(data_dir),
+    )
 
 
 def cli(argv: Sequence[str] | None = None) -> int:
+    _ensure_console_streams()
     _configure_parent_streams()
     parser = build_parser()
     args = parser.parse_args(list(argv) if argv is not None else None)
+    _configure_launcher_logging()
+    _LOGGER.info(
+        "launcher start argv=%s cwd=%s executable=%s frozen=%s",
+        list(argv) if argv is not None else sys.argv[1:],
+        os.getcwd(),
+        sys.executable,
+        bool(getattr(sys, "frozen", False)),
+    )
     if getattr(args, "apply_data_move", None):
         from windows.console_move_ext import apply_move_request
 
@@ -1249,9 +1353,19 @@ def cli(argv: Sequence[str] | None = None) -> int:
     try:
         return int(run(args, parser))
     except KeyboardInterrupt:
+        _LOGGER.warning("launcher interrupted")
         print("\nInterrupted.", file=sys.stderr)
         return 130
-    except (DockerError, RuntimeError, ValueError, OSError) as exc:
+    except Exception as exc:
+        _LOGGER.exception("launcher failed")
+        data_dir = resolve_data_dir(args.data_dir)
+        if _is_app_mode(args):
+            return app_shell.show_error_window(
+                "QQ Bot Studio 启动失败",
+                f"启动过程中发生错误。窗口保持打开，可复制日志或打开日志目录。\n\n{type(exc).__name__}: {exc}",
+                log_paths=_app_log_paths(data_dir),
+                data_dir=data_dir,
+            )
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 

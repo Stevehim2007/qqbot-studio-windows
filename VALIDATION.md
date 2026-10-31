@@ -1,6 +1,76 @@
 # Validation record
 
-## v0.9.0 / core 3.13.0 / plugin 1.22.0 (latest)
+## v0.10.0 App Shell + Native Installer POC (unreleased)
+
+Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](docs/app-shell-and-native-installer-poc.md).
+
+### Docker v0.9.0 "flash" root-cause evidence
+
+- Local Windows build of v0.9.0 (same source tree as Release) was run from
+  PowerShell and cmd with isolated `%LOCALAPPDATA%` and temporary data dirs.
+- `--version` exit 0 and printed launcher/core versions; stderr empty.
+- No-arg run: launcher printed Docker ready, hidden management healthy PID,
+  console URL, then **exited by design**; stderr empty; `/healthz` remained
+  healthy (`3.13.0`) and `studio-server.log` showed the browser loaded
+  `/console`, `/console.js`, `/services/api.js` and other assets HTTP 200.
+- Application/System Event Viewer had zero matching errors; Defender threat
+  detections and recent Defender Operational events were empty; SmartScreen
+  debug had no recent events; the local copy had no Zone.Identifier MOTW; no
+  new `_MEI*` unpack error was seen.
+- The file is unsigned (`Authenticode NotSigned`). Actual GitHub Release asset
+  download was network-blocked in this run; local build evidence is recorded.
+- Observed UX cause: console parent exits immediately after launching an
+  **external browser**; first-run may open an auto-detected public IP
+  (`http://49.140.56.31:8765/console`) rather than loopback. If browser
+  visibility/hairpin/firewall fails, the user sees only the console closing.
+- POC fix: pywebview/WebView2 desktop window loads loopback UI and keeps parent
+  alive until window close; errors display a Tk window with copyable logs.
+
+### POC implementation/verification
+
+- `windows/app_shell.py`: pywebview 6.2.1 WebView2 shell, rotating logs,
+  injected diagnostics panel (copy/open log folder), Tk error-window fallback,
+  loopback-only app URL.
+- `windows/native_app.py`: Native dashboard with status cards, install progress,
+  start/stop, NTQQ open, logs copy/open.
+- `windows/native_setup.py`: one-click official-source installer plan/download
+  with pinned sizes and SHA256:
+  uv 0.13.6, AstrBot 4.29.3 wheel, SnowLuma 2.2.1 win-x64-lite,
+  Node.js 26.13.0; NTQQ detection only; EULA/QQ verification manual.
+- POC dual EXE build (not released): Docker `16,146,311` bytes SHA256
+  `a2358356abe6a43733f37e8c36a4b7b02ab9c493c38848a968eb7c7426f88097`;
+  Native `14,926,682` bytes SHA256
+  `2163ddc4a290f7a4db5cc38d6b66817e95d7e2f352e3346a451f49ca88301348`.
+- Docker App smoke: window opened existing console at
+  `http://127.0.0.1:18830/console`; app-shell log recorded
+  `diagnostics panel injected` and `app window closed normally`; server assets
+  HTTP 200; health 3.13.0 after window close.
+- Native App smoke: dashboard window opened/closed and logged normally;
+  packaged `--install-plan --json` detected real Windows x64 + NTQQ
+  `D:\Program Files\Tencent\QQ.exe` + uv/node and returned all four official
+  sources/checksums.
+- Tk error-window fallback test opened and auto-closed with return 1; log panel
+  is copyable.
+- POC test suite: Linux/Windows **97 tests OK** (Linux skips one Windows-only
+  drive test); compileall, PowerShell AST, JS/YAML/upstream metadata gate pass.
+
+### POC limitations
+
+- No v0.10.0 tag/Release; waiting for Lead confirmation. Existing v0.9.0
+  Release remains untouched.
+- pywebview/WebView2 packaged window verified on this Windows host; clean
+  target-PC WebView2-missing path currently falls back to Tk error window and
+  needs runtime-install UX later.
+- Native one-click installer download/install E2E was not rerun; task-72
+  already validated the same AstrBot/SnowLuma/Node components. This run verifies
+  the official-source plan/detection/config code and UI only.
+- No real QQ scan/EULA/message E2E, no browser DOM click automation, no
+  DeepSeek generation. QQ/SnowLuma manual steps remain ENV_BLOCKED.
+- Actual Release asset download and MOTW/SmartScreen test remain unverified.
+
+---
+
+## v0.9.0 / core 3.13.0 / plugin 1.22.0 (previous release)
 
 ### Sync source
 

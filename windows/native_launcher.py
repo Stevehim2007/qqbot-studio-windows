@@ -11,15 +11,18 @@ No Docker, WSL or noVNC is used.
 from __future__ import annotations
 
 import argparse
+import ctypes
 import json
+import logging
 import os
 import platform
 import shutil
 import sys
 import webbrowser
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-NATIVE_LAUNCHER_VERSION = "0.9.0"
+NATIVE_LAUNCHER_VERSION = "0.10.0"
 SNOWLUMA_WINDOWS_DOCS = "https://snowluma.github.io/zh/docs/guide/deploy/windows"
 SNOWLUMA_RELEASES = "https://github.com/SnowLuma/SnowLuma/releases"
 ASTRBOT_WINDOWS_DOCS = "https://docs.astrbot.app/deploy/astrbot/package.html"
@@ -30,7 +33,51 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from windows import native_runtime  # noqa: E402
+from windows import app_shell, native_runtime, native_setup  # noqa: E402
+
+_LOGGER = logging.getLogger("qqbot.windows.native_launcher")
+
+
+def _ensure_console_streams() -> None:
+    if os.name != "nt" or (sys.stdout is not None and sys.stderr is not None):
+        return
+    attached = False
+    try:
+        attached = bool(ctypes.windll.kernel32.AttachConsole(-1))
+    except Exception:
+        attached = False
+    if attached:
+        try:
+            sys.stdin = open("CONIN$", "r", encoding="utf-8", errors="replace")
+            sys.stdout = open("CONOUT$", "w", encoding="utf-8", errors="replace", buffering=1)
+            sys.stderr = open("CONOUT$", "w", encoding="utf-8", errors="replace", buffering=1)
+            return
+        except Exception:
+            pass
+    try:
+        sys.stdout = open(os.devnull, "w", encoding="utf-8")
+        sys.stderr = open(os.devnull, "w", encoding="utf-8")
+    except Exception:
+        pass
+
+
+def _configure_native_logging(root: Path) -> None:
+    app_shell.configure_logger()
+    path = root / "logs" / "native-launcher.log"
+    _LOGGER.setLevel(logging.INFO)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if not any(
+            isinstance(handler, RotatingFileHandler)
+            and Path(getattr(handler, "baseFilename", "")) == path.resolve()
+            for handler in _LOGGER.handlers
+        ):
+            handler = RotatingFileHandler(path, maxBytes=2 * 1024 * 1024, backupCount=3, encoding="utf-8")
+            handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
+            _LOGGER.addHandler(handler)
+    except OSError:
+        pass
+    _LOGGER.propagate = False
 
 
 def _bundle_root() -> Path:
@@ -199,6 +246,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--open-qq", action="store_true", help="Open the official local NTQQ window (no login automation).")
     parser.add_argument("--json", action="store_true", help="Machine-readable JSON for status/health/check.")
     parser.add_argument("--guide", action="store_true", help="Print the native POC setup guide.")
+    parser.add_argument("--app", action="store_true", help="Open the Native desktop app dashboard.")
+    parser.add_argument("--install", action="store_true", help="One-click install/repair official AstrBot/Python/SnowLuma/Node components.")
+    parser.add_argument("--install-plan", action="store_true", help="Print official download sources/checksums and detected environment without installing.")
     parser.add_argument("--open-snowluma", action="store_true")
     parser.add_argument("--open-snowluma-release", action="store_true")
     parser.add_argument("--open-astrbot", action="store_true")
@@ -221,9 +271,12 @@ def run(argv: list[str] | None = None) -> int:
             stream.reconfigure(errors="replace")  # type: ignore[attr-defined]
         except (AttributeError, OSError, ValueError):
             pass
+    _ensure_console_streams()
     parser = build_parser()
     args = parser.parse_args(argv)
     root = native_runtime.native_root(args.data_dir)
+    _configure_native_logging(root)
+    _LOGGER.info("native launcher start argv=%s root=%s frozen=%s executable=%s", list(argv) if argv is not None else sys.argv[1:], root, bool(getattr(sys, "frozen", False)), sys.executable)
     open_requested = False
     if args.open_snowluma:
         _open(SNOWLUMA_WINDOWS_DOCS)
@@ -240,6 +293,16 @@ def run(argv: list[str] | None = None) -> int:
     ):
         return 0
     try:
+        if args.install_plan:
+            payload = native_setup.detect_environment(root)
+            print(json.dumps(payload, ensure_ascii=False, indent=2))
+            return 0
+        if args.install:
+            def progress(phase: str, percent: int, message: str) -> None:
+                print(f"[{percent:3d}%] {phase}: {message}", flush=True)
+            result = native_setup.install_all(root, progress)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
         if args.configure:
             _configure(root, args)
             return 0
@@ -305,8 +368,9 @@ def run(argv: list[str] | None = None) -> int:
             print(f"Opened official NTQQ: {path}")
             print("Complete QR/device/SMS/slider verification manually in that window.")
             return 0
-        _print_guide()
-        return 0
+        from windows import native_app
+        _LOGGER.info("opening Native desktop dashboard")
+        return native_app.run(root)
     except native_runtime.NativeBlocked as exc:
         print("NATIVE_START=BLOCKED")
         for blocker in exc.blockers:

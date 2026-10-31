@@ -9,7 +9,7 @@ runtime or build time.
 - Snapshot date: 2026-10-31
 - Upstream release line: v3.13.0
 - Bundled core version: `qqbot_studio.__version__ == 3.13.0`
-- Windows launcher version: `0.9.0`
+- Windows launcher version: `0.10.0`
 - Plugin snapshot: `qqbot_enhancer` 1.22.0
 
 The upstream working tree was clean at the snapshot commit. This repository is
@@ -64,6 +64,7 @@ syncs:
 - `windows/native_launcher.py` and `windows/native_runtime.py` (Windows Native POC
   process manager, not present upstream)
 - `docs/native-e2e-validation.md` (Windows-only real-component validation record)
+- `docs/app-shell-and-native-installer-poc.md` (Windows-owned App shell / one-click installer POC)
 - Windows-specific README/UPSTREAM/VALIDATION/tests
 
 ## Updating from upstream

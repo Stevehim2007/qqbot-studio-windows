@@ -12,7 +12,7 @@ QQ Bot Studio 的**独立 Windows 10/11 双发行版项目**：
 本仓库不是 Linux 项目的打包目录，也不是它的自动更新分支。它拥有自己的启动器、
 Windows 服务生命周期实现、版本号、数据目录约定、测试和发布流水线。
 
-> **状态：Windows v0.9.0（最新正式 Release 为 v0.9.0），已同步主项目 core 3.13.0。**
+> **状态：Windows v0.10.0 App Shell POC（未发布；最新正式 Release 为 v0.9.0），core 3.13.0。**
 >
 > 已包含独立 `/assistant` AI 助手页面、控制台 30 分钟刷新 + 手动刷新、
 > AI 助手 B 本机/公网配置、控制台插件参数编辑（`reply_probability` 等）、
@@ -32,6 +32,8 @@ Windows 服务生命周期实现、版本号、数据目录约定、测试和发
 > 依赖、E2E 脚本（排除 artifacts）和净减源码/测试。
 > v0.9.0 同步 Linux 3.13.0：profile 模板库/pinned 默认模板、activate 不 pending、
 > `/新会话 名称 [提示词标题]`、`/表情状态`、配置 backup 恢复。
+> v0.10.0 POC：pywebview/WebView2 双版本桌面 App shell、详细启动/诊断日志、
+> Native 一键安装向导（官方组件 URL/SHA256 校验）；尚未发布 tag。
 > Docker EXE、隐藏管理服务、Docker Desktop/Linux engine 和本机 smoke 已做部分
 > 真实验证；发布使用 `v*` tag 触发的 GitHub Release。
 > **Native EXE 已是单实例 POC 进程管理器，并在临时目录用真实 AstrBot 4.29.3 +
@@ -63,7 +65,7 @@ websockify，共享整个交互式 Windows 桌面，不承诺每实例独立屏�
 
 ### Native Windows POC
 
-Native POC 当前实现（`VERSION=0.9.0`，随 v0.9.0 发行）：
+Native POC 当前实现（`VERSION=0.10.0` POC）：
 
 - 数据根：`%LOCALAPPDATA%\QQBotStudio\data\native`；
 - `native.json` 保存 AstrBot 命令/`ASTRBOT_ROOT`、SnowLuma 目录/命令、NTQQ 路径、
@@ -104,18 +106,33 @@ AstrBot OneBot `ws://127.0.0.1:16199/ws` TCP listening=true、health
 没有伪造登录成功。完整证据、版本、日志摘要和清理见
 [`docs/native-e2e-validation.md`](docs/native-e2e-validation.md)。
 
-Native v0.9.0 本地候选构建：
+App Shell POC 本地构建（未发布，详见 [`docs/app-shell-and-native-installer-poc.md`](docs/app-shell-and-native-installer-poc.md)）：
 
-- Docker `QQBotStudioWindows.exe`：`8,597,456` bytes，SHA256
-  `2207209cae9c559d228132405c669f18e365ccf63a4930d34ea23be76dc9bf2e`；
-- Native POC `QQBotStudioWindowsNative.exe`：`6,966,079` bytes，SHA256
-  `135aad620ab6e05fbda225e23964495ce9131fd2a61c527ed320e20f9e98460f`；
-- Linux/Windows 各 93 tests OK；真实组件启动、health、OneBot listener、logs、stop
-  已验证；QQ EULA/扫码人工步骤 ENV_BLOCKED。
+- Docker `QQBotStudioWindows.exe`：`16,146,311` bytes，SHA256
+  `a2358356abe6a43733f37e8c36a4b7b02ab9c493c38848a968eb7c7426f88097`；
+- Native `QQBotStudioWindowsNative.exe`：`14,926,682` bytes，SHA256
+  `2163ddc4a290f7a4db5cc38d6b66817e95d7e2f352e3346a451f49ca88301348`；
+- Linux/Windows 各 97 tests OK（POC tree）；Docker App 窗口和 Native Dashboard
+  实际启动/关闭通过；Native 一键安装 plan 检测通过；
+- 真实 QQ 登录/SnowLuma EULA/QQ 消息 E2E 仍为 ENV_BLOCKED。
 
 本仓库 vendor 了主项目的 `qqbot_studio/` Python 核心、静态 UI、`assets/` 和
 `plugins/qqbot_enhancer/`。这不是符号链接，也不会在运行时从 Linux 主项目拉取代码。
 快照来源与更新方法见 [`UPSTREAM.md`](UPSTREAM.md)。
+
+
+### v0.10.0 App Shell POC
+
+- Docker EXE 闪退根因证据与 Windows 证据记录见
+  [`docs/app-shell-and-native-installer-poc.md`](docs/app-shell-and-native-installer-poc.md)：
+  当前 v0.9.0 本地构建没有 Python/PyInstaller 崩溃，父进程按设计启动后台服务、
+  打开外部浏览器后退出；首次运行还可能打开自动探测的公网 IP URL。
+- POC 改为 pywebview + Edge WebView2 桌面窗口，始终加载 loopback URL；
+  窗口关闭前父进程保持；诊断日志浮层可复制/打开日志目录。
+- Native 默认打开 App 仪表盘；一键安装核心使用官方固定 URL/SHA256 下载
+  uv/AstrBot wheel/SnowLuma/Node，并生成 AstrBot/SnowLuma OneBot 配置；
+  NTQQ 仅检测，QQ 扫码/EULA 人工。
+- 本 POC 未 tag/未创建 GitHub Release，等待 Lead 确认 v0.10.0 tag。
 
 ### v3.13.0 同步内容
 
@@ -741,7 +758,7 @@ Windows 文档同步规则与 Linux 主项目 `docs/windows-editions-research.md
 本仓库已在同一台 Windows 主机上通过 WSL interop 使用 Windows PowerShell 5.1、
 Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 
-- 独立测试套件 **93 tests** 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
+- 独立测试套件 **97 tests**（POC tree） 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
 - Windows Python `compileall`、PowerShell 5.1 AST、Node JS 检查通过；
 - Docker Desktop 4.93.0 / Engine 29.8.1 / `OSType=linux` / Compose v5.5.1；
 - 最小 busybox Compose `config/up/down` 全部 exit 0，容器实际输出
@@ -831,6 +848,7 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 - [`docs/ui-api-contract-v2.md`](docs/ui-api-contract-v2.md)：最新管理 API 契约；
 - [`docs/plugin-qqbot-enhancer.md`](docs/plugin-qqbot-enhancer.md)：qqbot_enhancer 1.22.0；
 - [`VALIDATION.md`](VALIDATION.md)：真实执行和未验证项；
+- [`docs/app-shell-and-native-installer-poc.md`](docs/app-shell-and-native-installer-poc.md)：v0.10.0 App Shell/Native 一键安装 POC 根因与验证；
 - [`UPSTREAM.md`](UPSTREAM.md)：vendor 来源与下次同步步骤；
 - [Linux 主项目 README](https://github.com/Stevehim2007/qqbot-studio/blob/main/README.md)：
   Ubuntu/Linux 安装说明，不要与 Windows 数据目录混用。
