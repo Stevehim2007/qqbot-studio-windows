@@ -35,6 +35,8 @@ class SyncWorkflowStaticTests(unittest.TestCase):
             '("qqbot_studio", "qqbot_studio")',
             '("plugins/qqbot_enhancer", "plugins/qqbot_enhancer")',
             '("assets", "assets")',
+            '("tests/e2e", "tests/e2e")',
+            '"artifacts"',
             "DOC_ALLOWLIST",
             ".upstream-commit",
             "UPSTREAM.md",
@@ -110,6 +112,14 @@ class SyncUpstreamTests(unittest.TestCase):
         assets = self.upstream / "assets"
         assets.mkdir()
         (assets / "logo.svg").write_text("<svg/>\n", encoding="utf-8")
+        e2e = self.upstream / "tests" / "e2e"
+        e2e.mkdir(parents=True)
+        (e2e / "e2e_smoke.py").write_text("# upstream e2e harness\n", encoding="utf-8")
+        (e2e / "run_studio_server.py").write_text("# upstream runner\n", encoding="utf-8")
+        (e2e / ".gitignore").write_text("artifacts/\n", encoding="utf-8")
+        artifacts = e2e / "artifacts"
+        artifacts.mkdir()
+        (artifacts / "generated-secret.txt").write_text("must not sync\n", encoding="utf-8")
         docs = self.upstream / "docs"
         docs.mkdir()
         (docs / "ui-api-contract-v2.md").write_text("api 9.9.9\n", encoding="utf-8")
@@ -162,6 +172,10 @@ class SyncUpstreamTests(unittest.TestCase):
         self.assertTrue((self.target / "assets/logo.svg").is_file())
         self.assertTrue((self.target / "docs/ui-api-contract-v2.md").is_file())
         self.assertTrue((self.target / "docs/windows-editions-research.md").is_file())
+        self.assertTrue((self.target / "tests/e2e/e2e_smoke.py").is_file())
+        self.assertTrue((self.target / "tests/e2e/run_studio_server.py").is_file())
+        self.assertTrue((self.target / "tests/e2e/.gitignore").is_file())
+        self.assertFalse((self.target / "tests/e2e/artifacts").exists())
         # Windows-owned paths and docs must not be replaced.
         self.assertEqual((self.target / "VERSION").read_text(encoding="ascii"), "0.4.1\n")
         self.assertEqual((self.target / "windows/launcher.py").read_text(encoding="utf-8"), "# windows launcher sentinel\n")

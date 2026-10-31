@@ -5,11 +5,11 @@ reusable Python/UI core from the Linux project instead of fetching code at
 runtime or build time.
 
 - Upstream project: `git@github.com:Stevehim2007/qqbot-studio.git`
-- Upstream snapshot commit: `ae10104427b0f1384732d5c9c03b0db1ef75af55`
+- Upstream snapshot commit: `2192ba0e4605f63dd3ac97b00865cec2343d1625`
 - Snapshot date: 2026-10-31
-- Upstream release line: v3.12.0
-- Bundled core version: `qqbot_studio.__version__ == 3.12.0`
-- Windows launcher version: `0.8.0`
+- Upstream release line: v3.12.1
+- Bundled core version: `qqbot_studio.__version__ == 3.12.1`
+- Windows launcher version: `0.8.1`
 - Plugin snapshot: `qqbot_enhancer` 1.21.0
 
 The upstream working tree was clean at the snapshot commit. This repository is
@@ -33,7 +33,9 @@ Linux data directory or the Linux auto-update pipeline.
   ambient group context/participation, group identity, `/food`, unified tool
   markers, semantic/multi-category stickers, and previous image/song/sticker
   features;
-- latest v3.12 API contract, prompt-profile/restart-pending documentation,
+- Ponytail phase 2 shared `qqbot_studio/gitutil.py`, browser
+  `static/services/api.js`, HTML script dependencies and E2E harness scripts;
+- latest v3.12.1 API contract, prompt-profile/restart-pending documentation,
   plugin docs and QA references under `docs/`;
 - Windows launcher/services/PowerShell/PyInstaller/CI files maintained here,
   plus tag-driven GitHub Release publishing of the EXE and SHA256.
@@ -45,7 +47,8 @@ Linux data directory or the Linux auto-update pipeline.
 - `plugins/qqbot_enhancer/` - AstrBot plugin installed by the deployer;
 - `assets/qqbot-studio.svg` - console icon;
 - `docs/` - synced API/plugin/FAQ/reference documentation plus a Windows index;
-- `tests/` - Windows-focused independent test suite;
+- `tests/` - Windows-focused independent test suite plus synced
+  `tests/e2e/` harness scripts;
 - `windows/` - standalone Windows launcher, PowerShell fallback scripts,
   PyInstaller spec and build script.
 
@@ -66,8 +69,9 @@ syncs:
 ## Updating from upstream
 
 1. Fetch/pull the desired clean Linux main commit.
-2. Copy upstream `qqbot_studio/`, `plugins/qqbot_enhancer/`, `assets/` and the
-   API/plugin/FAQ docs into a branch of this repository.
+2. Copy upstream `qqbot_studio/`, `plugins/qqbot_enhancer/`, `assets/`,
+   `tests/e2e/` harness scripts (excluding generated `tests/e2e/artifacts/`) and
+   the API/plugin/FAQ docs into a branch of this repository.
 3. Review Windows compatibility changes and re-apply any Windows launcher/CI
    adjustments that are intentionally local to this repository.
 4. Update `VERSION`, this file, the Windows README and `VALIDATION.md`.

@@ -12,7 +12,7 @@ QQ Bot Studio 的**独立 Windows 10/11 双发行版项目**：
 本仓库不是 Linux 项目的打包目录，也不是它的自动更新分支。它拥有自己的启动器、
 Windows 服务生命周期实现、版本号、数据目录约定、测试和发布流水线。
 
-> **状态：Windows v0.8.0（最新正式 Release 为 v0.8.0），已同步主项目 core 3.12.0。**
+> **状态：Windows v0.8.1 发布候选（最新正式 Release 为 v0.8.0），已同步主项目 core 3.12.1。**
 >
 > 已包含独立 `/assistant` AI 助手页面、控制台 30 分钟刷新 + 手动刷新、
 > AI 助手 B 本机/公网配置、控制台插件参数编辑（`reply_probability` 等）、
@@ -28,6 +28,8 @@ Windows 服务生命周期实现、版本号、数据目录约定、测试和发
 > 统一 AI tool marker、#sl 关闭、提示词换行保留和最新 UI/backend。
 > v0.8.0 同步 Linux 3.12.0：提示词 profiles/active/新会话、按名会话、ambient
 > 全群上下文/@ 回复、AstrBot 每群 Persona、群身份、多分类语义收藏和 QA 文档。
+> v0.8.1 同步 Linux 3.12.1：Ponytail phase 2 共享 gitutil/static API、HTML
+> 依赖、E2E 脚本（排除 artifacts）和净减源码/测试。
 > Docker EXE、隐藏管理服务、Docker Desktop/Linux engine 和本机 smoke 已做部分
 > 真实验证；发布使用 `v*` tag 触发的 GitHub Release。
 > **Native EXE 已是单实例 POC 进程管理器，并在临时目录用真实 AstrBot 4.29.3 +
@@ -59,7 +61,7 @@ websockify，共享整个交互式 Windows 桌面，不承诺每实例独立屏�
 
 ### Native Windows POC
 
-Native POC 当前实现（`VERSION=0.8.0`，随 v0.8.0 发行）：
+Native POC 当前实现（`VERSION=0.8.1`，随 v0.8.1 发行）：
 
 - 数据根：`%LOCALAPPDATA%\QQBotStudio\data\native`；
 - `native.json` 保存 AstrBot 命令/`ASTRBOT_ROOT`、SnowLuma 目录/命令、NTQQ 路径、
@@ -100,18 +102,27 @@ AstrBot OneBot `ws://127.0.0.1:16199/ws` TCP listening=true、health
 没有伪造登录成功。完整证据、版本、日志摘要和清理见
 [`docs/native-e2e-validation.md`](docs/native-e2e-validation.md)。
 
-Native v0.8.0 本地候选构建：
+Native v0.8.1 本地候选构建：
 
-- Docker `QQBotStudioWindows.exe`：`8,594,242` bytes，SHA256
-  `4e5cf67e733cd4eee63c81d414e2aee9be9454ac53d0979ac3795bcf72b9fab0`；
-- Native POC `QQBotStudioWindowsNative.exe`：`6,965,992` bytes，SHA256
-  `235b44cefcd32fbd0231474e27bd53194b0dc99d685e8403c6c60d82c96d6362`；
-- Linux/Windows 各 91 tests OK；真实组件启动、health、OneBot listener、logs、stop
+- Docker `QQBotStudioWindows.exe`：`8,593,602` bytes，SHA256
+  `8d61082c63065cc18b41c1278cdda6728539defc1b4be3265c7a1a17a56cc62f`；
+- Native POC `QQBotStudioWindowsNative.exe`：`6,965,968` bytes，SHA256
+  `274b238547d7bb36e9a0a831452a8af85bb9345018fb2074bff89c28eeda487b`；
+- Linux/Windows 各 92 tests OK；真实组件启动、health、OneBot listener、logs、stop
   已验证；QQ EULA/扫码人工步骤 ENV_BLOCKED。
 
 本仓库 vendor 了主项目的 `qqbot_studio/` Python 核心、静态 UI、`assets/` 和
 `plugins/qqbot_enhancer/`。这不是符号链接，也不会在运行时从 Linux 主项目拉取代码。
 快照来源与更新方法见 [`UPSTREAM.md`](UPSTREAM.md)。
+
+### v3.12.1 同步内容
+
+- core `3.12.1`、qqbot_enhancer `1.21.0`；
+- Ponytail phase 2：共享 `qqbot_studio/gitutil.py`、`static/services/api.js`；
+- `console.html`/`assistant.html`/`index.html` 显式加载共享 API 依赖；
+- 同步 `tests/e2e/` harness 脚本与 `.gitignore`，排除 `tests/e2e/artifacts/`；
+- 源码/测试净减、共享 fixtures/helpers，保留 prompts/ambient/persona 功能；
+- Windows Native POC、`docs/native-e2e-validation.md` 和双 EXE 流程保留。
 
 ### v3.12.0 同步内容
 
@@ -210,8 +221,8 @@ Native v0.8.0 本地候选构建：
 
 ### 升级边界
 
-- 本仓库独立维护版本：当前开发版 `VERSION = 0.8.0`，bundled core 版本为
-  `qqbot_studio.__version__ = 3.12.0`。
+- 本仓库独立维护版本：当前开发版 `VERSION = 0.8.1`，bundled core 版本为
+  `qqbot_studio.__version__ = 3.12.1`。
 - Linux 主项目的自动更新、`scripts/auto-update.sh` 和网页内“更新并重启”不适用于
   本仓库。
 - Windows 版升级方式是：下载新的 EXE / PowerShell 发行包，停止旧管理服务，保留
@@ -298,12 +309,12 @@ docker info --format "{{.OSType}}"
   - `README.md`、`VALIDATION.md`
 - 正式 Release 由 same-tag `v0.8.0` workflow 构建，和本地开发构建不保证逐字节一致。
 
-本地 v0.8.0 双 EXE 开发构建（Windows Python 3.10 + PyInstaller 6.10.0）：
+本地 v0.8.1 双 EXE 开发构建（Windows Python 3.10 + PyInstaller 6.10.0）：
 
-- Docker `QQBotStudioWindows.exe`：`8,594,242` bytes，SHA256
-  `4e5cf67e733cd4eee63c81d414e2aee9be9454ac53d0979ac3795bcf72b9fab0`；
-- Native POC `QQBotStudioWindowsNative.exe`：`6,965,992` bytes，SHA256
-  `235b44cefcd32fbd0231474e27bd53194b0dc99d685e8403c6c60d82c96d6362`。
+- Docker `QQBotStudioWindows.exe`：`8,593,602` bytes，SHA256
+  `8d61082c63065cc18b41c1278cdda6728539defc1b4be3265c7a1a17a56cc62f`；
+- Native POC `QQBotStudioWindowsNative.exe`：`6,965,968` bytes，SHA256
+  `274b238547d7bb36e9a0a831452a8af85bb9345018fb2074bff89c28eeda487b`。
 
 正式用户应使用上面的 Release 资产和 `SHA256SUMS.txt`；不要用本地开发 hash 替代。
 
@@ -717,17 +728,17 @@ Windows 文档同步规则与 Linux 主项目 `docs/windows-editions-research.md
 本仓库已在同一台 Windows 主机上通过 WSL interop 使用 Windows PowerShell 5.1、
 Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 
-- 独立测试套件 **91 tests** 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
+- 独立测试套件 **92 tests** 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
 - Windows Python `compileall`、PowerShell 5.1 AST、Node JS 检查通过；
 - Docker Desktop 4.93.0 / Engine 29.8.1 / `OSType=linux` / Compose v5.5.1；
 - 最小 busybox Compose `config/up/down` 全部 exit 0，容器实际输出
   `qqbot-windows-v070-compose-smoke` 后清理；
 - PyInstaller 6.10.0 实际构建出 Docker/Native 两个 one-file EXE：
-  - Docker：`8,594,242` bytes，SHA256
-    `4e5cf67e733cd4eee63c81d414e2aee9be9454ac53d0979ac3795bcf72b9fab0`；
-  - Native POC：`6,965,992` bytes，SHA256
-    `235b44cefcd32fbd0231474e27bd53194b0dc99d685e8403c6c60d82c96d6362`；
-- Docker EXE `--assistant` 启动后 `/healthz` 返回 version `3.12.0`，`/console` 与
+  - Docker：`8,593,602` bytes，SHA256
+    `8d61082c63065cc18b41c1278cdda6728539defc1b4be3265c7a1a17a56cc62f`；
+  - Native POC：`6,965,968` bytes，SHA256
+    `274b238547d7bb36e9a0a831452a8af85bb9345018fb2074bff89c28eeda487b`；
+- Docker EXE `--assistant` 启动后 `/healthz` 返回 version `3.12.1`，`/console` 与
   `/assistant` 均 HTTP 200；
 - Native POC `--version/--help/--guide/--check` 实际通过；fake 进程和 fake HTTP
   smoke 验证过 `--configure/--start/--status/--logs/--stop/--health`；随后在临时
@@ -735,7 +746,7 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
   AstrBot/SnowLuma HTTP 200、OneBot listener=true、health OK；QQ EULA/扫码未完成，
   明确标记 ENV_BLOCKED；
 - `--move-data` 最终 EXE smoke 通过：旧目录保留、目标数据/迁移记录/pointer 写入，
-  可通过 pointer 在目标目录重启 `/healthz` 3.12.0，`--stop` 后 health 不可达；
+  可通过 pointer 在目标目录重启 `/healthz` 3.12.1，`--stop` 后 health 不可达；
 - 最终插件配置 API 实测 **191 字段**；schema 含提示词 profiles、按名会话、
   ambient/grou identity、`safe_tools_marker_enabled`、语义标签、多分类收藏、
   `/food` 等字段；POST 保存 `reply_probability=0.61` /
@@ -761,7 +772,7 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 - B 诊断 API `/api/assistant/diagnose` 实际 200，`healthy=false`、
   `error_code=not_installed`，并返回 listener/local_health/public_probe 字段；
 - `sync-upstream` 本地 dry-run + 实际同步通过；上游记录为
-  `ae10104427b0f1384732d5c9c03b0db1ef75af55`（core 3.12.0/plugin 1.21.0），
+  `2192ba0e4605f63dd3ac97b00865cec2343d1625`（core 3.12.1/plugin 1.21.0），
   第二次 dry-run 为 no changes；已安全尝试 GitHub workflow_dispatch，因无
   token/gh 返回 HTTP 401 `Requires authentication`，未实际触发；
 - 通过 token API 创建实例 `bot-1`，并使用插件 schema 实测插件参数配置：
@@ -777,14 +788,13 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 
 ### 仍未验证
 
-- v0.8.0 的 dual build run `41150534303` 和 dual Release run `41150711387` 已实际成功；
-  双 EXE、SHA256、README、VALIDATION 均已上传。
+- v0.8.1 的 dual build / Release workflow 将在本次发布中实际执行；v0.8.0 Release 保留不重复 tag。
 - 浏览器自动打开未测试，服务生命周期测试均使用 `--no-open`。
 - `install.ps1` 全流程、winget 安装、WSL2 初始化/重启未测试。
 - Windows Defender 防火墙、云安全组、局域网/VPN 远程访问未测试。
 - GitHub Actions `sync-upstream` 实际 dispatch/schedule 未执行（环境没有
   gh/GH_TOKEN/GITHUB_TOKEN；API 尝试返回 401 Requires authentication）；
-  当前 v0.8.0 是本地执行同一 sync 脚本手动同步。请在 Actions 页面手动点一次
+  当前 v0.8.1 是本地执行同一 sync 脚本手动同步。请在 Actions 页面手动点一次
   `Sync upstream Linux snapshot` 做远端流程验证。
 - 双 EXE `v*` Release workflow 已实际执行并成功；Release URL 和两个资产 SHA 见上。
 - Native POC 已在临时目录真实安装/启动 AstrBot 4.29.3 + SnowLuma 2.2.1 + Node

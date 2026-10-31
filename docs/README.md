@@ -1,6 +1,6 @@
 # Windows 文档索引
 
-本目录保存从 Linux 主项目 v3.12.0 同步的功能/API/FAQ 文档，并补充 Windows 独立发行
+本目录保存从 Linux 主项目 v3.12.1 同步的功能/API/FAQ 文档，并补充 Windows 独立发行
 项目自己的说明。
 
 ## 先读
@@ -17,16 +17,24 @@
 
 | 文档 | 内容 |
 |---|---|
-| [`ui-api-contract-v2.md`](ui-api-contract-v2.md) | v3.12.0 管理 API，包括 `/assistant`、AI 助手 B 配置/启停、提示词 profiles、插件、记忆、统计 |
+| [`ui-api-contract-v2.md`](ui-api-contract-v2.md) | v3.12.1 管理 API，包括 `/assistant`、AI 助手 B 配置/启停、提示词 profiles、插件、记忆、统计 |
 | [`plugin-qqbot-enhancer.md`](plugin-qqbot-enhancer.md) | qqbot_enhancer 1.21.0：提示词 profiles、按名会话、ambient、群身份、`/food`、多分类语义收藏 |
 | [`server-troubleshooting.md`](server-troubleshooting.md) | Linux/云服务器排错资料；Windows 场景请同时阅读本目录 FAQ 和根 README |
 | [`integration-research.md`](integration-research.md) | AstrBot / SnowLuma / OneBot / DeepSeek 集成调研 |
-| [`qa-report-v2.md`](qa-report-v2.md) | 主项目 v3.12.0 条件验收、P0/P1 和真实 E2E 待测清单 |
+| [`qa-report-v2.md`](qa-report-v2.md) | 主项目 v3.12.1 条件验收、P0/P1 和真实 E2E 待测清单 |
 | [`windows-editions-research.md`](windows-editions-research.md) | 双发行版（Native/Docker）可行性、限制和同步发布规则 |
 | [`ui-api-contract.md`](ui-api-contract.md) | 旧版单实例 API，历史兼容参考 |
 | [`qa-report.md`](qa-report.md) | 旧版 QA 快照，历史参考 |
 
-## v3.12.0 同步重点
+## v3.12.1 同步重点
+
+- core 3.12.1、qqbot_enhancer 1.21.0；
+- Ponytail phase 2：共享 `qqbot_studio/gitutil.py`、`static/services/api.js`；
+- HTML 显式加载共享 API；同步 `tests/e2e/` harness，排除 artifacts；
+- prompts/ambient/persona、多分类语义收藏和 `/food` 功能保留；
+- Windows Native POC 与真实启动验证文档保留。
+
+## v3.12.0 同步重点（历史）
 
 - core 3.12.0、qqbot_enhancer 1.21.0；
 - 提示词 profiles/active/新会话、按名会话、AstrBot 每群 Persona/记忆；

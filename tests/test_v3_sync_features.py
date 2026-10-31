@@ -314,6 +314,38 @@ class V3SyncFeatureTests(unittest.TestCase):
         ):
             self.assertTrue((ROOT / relative).is_file(), relative)
 
+    def test_v3_12_1_gitutil_shared_api_html_deps_and_e2e_scripts(self):
+        for relative in (
+            "qqbot_studio/gitutil.py",
+            "qqbot_studio/static/services/api.js",
+            "tests/e2e/e2e_smoke.py",
+            "tests/e2e/run_studio_server.py",
+            "tests/e2e/.gitignore",
+        ):
+            self.assertTrue((ROOT / relative).is_file(), relative)
+        gitutil = (ROOT / "qqbot_studio" / "gitutil.py").read_text(encoding="utf-8")
+        for marker in ("GIT_TERMINAL_PROMPT", "ControlPath=none", "shell=False", "timeout=timeout"):
+            self.assertIn(marker, gitutil)
+        api = (ROOT / "qqbot_studio" / "static" / "services" / "api.js").read_text(encoding="utf-8")
+        for marker in ("createApiClient", "X-QB-Token", "ApiError", "requestWithFallback"):
+            self.assertIn(marker, api)
+        for relative in (
+            "qqbot_studio/static/console.html",
+            "qqbot_studio/static/assistant.html",
+            "qqbot_studio/static/index.html",
+        ):
+            html = (ROOT / relative).read_text(encoding="utf-8")
+            self.assertIn('src="/services/api.js"', html)
+        e2e = (ROOT / "tests/e2e/e2e_smoke.py").read_text(encoding="utf-8")
+        for marker in ("manual-qq-checklist.txt", "OneBot", "artifacts"):
+            self.assertIn(marker, e2e)
+        self.assertIn("artifacts/", (ROOT / "tests/e2e/.gitignore").read_text(encoding="utf-8"))
+        sync = (ROOT / "scripts/sync_upstream.py").read_text(encoding="utf-8")
+        self.assertIn('("tests/e2e", "tests/e2e")', sync)
+        self.assertIn('"artifacts"', sync)
+        spec = (ROOT / "windows/qqbot-studio-windows.spec").read_text(encoding="utf-8")
+        self.assertIn("qqbot_studio.gitutil", spec)
+
     def test_plugin_parameter_config_api_and_ui_are_synced(self):
         server = (ROOT / "qqbot_studio" / "server.py").read_text(encoding="utf-8")
         console_html = (STATIC / "console.html").read_text(encoding="utf-8")

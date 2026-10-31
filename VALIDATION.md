@@ -1,6 +1,85 @@
 # Validation record
 
-## v0.8.0 / core 3.12.0 / plugin 1.21.0 (latest)
+## v0.8.1 / core 3.12.1 / plugin 1.21.0 (latest)
+
+### Sync source
+
+- Linux upstream clean snapshot: `2192ba0e4605f63dd3ac97b00865cec2343d1625`
+  (tag `v3.12.1`);
+- bundled core: `qqbot_studio.__version__ == 3.12.1`;
+- plugin: `qqbot_enhancer` 1.21.0;
+- Windows VERSION: `0.8.1`;
+- manual sync from clean `2192ba0`; second dry-run was `no changes`;
+- Ponytail phase 2 additions synced: `qqbot_studio/gitutil.py`,
+  `qqbot_studio/static/services/api.js`, HTML `/services/api.js` script deps,
+  and `tests/e2e/{e2e_smoke.py,run_studio_server.py,.gitignore}`;
+- sync script now mirrors `tests/e2e` and excludes generated `artifacts` dirs;
+- `sync-upstream.yml` dispatch attempt without token returned HTTP 401
+  Requires authentication; remote workflow was not triggered. Manual local sync
+  and no-op dry-run were used.
+
+### Quality and builds
+
+- Linux Python: **92 tests OK** (1 Windows-only drive-type skip);
+- Windows Python 3.10.9: **92 tests OK**;
+- Windows `compileall`, PowerShell 5.1 AST, Node JS syntax, workflow YAML and
+  upstream metadata gate: passed;
+- PyInstaller 6.10.0 local dual build:
+  - Docker `QQBotStudioWindows.exe`: `8,593,602` bytes, SHA256
+    `8d61082c63065cc18b41c1278cdda6728539defc1b4be3265c7a1a17a56cc62f`;
+  - Native POC `QQBotStudioWindowsNative.exe`: `6,965,968` bytes, SHA256
+    `274b238547d7bb36e9a0a831452a8af85bb9345018fb2074bff89c28eeda487b`;
+- Docker Desktop 4.93.0 / Engine 29.8.1 / Compose v5.5.1: busybox
+  `config/up/down` all exit 0; output `qqbot-windows-v081-compose-smoke`;
+  container/network removed.
+
+### Docker EXE/API smoke
+
+- `/healthz` returned version `3.12.1`;
+- `/console`, `/assistant` HTTP 200; HTML loaded `/services/api.js`;
+- prompt manager UI and `/prompts` JS route present;
+- `GET /api/instances/bot-1/prompts`: initial profile count 1,
+  `restart_required=false`, `prompt_plugin_sync_pending=false`;
+- prompt create/activate `Ponytail Profile`: ok=true, active id matches,
+  multiline prompt preserved; undeployed instance `conversation_pending=false`;
+- plugin config schema fallback: `schema_source=bundled`, 191 fields, required
+  prompt/conversation/ambient/group persona/multi-category/semantic/food fields
+  present; ambient default false;
+- plugin POST local save returned `ok=true`, `restart_required=true`,
+  `api_available=false`, `source=local`; GET persisted reply probability 0.62,
+  ambient true, group persona, food, semantic/multi-category settings;
+- partial stats ok=true, partial=true;
+- B diagnostics HTTP 200: `error_code=not_installed` with listener fields;
+- token-protected storage migration: no token 403, relative target 400,
+  scheduled→completed, old dir retained, target/pointer/record correct,
+  request marker removed; prompts/plugin settings/B diagnostics persisted;
+- `--stop` exit 0 and health unreachable;
+- real `/food` helper request to `food.dlsz.top`: HTTP 200, 6 items,
+  formatted output for max 5 succeeded (no QQ command execution).
+
+### Native POC preservation
+
+- `windows/native_runtime.py`, Native launcher, `docs/native-e2e-validation.md`
+  and Windows-only fixes are retained.
+- Native EXE smoke `--version/--help/--guide/--check` exit 0; reports version
+  0.8.1 / core 3.12.1 and prerequisite blockers when AstrBot/SnowLuma are absent.
+- No QQ login/message E2E is claimed; native real-component startup remains the
+  task-72 validation record, with SnowLuma EULA/QQ scan `ENV_BLOCKED`.
+
+### Not verified for v0.8.1
+
+- No live QQ/OneBot message test for prompt profiles, named conversations,
+  ambient participation, `/会话` commands or real `/food` command.
+- Prompt/restart pending semantics tested on undeployed instance and offline
+  local plugin save, not a live deployed AstrBot hot-reload/stale-promise path.
+- No real browser DOM automation, QQ scan/device/slider, DeepSeek/LLM
+  generation, OneDrive/UNC/WSL mount or second physical disk.
+- `sync-upstream` remote workflow was not actually triggered (401); manual local
+  sync and no-op dry-run passed.
+
+---
+
+## v0.8.0 / core 3.12.0 / plugin 1.21.0 (previous)
 
 ### Sync source
 

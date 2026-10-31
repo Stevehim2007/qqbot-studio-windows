@@ -30,6 +30,9 @@ MIRRORED_PATHS = (
     ("qqbot_studio", "qqbot_studio"),
     ("plugins/qqbot_enhancer", "plugins/qqbot_enhancer"),
     ("assets", "assets"),
+    # E2E harness scripts are source artifacts too; generated tests/e2e/artifacts
+    # directories are excluded below.
+    ("tests/e2e", "tests/e2e"),
 )
 
 # Docs are copied file-by-file. docs/README.md and docs/FAQ.md are
@@ -47,7 +50,7 @@ DOC_ALLOWLIST = (
 
 CORE_VERSION_RE = re.compile(r'__version__\s*=\s*"([^"]+)"')
 PLUGIN_VERSION_RE = re.compile(r"^version:\s*(\S+)", re.MULTILINE)
-IGNORED_NAMES = {"__pycache__", ".pytest_cache", ".mypy_cache"}
+IGNORED_NAMES = {"__pycache__", ".pytest_cache", ".mypy_cache", "artifacts"}
 
 
 def _sha256(path: Path) -> str:

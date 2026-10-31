@@ -198,7 +198,7 @@ tag 校验的 EXE。Release workflow 会校验 `VERSION` 与 `v*` tag 一致，�
 
 ## 14. Native POC 如何配置和运行？
 
-Native POC（`VERSION=0.8.0`）与 Docker edition 独立，单实例，不使用
+Native POC（`VERSION=0.8.1`）与 Docker edition 独立，单实例，不使用
 Docker/WSL/noVNC：
 
 ```powershell
