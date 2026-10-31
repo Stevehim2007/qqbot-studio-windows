@@ -1,18 +1,28 @@
 # Validation record
 
-## v1.0.0 Desktop App / core 4.0.1 / plugin 2.1.0 (release)
+## v1.0.2 Desktop App / core 4.0.3 / plugin 2.2.0 (release)
 
-- Source Linux snapshot: `790d6c0bfc1aa1019934fa348ab9ad847ae8685b`
-  (`v4.0.1`, clean working tree); Windows `VERSION=1.0.0`.
+- Source Linux snapshot: `8e6e1bc60b04825df0f5b34467cd2c0105b8a909`
+  (`v4.0.3`, clean working tree); Windows `VERSION=1.0.2`.
 - Synced through the maintained allowlisted `scripts/sync_upstream.py`
   (core/plugin/static/E2E/docs allowlist) and preserved Windows-owned
   `windows/app_shell.py`, `native_app.py`, `native_setup.py` and launchers.
-- Upstream Linux suite: **441 tests OK**. Windows independent suite:
-  **106 tests OK** (Linux skips one Windows-only drive test).
+- Upstream Linux suite: **450 tests OK**. Windows independent suite:
+  **108 tests OK** (Linux skips one Windows-only drive test).
+- Built v1.0.2 EXE smoke: `--version` reports launcher 1.0.2 / core 4.0.3;
+  management `/healthz` is `4.0.3`; plugin config GET returns `ok=true`,
+  `schema=193`, `values=193`, `reply_probability=0.12`; deprecated
+  `ambient_group_reply_probability` returns the compatibility-only message;
+  `/option` source text contains `reply_probability（唯一普通概率）` and
+  `ambient 开启时只走 ambient 决策`.
+- v4.0.3 schema smoke: plugin config GET returns bundled-first schema
+  (`schema_source=bundled`) with 193 schema/values entries; a missing/invalid
+  instance schema yields HTTP 200, `schema_source=bundled`, and the safe warning
+  `实例 plugin schema 不存在，已使用主项目内置 schema。`
 - `sync-upstream` unauthenticated `workflow_dispatch` API cannot be triggered:
   `POST /actions/workflows/sync-upstream.yml/dispatches` returned HTTP **401**
   with body `{"message":"Requires authentication","status":"401"}`
-  (GitHub request id `B086:112471:EE1FD:16F337:6AE57FBF`). No fake workflow run
+  (GitHub request id `B1FC:2564A2:53B3CC:81235F:6AE5A50B`). No fake workflow run
   is claimed; the sync was executed manually from the clean local Linux
   `790d6c0` tree with the same committed sync script, then checked with
   `check_upstream_state.py`.
@@ -41,7 +51,7 @@ Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](d
 - POC fix: pywebview/WebView2 desktop window loads loopback UI and keeps parent
   alive until window close; errors display a Tk window with copyable logs.
 
-### v1.0.0 implementation and POC verification
+### v1.0.2 implementation and POC verification
 
 - `windows/app_shell.py`: pywebview 6.2.1 WebView2 shell, rotating logs,
   left App navigation (控制台/向导), injected diagnostics panel
@@ -55,10 +65,10 @@ Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](d
   with pinned sizes and SHA256:
   uv 0.13.6, AstrBot 4.29.3 wheel, SnowLuma 2.2.1 win-x64-lite,
   Node.js 26.13.0; NTQQ detection only; EULA/QQ verification manual.
-- v1.0.0 local dual EXE build (Windows Python 3.10; CI Release asset hash may differ): Docker `16,155,369` bytes SHA256
-  `a33239b8412625a4ae2abc37c144411499c3d26b83791b70dfc4bd40304c2a59`;
-  Native `14,931,820` bytes SHA256
-  `0bb812e1bcffa6ce5ea82c5755d6e8824416c844fcc5be18d054c710e1e3de93`.
+- v1.0.2 local dual EXE build (Windows Python 3.10; CI Release asset hash may differ): Docker `16,155,923` bytes SHA256
+  `188e198590bfa0f3a3a997ecc25f445dac42a0821ffe3c76bf48ef11ffb58c27`;
+  Native `14,931,831` bytes SHA256
+  `2a533ec63abd74435c40f1cf1efa52cbac29a370124af30bfb1ce84a1c529778`.
 - Docker App smoke: window opened existing console at
   `http://127.0.0.1:18830/console` with left “控制台/向导” nav; app-shell log
   recorded `app navigation and diagnostics panel injected` and
@@ -66,19 +76,20 @@ Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](d
   window close.
 - Docker wizard smoke: automated click of “向导” navigated to
   `/wizard?instance=bot-1` (HTTP 200) in the same WebView2 window; the
-  Linux v4.0.1-style quick jump dropdown was visible; no external browser.
+  task-96 quick jump dropdown was visible; no external browser.
 - Native App smoke: dashboard window opened/closed and logged normally;
   packaged `--install-plan --json` detected real Windows x64 + NTQQ
   `D:\Program Files\Tencent\QQ.exe` + uv/node and returned all four official
   sources/checksums.
 - Tk error-window fallback test opened and auto-closed with return 1; log panel
   is copyable.
-- Upstream Linux **441 tests OK**; Windows independent suite **106 tests OK**
+- Upstream Linux **450 tests OK**; Windows independent suite **108 tests OK**
   (Linux skips one Windows-only drive test); compileall, PowerShell AST, JS/YAML/upstream metadata gate pass.
 
-### v1.0.0 limitations / not verified
+### v1.0.2 limitations / not verified
 
-- v1.0.0 is the target release; v0.9.0 Release remains untouched.
+- v1.0.2 is the schema hot-reload maintenance release; v1.0.1 was never tagged;
+  v1.0.0/v0.9.0 Releases remain untouched.
   Native full download/install E2E is not re-run in this task.
 - pywebview/WebView2 packaged window verified on this Windows host; clean
   target-PC WebView2-missing path currently falls back to Tk error window and

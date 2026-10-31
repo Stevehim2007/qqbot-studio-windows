@@ -5,12 +5,12 @@ reusable Python/UI core from the Linux project instead of fetching code at
 runtime or build time.
 
 - Upstream project: `git@github.com:Stevehim2007/qqbot-studio.git`
-- Upstream snapshot commit: `790d6c0bfc1aa1019934fa348ab9ad847ae8685b`
+- Upstream snapshot commit: `8e6e1bc60b04825df0f5b34467cd2c0105b8a909`
 - Snapshot date: 2026-10-31
-- Upstream release line: v4.0.1
-- Bundled core version: `qqbot_studio.__version__ == 4.0.1`
-- Windows launcher version: `1.0.0`
-- Plugin snapshot: `qqbot_enhancer` 2.1.0
+- Upstream release line: v4.0.3
+- Bundled core version: `qqbot_studio.__version__ == 4.0.3`
+- Windows launcher version: `1.0.2`
+- Plugin snapshot: `qqbot_enhancer` 2.2.0
 
 The upstream working tree was clean at the snapshot commit. This repository is
 now the source of truth for the Windows distribution; do not point it at a
@@ -28,18 +28,18 @@ Linux data directory or the Linux auto-update pipeline.
   - schema-driven bool/int/float/string/text/list validation;
   - `reply_probability` highlighted editor and offline restart guidance;
   - sensitive Key/token/password fields excluded;
-- `qqbot_enhancer` 2.1.0 with prompt profile/session improvements, pinned
+- `qqbot_enhancer` 2.2.0 with unified ambient/generic group probability, prompt profile/session improvements, pinned
   default profile, `/新会话 [prompt title]`, existing-only `/会话` switching,
   `/表情状态` storage diagnostics, backup recovery, named AstrBot conversations,
   per-group Persona/memory, ambient, group identity, `/food`, unified tool
   markers and semantic/multi-category stickers;
 - Ponytail phase 2 shared `qqbot_studio/gitutil.py`, browser
   `static/services/api.js`, HTML script dependencies and E2E harness scripts;
-- latest v4.0.1 API contract, conversation-template/pinned/default-profile documentation,
+- latest v4.0.3 API contract, conversation-template/pinned/default-profile documentation,
   plugin docs and QA references under `docs/`;
 - Windows launcher/services/PowerShell/PyInstaller/CI files maintained here,
   plus tag-driven GitHub Release publishing of the EXE and SHA256;
-- v1.0.0 Windows App shell: pywebview/Edge WebView2 desktop window, left
+- Windows App shell: pywebview/Edge WebView2 desktop window, left
   Console/Wizard navigation, task-96 wizard step dropdown + post-deploy lock,
   detailed diagnostics, and the Native one-click installer core (official
   sources with SHA256 verification; manual QQ/EULA boundaries).
