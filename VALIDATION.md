@@ -57,8 +57,8 @@ Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](d
   Node.js 26.13.0; NTQQ detection only; EULA/QQ verification manual.
 - v1.0.0 local dual EXE build (Windows Python 3.10; CI Release asset hash may differ): Docker `16,155,369` bytes SHA256
   `a33239b8412625a4ae2abc37c144411499c3d26b83791b70dfc4bd40304c2a59`;
-  Native `14,931,791` bytes SHA256
-  `18bdd630f1918f5808d9fff830e600e0be4fe8eab3223a43ca2ea220f910cb5c`.
+  Native `14,931,820` bytes SHA256
+  `0bb812e1bcffa6ce5ea82c5755d6e8824416c844fcc5be18d054c710e1e3de93`.
 - Docker App smoke: window opened existing console at
   `http://127.0.0.1:18830/console` with left “控制台/向导” nav; app-shell log
   recorded `app navigation and diagnostics panel injected` and

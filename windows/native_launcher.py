@@ -293,6 +293,9 @@ def run(argv: list[str] | None = None) -> int:
     ):
         return 0
     try:
+        if args.guide:
+            _print_guide()
+            return 0
         if args.install_plan:
             payload = native_setup.detect_environment(root)
             print(json.dumps(payload, ensure_ascii=False, indent=2))

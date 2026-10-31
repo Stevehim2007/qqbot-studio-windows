@@ -112,8 +112,8 @@ v1.0.0 Desktop App 本地构建（详见 [`docs/app-shell-and-native-installer-p
 
 - Docker `QQBotStudioWindows.exe`：`16,155,369` bytes，SHA256
   `a33239b8412625a4ae2abc37c144411499c3d26b83791b70dfc4bd40304c2a59`；
-- Native `QQBotStudioWindowsNative.exe`：`14,931,791` bytes，SHA256
-  `18bdd630f1918f5808d9fff830e600e0be4fe8eab3223a43ca2ea220f910cb5c`；
+- Native `QQBotStudioWindowsNative.exe`：`14,931,820` bytes，SHA256
+  `0bb812e1bcffa6ce5ea82c5755d6e8824416c844fcc5be18d054c710e1e3de93`；
 - Linux upstream 441 tests OK；Windows 独立套件 106 tests OK（Linux 1 个 Windows-only skip）；
   Docker App 窗口、左栏导航、向导路由和 Native install-plan 实际 smoke 通过；
 - 真实 QQ 登录/SnowLuma EULA/QQ 消息 E2E 仍为 ENV_BLOCKED。
@@ -357,8 +357,8 @@ docker info --format "{{.OSType}}"
 
 - Docker `QQBotStudioWindows.exe`：`16,155,369` bytes，SHA256
   `a33239b8412625a4ae2abc37c144411499c3d26b83791b70dfc4bd40304c2a59`；
-- Native `QQBotStudioWindowsNative.exe`：`14,931,791` bytes，SHA256
-  `18bdd630f1918f5808d9fff830e600e0be4fe8eab3223a43ca2ea220f910cb5c`。
+- Native `QQBotStudioWindowsNative.exe`：`14,931,820` bytes，SHA256
+  `0bb812e1bcffa6ce5ea82c5755d6e8824416c844fcc5be18d054c710e1e3de93`。
 
 正式用户应使用 Release 资产和 `SHA256SUMS.txt`；不要用本地开发 hash 替代正式资产。
 

@@ -22,7 +22,10 @@ class V1ReleaseContractTests(unittest.TestCase):
         metadata = (ROOT / "plugins" / "qqbot_enhancer" / "metadata.yaml").read_text(encoding="utf-8")
         self.assertIn("version: 2.1.0", metadata)
         self.assertIn('LAUNCHER_VERSION = "1.0.0"', (WINDOWS / "launcher.py").read_text(encoding="utf-8"))
-        self.assertIn('NATIVE_LAUNCHER_VERSION = "1.0.0"', (WINDOWS / "native_launcher.py").read_text(encoding="utf-8"))
+        native_launcher = (WINDOWS / "native_launcher.py").read_text(encoding="utf-8")
+        self.assertIn('NATIVE_LAUNCHER_VERSION = "1.0.0"', native_launcher)
+        self.assertIn("if args.guide:", native_launcher)
+        self.assertLess(native_launcher.index("if args.guide:"), native_launcher.index("from windows import native_app"))
 
     def test_desktop_app_navigation_and_no_external_browser(self) -> None:
         launcher = (WINDOWS / "launcher.py").read_text(encoding="utf-8")

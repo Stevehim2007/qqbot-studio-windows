@@ -69,8 +69,8 @@ v1.0.0 EXE：
 
 - Docker：16,155,369 bytes，SHA256
   `a33239b8412625a4ae2abc37c144411499c3d26b83791b70dfc4bd40304c2a59`
-- Native：14,931,791 bytes，SHA256
-  `18bdd630f1918f5808d9fff830e600e0be4fe8eab3223a43ca2ea220f910cb5c`
+- Native：14,931,820 bytes，SHA256
+  `0bb812e1bcffa6ce5ea82c5755d6e8824416c844fcc5be18d054c710e1e3de93`
 
 用隔离环境、预配置 loopback、`QQBOT_APP_AUTOCLOSE_SECONDS=6` 启动 Docker EXE：
 
@@ -129,8 +129,8 @@ POC 验证：
   最终 POC 构建哈希：
   - Docker `16,155,369` bytes
     `a33239b8412625a4ae2abc37c144411499c3d26b83791b70dfc4bd40304c2a59`
-  - Native `14,931,791` bytes
-    `18bdd630f1918f5808d9fff830e600e0be4fe8eab3223a43ca2ea220f910cb5c`
+  - Native `14,931,820` bytes
+    `0bb812e1bcffa6ce5ea82c5755d6e8824416c844fcc5be18d054c710e1e3de93`
 
 ## 6. 当前限制与未验证项
 
