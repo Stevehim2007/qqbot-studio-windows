@@ -12,7 +12,7 @@ WINDOWS = ROOT / "windows"
 
 class V1ReleaseContractTests(unittest.TestCase):
     def test_versions_and_upstream_snapshot(self) -> None:
-        self.assertEqual((ROOT / "VERSION").read_text(encoding="ascii").strip(), "1.0.3")
+        self.assertEqual((ROOT / "VERSION").read_text(encoding="ascii").strip(), "1.0.4")
         self.assertEqual((ROOT / ".upstream-commit").read_text(encoding="ascii").strip(), "209c5568e5a51742cec3fd8a7749688fe531d93e")
         init = (ROOT / "qqbot_studio" / "__init__.py").read_text(encoding="utf-8")
         self.assertIn('__version__ = "4.0.4"', init)
@@ -21,9 +21,9 @@ class V1ReleaseContractTests(unittest.TestCase):
             self.assertIn(marker, upstream)
         metadata = (ROOT / "plugins" / "qqbot_enhancer" / "metadata.yaml").read_text(encoding="utf-8")
         self.assertIn("version: 2.3.0", metadata)
-        self.assertIn('LAUNCHER_VERSION = "1.0.3"', (WINDOWS / "launcher.py").read_text(encoding="utf-8"))
+        self.assertIn('LAUNCHER_VERSION = "1.0.4"', (WINDOWS / "launcher.py").read_text(encoding="utf-8"))
         native_launcher = (WINDOWS / "native_launcher.py").read_text(encoding="utf-8")
-        self.assertIn('NATIVE_LAUNCHER_VERSION = "1.0.3"', native_launcher)
+        self.assertIn('NATIVE_LAUNCHER_VERSION = "1.0.4"', native_launcher)
         self.assertIn("if args.guide:", native_launcher)
         self.assertLess(native_launcher.index("if args.guide:"), native_launcher.index("from windows import native_app"))
 

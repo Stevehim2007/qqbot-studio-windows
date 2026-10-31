@@ -22,7 +22,7 @@ import webbrowser
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-NATIVE_LAUNCHER_VERSION = "1.0.3"
+NATIVE_LAUNCHER_VERSION = "1.0.4"
 SNOWLUMA_WINDOWS_DOCS = "https://snowluma.github.io/zh/docs/guide/deploy/windows"
 SNOWLUMA_RELEASES = "https://github.com/SnowLuma/SnowLuma/releases"
 ASTRBOT_WINDOWS_DOCS = "https://docs.astrbot.app/deploy/astrbot/package.html"

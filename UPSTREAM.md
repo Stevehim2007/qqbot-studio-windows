@@ -9,7 +9,7 @@ runtime or build time.
 - Snapshot date: 2026-10-31
 - Upstream release line: v4.0.4
 - Bundled core version: `qqbot_studio.__version__ == 4.0.4`
-- Windows launcher version: `1.0.3`
+- Windows launcher version: `1.0.4`
 - Plugin snapshot: `qqbot_enhancer` 2.3.0
 
 The upstream working tree was clean at the snapshot commit. This repository is

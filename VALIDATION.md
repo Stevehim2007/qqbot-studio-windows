@@ -1,15 +1,15 @@
 # Validation record
 
-## v1.0.3 Desktop App / core 4.0.4 / plugin 2.3.0 (release)
+## v1.0.4 Desktop App / core 4.0.4 / plugin 2.3.0 (hotfix release)
 
 - Source Linux snapshot: `209c5568e5a51742cec3fd8a7749688fe531d93e`
-  (`v4.0.4`, clean working tree); Windows `VERSION=1.0.3`.
+  (`v4.0.4`, clean working tree); Windows `VERSION=1.0.4`.
 - Synced through the maintained allowlisted `scripts/sync_upstream.py`
   (core/plugin/static/E2E/docs allowlist) and preserved Windows-owned
   `windows/app_shell.py`, `native_app.py`, `native_setup.py` and launchers.
 - Upstream Linux suite: **453 tests OK**. Windows independent suite:
-  **109 tests OK** (Linux skips one Windows-only drive test).
-- Built v1.0.3 EXE smoke: `--version` reports launcher 1.0.3 / core 4.0.4;
+  **111 tests OK** (Linux skips one Windows-only drive test).
+- Built v1.0.4 EXE smoke: `--version` reports launcher 1.0.4 / core 4.0.4;
   management `/healthz` is `4.0.4`; plugin config GET returns `ok=true`,
   `schema=193`, `values=193`, `reply_probability=0.12`; deprecated
   `ambient_group_reply_probability` returns the compatibility-only message;
@@ -23,9 +23,13 @@
   `[[tool:send_sticker ...]]` without the old reply extra; successful path
   replaces with one text + one local `Comp.Image`; failure removes the marker;
   category/tag fuzzy matching and `/表情状态` recent failure diagnostics present.
-- v1.0.3 smoke: `/healthz=4.0.4`; plugin config GET `schema_source=bundled`,
+- v1.0.4 smoke: `/healthz=4.0.4`; plugin config GET `schema_source=bundled`,
   37-char safe schema warning, 193 schema/values entries, `reply_probability=0.12`;
   App window/wizard route/log/close and Native install-plan (4 sources) passed.
+- v1.0.4 hotfix smoke: Native dashboard JS mock test proves delayed `window.pywebview.api` stays
+  safe, `one_click_install` is not undefined, `get_logs` returns mock log text,
+  and `pywebviewready` refreshes state; Native dashboard is light themed and
+  Docker App left navigation is light themed. Native `--install-plan` remains.
 - `sync-upstream` unauthenticated `workflow_dispatch` API cannot be triggered:
   `POST /actions/workflows/sync-upstream.yml/dispatches` returned HTTP **401**
   with body `{"message":"Requires authentication","status":"401"}`
@@ -58,7 +62,7 @@ Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](d
 - POC fix: pywebview/WebView2 desktop window loads loopback UI and keeps parent
   alive until window close; errors display a Tk window with copyable logs.
 
-### v1.0.3 implementation and POC verification
+### v1.0.4 implementation and hotfix verification
 
 - `windows/app_shell.py`: pywebview 6.2.1 WebView2 shell, rotating logs,
   left App navigation (控制台/向导), injected diagnostics panel
@@ -72,10 +76,10 @@ Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](d
   with pinned sizes and SHA256:
   uv 0.13.6, AstrBot 4.29.3 wheel, SnowLuma 2.2.1 win-x64-lite,
   Node.js 26.13.0; NTQQ detection only; EULA/QQ verification manual.
-- v1.0.3 local dual EXE build (Windows Python 3.10; CI Release asset hash may differ): Docker `16,158,069` bytes SHA256
-  `0a72896d2a45cbb41534302a2130c0dccf07a124443505adaa425deb5addd27d`;
-  Native `14,931,848` bytes SHA256
-  `88494a6803242a34b09dd64a906c0abd2269fc7640a805c1e99b4cceec5c1409`.
+- v1.0.4 local dual EXE build (Windows Python 3.10; CI Release asset hash may differ): Docker `16,158,380` bytes SHA256
+  `09e9ae1f52c06becbfc2902d3ee9c72bf29995dfe0c89592372a8313f7eb85e6`;
+  Native `14,933,721` bytes SHA256
+  `a9a5608ed01023dfc43e4295181efa4c90762fabc44e74a0cc83873efa0bf62e`.
 - Docker App smoke: window opened existing console at
   `http://127.0.0.1:18830/console` with left “控制台/向导” nav; app-shell log
   recorded `app navigation and diagnostics panel injected` and
@@ -90,13 +94,13 @@ Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](d
   sources/checksums.
 - Tk error-window fallback test opened and auto-closed with return 1; log panel
   is copyable.
-- Upstream Linux **453 tests OK**; Windows independent suite **109 tests OK**
+- Upstream Linux **453 tests OK**; Windows independent suite **111 tests OK**
   (Linux skips one Windows-only drive test); compileall, PowerShell AST, JS/YAML/upstream metadata gate pass.
 
-### v1.0.3 limitations / not verified
+### v1.0.4 limitations / not verified
 
-- v1.0.3 is the memory-marker maintenance release; v1.0.1 was never tagged;
-  prior v1.0.2/v1.0.0/v0.9.0 Releases remain untouched.
+- v1.0.4 is the Native dashboard hotfix; v1.0.1 was never tagged;
+  prior v1.0.3/v1.0.2/v1.0.0/v0.9.0 Releases remain untouched.
   Native full download/install E2E is not re-run in this task.
 - pywebview/WebView2 packaged window verified on this Windows host; clean
   target-PC WebView2-missing path currently falls back to Tk error window and

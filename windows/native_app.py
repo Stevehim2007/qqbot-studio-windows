@@ -40,8 +40,22 @@ main{max-width:1240px;margin:0 auto;padding:24px;display:grid;gap:18px}.grid{dis
 #native-app-nav .nav-icon{width:22px;height:22px;display:grid;place-items:center;border:1px solid currentColor;border-radius:7px;font-size:13px}
 #native-app-nav .nav-spacer{flex:1}#native-app-nav .nav-meta{padding:10px 6px 0;border-top:1px solid #1d4258;color:#7198ac;font:10px/1.5 "Cascadia Mono",Consolas,monospace;word-break:break-all}#native-app-nav .nav-meta strong{display:block;color:#a7cad8}
 body{padding-left:190px;box-sizing:border-box}.native-view[hidden]{display:none!important}.wizard-head{display:flex;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap}.wizard-picker label{display:block;margin-bottom:6px;color:var(--muted);font-size:11px;font-weight:720;letter-spacing:.05em}.wizard-picker select{min-width:220px;min-height:36px;padding:7px 28px 7px 10px;color:#e7fffa;background:#0d2d4b;border:1px solid #2a5275;border-radius:9px;font:12px "Segoe UI","Microsoft YaHei UI",sans-serif;cursor:pointer}.wizard-picker select:disabled{opacity:.7}.wizard-picker option{color:#edf8ff;background:#0d2d4b}.wizard-picker option:disabled{color:#69859c}.wizard-lock-note{margin:8px 0 0;color:#f2d69a;font-size:11px}.wizard-step-card{display:none}.wizard-step-card.is-active{display:block}.wizard-step-head{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}.wizard-step-index{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#123d54;border:1px solid #2d6a8f;color:#62e8c4;font-weight:700}.wizard-kv{display:grid;grid-template-columns:190px minmax(0,1fr);gap:7px 14px;margin:10px 0;font-size:13px}.wizard-kv dt{color:var(--muted)}.wizard-kv dd{margin:0;word-break:break-all;color:#d9f3ff}.wizard-actions{display:flex;gap:9px;margin-top:16px;flex-wrap:wrap}@media(max-width:900px){body{padding-left:148px}#native-app-nav{width:148px;padding:13px 8px}#native-app-nav .nav-brand small{display:none}#native-app-nav .nav-btn{padding:7px;font-size:11px}.wizard-kv{grid-template-columns:1fr}.wizard-picker select{min-width:170px}}
+
+/* v1.0.4 default light theme */
+:root{color-scheme:light;--bg:#f4f8fb;--panel:#ffffff;--panel2:#eef6fb;--line:#d6e4ee;--text:#183247;--muted:#5f788b;--accent:#0b8f72;--warn:#9a6419;--danger:#b23b4a}
+html,body{background:#f4f8fb!important;color:#183247!important}
+body{background:radial-gradient(circle at 85% 0,rgba(11,143,114,.09),transparent 28rem),linear-gradient(150deg,#f8fbfd,#edf5fa)!important}
+header{background:rgba(255,255,255,.94)!important;border-bottom:1px solid #d8e6ef!important;box-shadow:0 5px 18px rgba(31,67,91,.07)}
+h1{color:#122e43!important}h1 em{color:#0a9b80!important}.sub,.small,.statusline,.card .label{color:#5f788b!important}.pill{background:#fff!important;border-color:#cddfe9!important;color:#365b71!important}.pill.ok{color:#08755f!important;border-color:#b8e4d8!important;background:#effbf7!important}.pill.warn{color:#85601d!important;border-color:#ebd8ad!important;background:#fffaf0!important}.pill.bad{color:#a43343!important;border-color:#edc6cd!important;background:#fff4f5!important}
+#native-app-nav{background:linear-gradient(180deg,#ffffff,#f4fafc)!important;border-right:1px solid #d6e4ee!important;box-shadow:8px 0 24px rgba(31,67,91,.06)!important;color:#183247!important}
+#native-app-nav .nav-brand{border-bottom-color:#e1ebf2!important}#native-app-nav .nav-brand strong{color:#173247!important}#native-app-nav .nav-brand small,#native-app-nav .nav-label,#native-app-nav .nav-meta{color:#688295!important}#native-app-nav .nav-meta{border-top-color:#e1ebf2!important}#native-app-nav .nav-meta strong{color:#355a70!important}
+#native-app-nav .nav-btn{background:#fff!important;color:#31556b!important;border-color:#dbe8f0!important}#native-app-nav .nav-btn:hover{background:#f1f8fb!important;color:#163247!important;border-color:#bcd4e2!important}#native-app-nav .nav-btn[aria-current="page"]{color:#fff!important;background:linear-gradient(135deg,#0b8f72,#35bf9d)!important;border-color:#0b8f72!important;box-shadow:0 5px 14px rgba(11,143,114,.2)!important}
+.panel,.card{background:#fff!important;border-color:#d7e5ee!important;box-shadow:0 8px 24px rgba(28,63,88,.07)!important;color:#183247!important}section h2{color:#163247!important}.value{color:#183247!important}.ok{color:#08755f!important}.warn{color:#9a6419!important}.bad{color:#ad3848!important}
+.btn{background:#fff!important;color:#24536c!important;border-color:#c9dce8!important}.btn:hover{background:#eff7fb!important}.btn.primary{background:#0b8f72!important;color:#fff!important;border-color:#0b8f72!important}.btn.primary:hover{background:#087b62!important}.btn.danger{background:#fff4f5!important;color:#a43343!important;border-color:#ecc4cc!important}
+.progress-wrap{background:#e8f1f5!important;border-color:#d2e2eb!important}.logbox{background:#f8fbfd!important;border-color:#d6e4ee!important;color:#294c62!important;user-select:text!important}.manual{background:#fff9ec!important;border-left-color:#d6a343!important;color:#77531b!important}
+#toast{background:#fff!important;border-color:#cddfe9!important;color:#183247!important;box-shadow:0 10px 30px rgba(28,63,88,.18)!important}.wizard-picker select{background:#fff!important;color:#183247!important;border-color:#c8dbe7!important}.wizard-picker option{background:#fff!important;color:#183247!important}.wizard-lock-note{color:#8a661f!important}.wizard-step-index{background:#eff9f6!important;border-color:#b8e4d8!important;color:#0b8f72!important}.wizard-kv dt{color:#637e91!important}.wizard-kv dd{color:#183247!important}
 </style></head>
-<body><aside id="native-app-nav" aria-label="QQ Bot Studio Native App 导航"><div class="nav-brand"><div class="nav-brand-mark">◎</div><div><strong>QQ Bot Studio</strong><small>Native 桌面应用</small></div></div><div class="nav-label">工作区</div><button class="nav-btn" type="button" data-native-nav="console" aria-current="page"><span class="nav-icon">▦</span>控制台</button><button class="nav-btn" type="button" data-native-nav="wizard" aria-current="false"><span class="nav-icon">↗</span>向导</button><div class="nav-spacer"></div><div class="nav-meta"><strong>单实例模式</strong>WebView2 · 127.0.0.1</div></aside><header><div class="logo">◎</div><div><h1>QQ Bot <em>Studio</em> · Native</h1><div class="sub">Windows 原生单实例 POC · 无 Docker / 无 WSL / 无 noVNC</div></div><span id="mode-pill" class="pill">正在读取状态…</span></header>
+<body><aside id="native-app-nav" aria-label="QQ Bot Studio Native App 导航"><div class="nav-brand"><div class="nav-brand-mark">◎</div><div><strong>QQ Bot Studio</strong><small>Native 桌面应用</small></div></div><div class="nav-label">工作区</div><button class="nav-btn" type="button" data-native-nav="console" aria-current="page"><span class="nav-icon">▦</span>控制台</button><button class="nav-btn" type="button" data-native-nav="wizard" aria-current="false"><span class="nav-icon">↗</span>向导</button><div class="nav-spacer"></div><div class="nav-meta"><strong>单实例模式</strong>WebView2 · 127.0.0.1</div></aside><header><div class="logo">◎</div><div><h1>QQ Bot <em>Studio</em> · Native</h1><div class="sub">Windows 原生单实例 POC · 无 Docker / 无 WSL / 无 noVNC</div></div><span id="native-connection" class="pill warn">正在连接 Native 服务…</span><span id="mode-pill" class="pill">正在读取状态…</span></header>
 <main id="native-view-console" class="native-view">
 <section class="grid" id="env-cards">
 <div class="card"><div class="label">NTQQ</div><div class="value" id="ntqq">…</div></div>
@@ -67,30 +81,76 @@ body{padding-left:190px;box-sizing:border-box}.native-view[hidden]{display:none!
 <div id="toast"></div>
 
 <script>
-const api = window.pywebview && window.pywebview.api;
 let installPoller = null;
+let nativeReady = false;
+let nativeReadyTimer = null;
+function getApi(){
+  try {
+    const bridge = window.pywebview;
+    const candidate = bridge && bridge.api;
+    return candidate && typeof candidate === 'object' ? candidate : null;
+  } catch (error) { return null; }
+}
+function setConnection(text, tone='warn'){
+  const el = t('native-connection');
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'pill ' + tone;
+}
+async function callApi(method, ...args){
+  const api = getApi();
+  if (!api || typeof api[method] !== 'function') {
+    setConnection('Native 服务未连接', 'bad');
+    const error = new Error('Native API 尚未就绪：' + method);
+    error.code = 'NATIVE_API_NOT_READY';
+    throw error;
+  }
+  nativeReady = true;
+  if (nativeReadyTimer) { clearTimeout(nativeReadyTimer); nativeReadyTimer = null; }
+  setConnection('Native 服务已连接', 'ok');
+  try { return await api[method](...args); }
+  catch (error) { setConnection('Native 服务调用失败', 'bad'); throw error; }
+}
+function connectionFailureText(error){
+  const suffix = error && error.message ? error.message : String(error || '未知错误');
+  return '正在连接 Native 服务…\n\n暂时无法调用本地服务：' + suffix + '\n请保留本窗口，等待 pywebviewready；若持续失败，请点击“打开日志目录”反馈日志。';
+}
+window.addEventListener('pywebviewready', () => {
+  setConnection('Native 服务已连接', 'ok');
+  nativeReady = true;
+  if (nativeReadyTimer) { clearTimeout(nativeReadyTimer); nativeReadyTimer = null; }
+  refreshState().then(refreshLogs);
+});
+nativeReadyTimer = setTimeout(() => {
+  if (getApi()) return;
+  setConnection('无法连接 Native 服务', 'bad');
+  const box = t('logbox');
+  if (box) box.textContent = '正在连接 Native 服务…\n\n超时：window.pywebview.api 尚未注入。\n请保持窗口打开并查看诊断日志；可点击“打开日志目录”。';
+}, 5000);
+
 let nativeState = {};
 let currentNativeView = 'console';
 let currentWizardStep = 'env';
 function t(id){return document.getElementById(id)}
 function setText(id,text,cls){const e=t(id);e.textContent=text;if(cls)e.className='value '+cls}
 function toast(text){const e=t('toast');e.textContent=text;e.style.display='block';clearTimeout(window.__toast);window.__toast=setTimeout(()=>e.style.display='none',4500)}
-async function copyLogs(){try{const ok=await api.copy_logs();toast(ok?'日志已复制':'复制失败')}catch(e){toast('复制失败: '+e)}}
-async function openLogs(){try{await api.open_log_folder()}catch(e){toast('打开失败: '+e)}}
-async function refreshLogs(){try{t('logbox').textContent=await api.get_logs()}catch(e){t('logbox').textContent='读取日志失败: '+e}}
+async function copyLogs(){try{const ok=await callApi('copy_logs');toast(ok?'日志已复制':'复制失败')}catch(e){toast('复制失败: '+e)}}
+async function openLogs(){try{await callApi('open_log_folder')}catch(e){toast('打开失败: '+e)}}
+async function refreshLogs(){try{t('logbox').textContent=await callApi('get_logs')}catch(e){const box=t('logbox');if(box)box.textContent='读取日志失败: '+(e&&e.message?e.message:e)+'\n请点击“打开日志目录”查看本地日志。';setConnection('日志读取失败，可查看日志目录','bad')}}
 
 function deployedEnv(){const e=(nativeState&&nativeState.environment)||{};return !!(e.astrbot_installed&&e.snowluma_installed&&e.node);}
 function updateWizardLock(){const locked=deployedEnv();const select=t('native-wizard-step-select');const note=t('native-wizard-lock-note');if(!select||!note)return;Array.from(select.options||[]).forEach((option)=>{option.disabled=locked&&option.value!=='done'});note.hidden=!locked;if(locked&&currentWizardStep!=='done')currentWizardStep='done';select.value=currentWizardStep;document.querySelectorAll('[data-native-step]').forEach((panel)=>{panel.classList.toggle('is-active',panel.dataset.nativeStep===currentWizardStep)});const e=(nativeState&&nativeState.environment)||{};t('wiz-os').textContent=(e.os||'')+' / '+(e.arch||'');t('wiz-ntqq').textContent=e.ntqq||'未检测到';t('wiz-astrbot').textContent=e.astrbot_installed?'已安装':'未安装';t('wiz-snowluma').textContent=e.snowluma_installed?'已安装':'未安装';t('wiz-root').textContent=(nativeState&&nativeState.root)||'';t('wiz-onebot').textContent=(nativeState&&nativeState.onebot_url)||'';t('wiz-runtime').textContent=(nativeState&&nativeState.runtime_text)||'';t('wiz-done-ntqq').textContent=e.ntqq||'未检测到';t('wiz-done-runtime').textContent=(nativeState&&nativeState.runtime_text)||'';t('native-wizard-progress-text').textContent=locked?'部署完成：前三个步骤已锁定，后续只能查看完成与人工验证。':'可随时用下拉菜单切换步骤。';}
 function setWizardStep(step){const locked=deployedEnv();if(locked&&step!=='done'){toast('机器人组件已部署，前三步已锁定，只能进入完成与人工验证。');step='done';}currentWizardStep=step;updateWizardLock();}
 function switchNativeView(view){currentNativeView=view;t('native-view-console').hidden=view!=='console';t('native-view-wizard').hidden=view!=='wizard';document.querySelectorAll('[data-native-nav]').forEach((button)=>{button.setAttribute('aria-current',button.dataset.nativeNav===view?'page':'false')});if(view==='wizard')setWizardStep(deployedEnv()?'done':'env');}
-async function refreshState(){try{const s=await api.get_state(); nativeState=s; const e=s.environment||{}; setText('ntqq',e.ntqq?'已找到':'未找到',e.ntqq?'ok':'bad'); setText('astrbot',e.astrbot_installed?'已安装':'未安装',e.astrbot_installed?'ok':'warn'); setText('snowluma',e.snowluma_installed?'已安装':'未安装',e.snowluma_installed?'ok':'warn'); setText('node',e.node||'未找到',e.node?'ok':'warn'); t('mode-pill').textContent=s.bind_host||'127.0.0.1'; t('run-status').textContent=s.runtime_text||'AstrBot/SnowLuma 未启动'; updateWizardLock();}catch(e){toast('状态读取失败: '+e)}}
+async function refreshState(){try{const s=await callApi('get_state'); nativeState=s; const e=s.environment||{}; setText('ntqq',e.ntqq?'已找到':'未找到',e.ntqq?'ok':'bad'); setText('astrbot',e.astrbot_installed?'已安装':'未安装',e.astrbot_installed?'ok':'warn'); setText('snowluma',e.snowluma_installed?'已安装':'未安装',e.snowluma_installed?'ok':'warn'); setText('node',e.node||'未找到',e.node?'ok':'warn'); t('mode-pill').textContent=s.bind_host||'127.0.0.1'; t('run-status').textContent=s.runtime_text||'AstrBot/SnowLuma 未启动'; updateWizardLock();}catch(e){toast('状态读取失败: '+e)}}
 function showInstall(s){const p=Number(s.percent||0);t('progress-bar').style.width=p+'%';t('install-status').textContent=(s.message||'')+(s.error?' · '+s.error:'');if(t('wiz-progress-bar'))t('wiz-progress-bar').style.width=p+'%';if(t('wiz-install-status'))t('wiz-install-status').textContent=(s.message||'')+(s.error?' · '+s.error:'');if(s.active){t('install-btn').disabled=true;if(t('wiz-install-btn'))t('wiz-install-btn').disabled=true}else{t('install-btn').disabled=false;if(t('wiz-install-btn'))t('wiz-install-btn').disabled=false;if(installPoller){clearInterval(installPoller);installPoller=null}}}
-async function pollInstall(){try{const s=await api.get_install_status();showInstall(s);if(!s.active){await refreshState();await refreshLogs()}}catch(e){t('install-status').textContent='读取安装状态失败: '+e}}
-async function install(){try{const r=await api.one_click_install();if(!r.started){toast(r.message||'无法开始安装');return}t('install-btn').disabled=true;if(t('wiz-install-btn'))t('wiz-install-btn').disabled=true;t('install-status').textContent='正在安装，请保持窗口打开…';if(t('wiz-install-status'))t('wiz-install-status').textContent='正在安装，请保持窗口打开…';if(!installPoller)installPoller=setInterval(pollInstall,900)}catch(e){toast('安装启动失败: '+e)}}
-async function startServices(){try{const r=await api.start_services();toast(r.message||'启动请求已提交');setTimeout(refreshState,1200)}catch(e){toast('启动失败: '+e)}}
-async function stopServices(){try{const r=await api.stop_services();toast(r.message||'停止请求已提交');setTimeout(refreshState,500)}catch(e){toast('停止失败: '+e)}}
-async function openQQ(){try{const r=await api.open_qq();toast(r.message||'已打开 NTQQ')}catch(e){toast('打开 NTQQ 失败: '+e)}}
+async function pollInstall(){try{const s=await callApi('get_install_status');showInstall(s);if(!s.active){await refreshState();await refreshLogs()}}catch(e){t('install-status').textContent='读取安装状态失败: '+e}}
+async function install(){try{const r=await callApi('one_click_install');if(!r.started){toast(r.message||'无法开始安装');return}t('install-btn').disabled=true;if(t('wiz-install-btn'))t('wiz-install-btn').disabled=true;t('install-status').textContent='正在安装，请保持窗口打开…';if(t('wiz-install-status'))t('wiz-install-status').textContent='正在安装，请保持窗口打开…';if(!installPoller)installPoller=setInterval(pollInstall,900)}catch(e){toast('安装启动失败: '+e)}}
+async function startServices(){try{const r=await callApi('start_services');toast(r.message||'启动请求已提交');setTimeout(refreshState,1200)}catch(e){toast('启动失败: '+e)}}
+async function stopServices(){try{const r=await callApi('stop_services');toast(r.message||'停止请求已提交');setTimeout(refreshState,500)}catch(e){toast('停止失败: '+e)}}
+async function openQQ(){try{const r=await callApi('open_qq');toast(r.message||'已打开 NTQQ')}catch(e){toast('打开 NTQQ 失败: '+e)}}
 document.querySelectorAll('[data-native-nav]').forEach((button)=>{button.addEventListener('click',()=>switchNativeView(button.dataset.nativeNav))});t('native-wizard-step-select').addEventListener('change',()=>setWizardStep(t('native-wizard-step-select').value));t('wiz-install-btn').addEventListener('click',install);t('wiz-start-btn').addEventListener('click',startServices);t('wiz-stop-btn').addEventListener('click',stopServices);t('wiz-open-qq-btn').addEventListener('click',openQQ);t('wiz-open-logs-btn').addEventListener('click',openLogs);document.querySelectorAll('[data-native-step-action]').forEach((button)=>{button.addEventListener('click',()=>{const order=['env','install','config','done'];let index=order.indexOf(currentWizardStep);index+=(button.dataset.nativeStepAction==='next'?1:-1);index=Math.max(0,Math.min(order.length-1,index));setWizardStep(order[index])})});t('install-btn').addEventListener('click',install);t('refresh-btn').addEventListener('click',refreshState);t('refresh2-btn').addEventListener('click',refreshState);t('start-btn').addEventListener('click',startServices);t('stop-btn').addEventListener('click',stopServices);t('qq-btn').addEventListener('click',openQQ);t('copy-logs-btn').addEventListener('click',copyLogs);t('open-logs-btn').addEventListener('click',openLogs);t('refresh-logs-btn').addEventListener('click',refreshLogs);
+window.__nativeTest = {getApi, callApi, refreshState, refreshLogs, install};
 refreshState().then(refreshLogs);setInterval(refreshLogs,5000);
 </script></body></html>'''
 

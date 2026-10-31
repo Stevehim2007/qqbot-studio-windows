@@ -211,6 +211,17 @@ _APP_NAV_JS = r"""
       #qb-app-nav .qb-app-brand-copy small{display:none;}
       #qb-app-nav .qb-app-nav-button{padding:8px;font-size:12px;}
     }
+    /* v1.0.4 light app shell theme */
+    #qb-app-nav{color:#183247!important;background:linear-gradient(180deg,#ffffff,#f4fafc)!important;border-right:1px solid #d6e4ee!important;box-shadow:8px 0 24px rgba(31,67,91,.06)!important}
+    #qb-app-nav .qb-app-brand{border-bottom-color:#e1ebf2!important}
+    #qb-app-nav .qb-app-brand-copy strong{color:#173247!important}
+    #qb-app-nav .qb-app-brand-copy small,#qb-app-nav .qb-app-nav-label{color:#688295!important}
+    #qb-app-nav .qb-app-brand-mark{color:#0b8f72!important;background:linear-gradient(145deg,#effbf7,#d7f4eb)!important;border-color:#b8e4d8!important}
+    #qb-app-nav .qb-app-nav-button{color:#31556b!important;background:#fff!important;border-color:#dbe8f0!important}
+    #qb-app-nav .qb-app-nav-button:hover{color:#163247!important;background:#f1f8fb!important;border-color:#bcd4e2!important}
+    #qb-app-nav .qb-app-nav-button[aria-current="page"]{color:#fff!important;background:linear-gradient(135deg,#0b8f72,#35bf9d)!important;border-color:#0b8f72!important;box-shadow:0 5px 14px rgba(11,143,114,.2)!important}
+    #qb-app-nav .qb-app-nav-meta{border-top-color:#e1ebf2!important;color:#688295!important}
+    #qb-app-nav .qb-app-nav-meta strong{color:#355a70!important}
   `;
   document.head.appendChild(style);
   const nav = document.createElement('aside');
