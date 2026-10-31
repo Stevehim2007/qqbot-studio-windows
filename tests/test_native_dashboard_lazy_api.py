@@ -113,7 +113,8 @@ class NativeDashboardLazyApiTests(unittest.TestCase):
             path = Path(temp_dir) / "native-dashboard-mock.js"
             path.write_text(harness_script, encoding="utf-8")
             result = subprocess.run(
-                ["node", str(path)], check=True, capture_output=True, text=True, timeout=20
+                ["node", str(path)], check=True, capture_output=True, text=True,
+                encoding="utf-8", errors="replace", timeout=20
             )
         data = json.loads(result.stdout.strip().splitlines()[-1])
         self.assertTrue(data["beforeApiNull"])
