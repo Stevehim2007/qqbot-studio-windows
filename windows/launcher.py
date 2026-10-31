@@ -32,7 +32,7 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
-LAUNCHER_VERSION = "1.0.2"
+LAUNCHER_VERSION = "1.0.3"
 DEFAULT_SERVER_WAIT_SECONDS = 90
 LAUNCHER_LOG = "launcher.log"
 _LOGGER = logging.getLogger("qqbot.windows.launcher")

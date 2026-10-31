@@ -1,16 +1,16 @@
 # Validation record
 
-## v1.0.2 Desktop App / core 4.0.3 / plugin 2.2.0 (release)
+## v1.0.3 Desktop App / core 4.0.4 / plugin 2.3.0 (release)
 
-- Source Linux snapshot: `8e6e1bc60b04825df0f5b34467cd2c0105b8a909`
-  (`v4.0.3`, clean working tree); Windows `VERSION=1.0.2`.
+- Source Linux snapshot: `209c5568e5a51742cec3fd8a7749688fe531d93e`
+  (`v4.0.4`, clean working tree); Windows `VERSION=1.0.3`.
 - Synced through the maintained allowlisted `scripts/sync_upstream.py`
   (core/plugin/static/E2E/docs allowlist) and preserved Windows-owned
   `windows/app_shell.py`, `native_app.py`, `native_setup.py` and launchers.
-- Upstream Linux suite: **450 tests OK**. Windows independent suite:
-  **108 tests OK** (Linux skips one Windows-only drive test).
-- Built v1.0.2 EXE smoke: `--version` reports launcher 1.0.2 / core 4.0.3;
-  management `/healthz` is `4.0.3`; plugin config GET returns `ok=true`,
+- Upstream Linux suite: **453 tests OK**. Windows independent suite:
+  **109 tests OK** (Linux skips one Windows-only drive test).
+- Built v1.0.3 EXE smoke: `--version` reports launcher 1.0.3 / core 4.0.4;
+  management `/healthz` is `4.0.4`; plugin config GET returns `ok=true`,
   `schema=193`, `values=193`, `reply_probability=0.12`; deprecated
   `ambient_group_reply_probability` returns the compatibility-only message;
   `/option` source text contains `reply_probability（唯一普通概率）` and
@@ -19,6 +19,13 @@
   (`schema_source=bundled`) with 193 schema/values entries; a missing/invalid
   instance schema yields HTTP 200, `schema_source=bundled`, and the safe warning
   `实例 plugin schema 不存在，已使用主项目内置 schema。`
+- v4.0.4 plugin source checks: memory `on_decorating_result` handles
+  `[[tool:send_sticker ...]]` without the old reply extra; successful path
+  replaces with one text + one local `Comp.Image`; failure removes the marker;
+  category/tag fuzzy matching and `/表情状态` recent failure diagnostics present.
+- v1.0.3 smoke: `/healthz=4.0.4`; plugin config GET `schema_source=bundled`,
+  37-char safe schema warning, 193 schema/values entries, `reply_probability=0.12`;
+  App window/wizard route/log/close and Native install-plan (4 sources) passed.
 - `sync-upstream` unauthenticated `workflow_dispatch` API cannot be triggered:
   `POST /actions/workflows/sync-upstream.yml/dispatches` returned HTTP **401**
   with body `{"message":"Requires authentication","status":"401"}`
@@ -51,7 +58,7 @@ Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](d
 - POC fix: pywebview/WebView2 desktop window loads loopback UI and keeps parent
   alive until window close; errors display a Tk window with copyable logs.
 
-### v1.0.2 implementation and POC verification
+### v1.0.3 implementation and POC verification
 
 - `windows/app_shell.py`: pywebview 6.2.1 WebView2 shell, rotating logs,
   left App navigation (控制台/向导), injected diagnostics panel
@@ -65,10 +72,10 @@ Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](d
   with pinned sizes and SHA256:
   uv 0.13.6, AstrBot 4.29.3 wheel, SnowLuma 2.2.1 win-x64-lite,
   Node.js 26.13.0; NTQQ detection only; EULA/QQ verification manual.
-- v1.0.2 local dual EXE build (Windows Python 3.10; CI Release asset hash may differ): Docker `16,155,923` bytes SHA256
-  `188e198590bfa0f3a3a997ecc25f445dac42a0821ffe3c76bf48ef11ffb58c27`;
-  Native `14,931,831` bytes SHA256
-  `2a533ec63abd74435c40f1cf1efa52cbac29a370124af30bfb1ce84a1c529778`.
+- v1.0.3 local dual EXE build (Windows Python 3.10; CI Release asset hash may differ): Docker `16,158,069` bytes SHA256
+  `0a72896d2a45cbb41534302a2130c0dccf07a124443505adaa425deb5addd27d`;
+  Native `14,931,848` bytes SHA256
+  `88494a6803242a34b09dd64a906c0abd2269fc7640a805c1e99b4cceec5c1409`.
 - Docker App smoke: window opened existing console at
   `http://127.0.0.1:18830/console` with left “控制台/向导” nav; app-shell log
   recorded `app navigation and diagnostics panel injected` and
@@ -83,13 +90,13 @@ Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](d
   sources/checksums.
 - Tk error-window fallback test opened and auto-closed with return 1; log panel
   is copyable.
-- Upstream Linux **450 tests OK**; Windows independent suite **108 tests OK**
+- Upstream Linux **453 tests OK**; Windows independent suite **109 tests OK**
   (Linux skips one Windows-only drive test); compileall, PowerShell AST, JS/YAML/upstream metadata gate pass.
 
-### v1.0.2 limitations / not verified
+### v1.0.3 limitations / not verified
 
-- v1.0.2 is the schema hot-reload maintenance release; v1.0.1 was never tagged;
-  v1.0.0/v0.9.0 Releases remain untouched.
+- v1.0.3 is the memory-marker maintenance release; v1.0.1 was never tagged;
+  prior v1.0.2/v1.0.0/v0.9.0 Releases remain untouched.
   Native full download/install E2E is not re-run in this task.
 - pywebview/WebView2 packaged window verified on this Windows host; clean
   target-PC WebView2-missing path currently falls back to Tk error window and

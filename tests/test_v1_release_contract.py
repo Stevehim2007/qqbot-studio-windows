@@ -1,4 +1,4 @@
-"""Windows Desktop App + Linux 4.0.2 sync contracts."""
+"""Windows Desktop App + Linux 4.0.4 sync contracts."""
 
 from __future__ import annotations
 
@@ -12,18 +12,18 @@ WINDOWS = ROOT / "windows"
 
 class V1ReleaseContractTests(unittest.TestCase):
     def test_versions_and_upstream_snapshot(self) -> None:
-        self.assertEqual((ROOT / "VERSION").read_text(encoding="ascii").strip(), "1.0.2")
-        self.assertEqual((ROOT / ".upstream-commit").read_text(encoding="ascii").strip(), "8e6e1bc60b04825df0f5b34467cd2c0105b8a909")
+        self.assertEqual((ROOT / "VERSION").read_text(encoding="ascii").strip(), "1.0.3")
+        self.assertEqual((ROOT / ".upstream-commit").read_text(encoding="ascii").strip(), "209c5568e5a51742cec3fd8a7749688fe531d93e")
         init = (ROOT / "qqbot_studio" / "__init__.py").read_text(encoding="utf-8")
-        self.assertIn('__version__ = "4.0.3"', init)
+        self.assertIn('__version__ = "4.0.4"', init)
         upstream = (ROOT / "UPSTREAM.md").read_text(encoding="utf-8")
-        for marker in ("8e6e1bc60b04825df0f5b34467cd2c0105b8a909", "v4.0.3", "4.0.3", "2.2.0"):
+        for marker in ("209c5568e5a51742cec3fd8a7749688fe531d93e", "v4.0.4", "4.0.4", "2.3.0"):
             self.assertIn(marker, upstream)
         metadata = (ROOT / "plugins" / "qqbot_enhancer" / "metadata.yaml").read_text(encoding="utf-8")
-        self.assertIn("version: 2.2.0", metadata)
-        self.assertIn('LAUNCHER_VERSION = "1.0.2"', (WINDOWS / "launcher.py").read_text(encoding="utf-8"))
+        self.assertIn("version: 2.3.0", metadata)
+        self.assertIn('LAUNCHER_VERSION = "1.0.3"', (WINDOWS / "launcher.py").read_text(encoding="utf-8"))
         native_launcher = (WINDOWS / "native_launcher.py").read_text(encoding="utf-8")
-        self.assertIn('NATIVE_LAUNCHER_VERSION = "1.0.2"', native_launcher)
+        self.assertIn('NATIVE_LAUNCHER_VERSION = "1.0.3"', native_launcher)
         self.assertIn("if args.guide:", native_launcher)
         self.assertLess(native_launcher.index("if args.guide:"), native_launcher.index("from windows import native_app"))
 
@@ -124,6 +124,21 @@ class V1ReleaseContractTests(unittest.TestCase):
         api_doc = (ROOT / "docs" / "ui-api-contract-v2.md").read_text(encoding="utf-8")
         for marker in ("schema_source", "schema_warning", "bundled", "最多 3 次"):
             self.assertIn(marker, api_doc)
+
+
+    def test_v4_0_4_memory_sticker_marker_delivery(self) -> None:
+        plugin = (ROOT / "plugins" / "qqbot_enhancer" / "main.py").read_text(encoding="utf-8")
+        docs = (ROOT / "docs" / "plugin-qqbot-enhancer.md").read_text(encoding="utf-8")
+        for marker in (
+            "on_decorating_result",
+            "qqbot_enhancer_memory_reply",
+            "send_sticker",
+            "Comp.Image",
+            "difflib",
+        ):
+            self.assertIn(marker, plugin)
+        for marker in ("不再只依赖", "结果链含", "不残留", "唯一最佳", "表情状态"):
+            self.assertIn(marker, docs)
 
 
 if __name__ == "__main__":
