@@ -1,6 +1,106 @@
 # Validation record
 
-## v0.7.1 / Native Windows POC (latest development)
+## v0.8.0 / core 3.12.0 / plugin 1.21.0 (latest)
+
+### Sync source
+
+- Linux upstream clean snapshot: `ae10104427b0f1384732d5c9c03b0db1ef75af55`
+  (tag `v3.12.0`);
+- bundled core: `qqbot_studio.__version__ == 3.12.0`;
+- plugin: `qqbot_enhancer` 1.21.0;
+- Windows VERSION: `0.8.0`;
+- manual sync from a clean `ae10104` worktree; second dry-run was `no changes`;
+- `sync-upstream.yml` workflow_dispatch/schedule was not triggered because the
+  environment has no `gh`/`GH_TOKEN`/`GITHUB_TOKEN`; manual steps are in the
+  workflow and README.
+
+### Quality and builds
+
+- Linux Python: **91 tests OK** (1 Windows-only drive-type skip);
+- Windows Python 3.10.9: **91 tests OK**;
+- Windows `compileall`, PowerShell 5.1 AST, Node JS syntax and workflow YAML:
+  passed;
+- PyInstaller 6.10.0 local dual build:
+  - Docker `QQBotStudioWindows.exe`: `8,594,242` bytes, SHA256
+    `4e5cf67e733cd4eee63c81d414e2aee9be9454ac53d0979ac3795bcf72b9fab0`;
+  - Native POC `QQBotStudioWindowsNative.exe`: `6,965,992` bytes, SHA256
+    `235b44cefcd32fbd0231474e27bd53194b0dc99d685e8403c6c60d82c96d6362`;
+  - Native still reports 0.8.0 / core 3.12.0 and retains native_runtime.
+- Docker Desktop 4.93.0 / Engine 29.8.1 / Compose v5.5.1: busybox
+  `config/up/down` all exit 0; output
+  `qqbot-windows-v080-compose-smoke`; container/network removed.
+
+### Real Docker EXE/API smoke
+
+Executed against the local `QQBotStudioWindows.exe` with isolated
+`%LOCALAPPDATA%` and temporary `--data-dir`:
+
+- `/healthz` returned `{"ok":true,"version":"3.12.0"}`;
+- `/console`, `/assistant`, instance-settings/plugin-config/storage assets HTTP
+  200; console contains prompt-manager modal and AI tool permissions UI;
+- `GET /api/instances/bot-1/prompts`:
+  - ok=true, initial prompt count=1;
+  - `restart_required=false`, `conversation_pending=false`,
+    `prompt_plugin_sync_pending=false` for the undeployed instance;
+- prompt profile create/activate:
+  - create `Windows Profile A` with multiline prompt; ok=true;
+  - activate profile; `conversation_created=false`,
+    `conversation_pending=false`, `restart_required=false` for undeployed
+    instance;
+  - GET active_id matches; profile name and internal newline are preserved;
+- plugin config schema fallback (no instance-local schema):
+  - `schema_source=bundled`, 191 fields;
+  - prompt/ambient/conversation/group identity/semantic/multi-category/food
+    fields present; ambient default is false;
+  - POST local save of 0.61 reply probability, 0.74 sticker reaction,
+    safe-tools permission false, `group_personas` two-group JSON,
+    conversation settings and ambient enabled:
+    `ok=true`, `restart_required=true`, `api_available=false`, `source=local`;
+  - repeat GET reads all values back; schema remains bundled/191;
+- partial stats: ok=true, partial=true;
+- plugin list returns local fallback; toggle returns HTTP 400 for undeployed
+  instance (actionable offline error);
+- B diagnostics HTTP 200: `healthy=false`, `error_code=not_installed`, with
+  listener/local_health/public_probe fields;
+- token-protected storage migration:
+  - no token 403; relative target 400; valid target scheduled then completed;
+  - helper restarts management service; old dir retained, target/pointer/
+    migration record correct, request marker removed;
+  - after move plugin values, prompt profile active id/name/newline, stats,
+    B diagnostics and console still work;
+- `--stop` exit 0 and `/healthz` becomes unreachable;
+- real `/food` helper check against official fixed host:
+  - `https://food.dlsz.top/api/restaurants?q=火锅` HTTP 200;
+  - 6 raw items, formatting for max 5 succeeded; no AstrBot/QQ command was
+    involved.
+
+### Native POC preservation
+
+- Native launcher/runtime, real AstrBot/SnowLuma validation record
+  `docs/native-e2e-validation.md`, and Windows-only fixes are retained.
+- Native EXE smoke: `--version`, `--help`, `--guide`, `--check` exit 0;
+  requires official AstrBot/SnowLuma path configuration and reports blockers
+  when absent.
+- No Native QQ login or message E2E is claimed; SnowLuma EULA/QQ scan remains
+  manual `ENV_BLOCKED`.
+
+### Not verified for v0.8.0
+
+- No live QQ/OneBot message test for prompt profiles, named conversations,
+  ambient participation, group persona, `/会话` commands, or real `/food`
+  command; those are schema/API/helper/static contracts plus Linux unit tests.
+- Prompt profile and stale/pending restart behavior was exercised on an
+  undeployed instance and offline local plugin save; a live deployed AstrBot
+  hot-reload/stale-promise test was not performed.
+- No real browser DOM click automation; UI assets/JS and HTTP APIs were tested.
+- No real DeepSeek/LLM generation, QQ scan/device/SMS/slider verification,
+  noVNC, OneDrive/UNC/WSL mount or second physical disk.
+- `sync-upstream` remote workflow was not actually triggered; manual local sync
+  and no-op dry-run were used.
+
+---
+
+## v0.7.1 / Native Windows POC (previous development)
 
 This is a development/POC addition, not a new tagged Release. Bundled core remains
 `3.9.0` / plugin `1.15.0`; Windows VERSION is `0.7.1`.

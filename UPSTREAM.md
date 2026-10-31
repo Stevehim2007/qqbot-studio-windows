@@ -5,12 +5,12 @@ reusable Python/UI core from the Linux project instead of fetching code at
 runtime or build time.
 
 - Upstream project: `git@github.com:Stevehim2007/qqbot-studio.git`
-- Upstream snapshot commit: `6ed41b9b281e01b48e3f58e4ad088f3afdebe2df`
-- Snapshot date: 2026-10-30
-- Upstream release line: v3.9.0
-- Bundled core version: `qqbot_studio.__version__ == 3.9.0`
-- Windows launcher version: `0.7.1`
-- Plugin snapshot: `qqbot_enhancer` 1.15.0
+- Upstream snapshot commit: `ae10104427b0f1384732d5c9c03b0db1ef75af55`
+- Snapshot date: 2026-10-31
+- Upstream release line: v3.12.0
+- Bundled core version: `qqbot_studio.__version__ == 3.12.0`
+- Windows launcher version: `0.8.0`
+- Plugin snapshot: `qqbot_enhancer` 1.21.0
 
 The upstream working tree was clean at the snapshot commit. This repository is
 now the source of truth for the Windows distribution; do not point it at a
@@ -28,12 +28,13 @@ Linux data directory or the Linux auto-update pipeline.
   - schema-driven bool/int/float/string/text/list validation;
   - `reply_probability` highlighted editor and offline restart guidance;
   - sensitive Key/token/password fields excluded;
-- `qqbot_enhancer` 1.15.0 with natural-language image search, downloaded image
-  sending, local song playback, `/option`, memory-mode support, pure Image/Face
-  automatic reactions, collected-sticker categories, and
-  `/收藏表情`, `/表情分类`, `/表情列表`, `/发表情` commands;
-- latest API contract, plugin documentation, troubleshooting and QA references
-  under `docs/`;
+- `qqbot_enhancer` 1.21.0 with prompt profiles/active/new-session, named
+  AstrBot conversation switching, per-group Persona/memory in astrbot mode,
+  ambient group context/participation, group identity, `/food`, unified tool
+  markers, semantic/multi-category stickers, and previous image/song/sticker
+  features;
+- latest v3.12 API contract, prompt-profile/restart-pending documentation,
+  plugin docs and QA references under `docs/`;
 - Windows launcher/services/PowerShell/PyInstaller/CI files maintained here,
   plus tag-driven GitHub Release publishing of the EXE and SHA256.
 

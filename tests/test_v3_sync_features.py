@@ -67,14 +67,14 @@ class V3SyncFeatureTests(unittest.TestCase):
         self.assertIn("public_host", text)
         self.assertIn("没有可点击的浏览器 URL", text)
 
-    def test_plugin_is_1_15_x_and_has_extended_features(self):
+    def test_plugin_is_1_21_x_and_has_extended_features(self):
         metadata = (ROOT / "plugins" / "qqbot_enhancer" / "metadata.yaml").read_text(
             encoding="utf-8"
         )
         match = re.search(r"^version:\s*(\S+)", metadata, re.MULTILINE)
         self.assertIsNotNone(match)
         version_tuple = tuple(int(part) for part in match.group(1).split("."))
-        self.assertGreaterEqual(version_tuple, (1, 15, 0), match.group(1))
+        self.assertGreaterEqual(version_tuple, (1, 21, 0), match.group(1))
         main = (ROOT / "plugins" / "qqbot_enhancer" / "main.py").read_text(
             encoding="utf-8"
         )
@@ -101,6 +101,11 @@ class V3SyncFeatureTests(unittest.TestCase):
             "sticker_semantic_tags_enabled",
             "collected_sticker_multi_category_enabled",
             "safe_tools_allow_search_images",
+            "prompt_profiles",
+            "prompt_profile_active_id",
+            "group_identity_context_enabled",
+            "ambient_group_chat_enabled",
+            "food_enabled",
         ):
             self.assertIn(field, schema)
 
@@ -230,6 +235,84 @@ class V3SyncFeatureTests(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn("AI 工具权限", console)
+
+    def test_v3_12_prompt_profiles_sessions_ambient_and_qa_features(self):
+        for relative in (
+            "plugins/qqbot_enhancer/conversations.py",
+            "plugins/qqbot_enhancer/persona_bridge.py",
+        ):
+            self.assertTrue((ROOT / relative).is_file(), relative)
+        schema = json.loads(
+            (ROOT / "plugins" / "qqbot_enhancer" / "_conf_schema.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertGreaterEqual(len(schema), 191)
+        for marker in (
+            "prompt_profiles",
+            "prompt_profile_active_id",
+            "group_personas",
+            "group_identity_context_enabled",
+            "ambient_group_chat_enabled",
+            "ambient_group_reply_probability",
+            "ambient_group_keywords",
+            "collected_sticker_multi_category_enabled",
+            "sticker_semantic_tags_enabled",
+            "food_enabled",
+            "ai_unified_tool_protocol_enabled",
+        ):
+            self.assertIn(marker, schema)
+        deployer = (ROOT / "qqbot_studio" / "deployer.py").read_text(encoding="utf-8")
+        for marker in (
+            "get_prompt_profiles",
+            "update_prompt_profiles",
+            "PROMPT_PROFILE_MAX_COUNT",
+            "prompt_plugin_sync_pending",
+            "conversation_pending",
+            "restart_required",
+        ):
+            self.assertIn(marker, deployer)
+        server = (ROOT / "qqbot_studio" / "server.py").read_text(encoding="utf-8")
+        for marker in ('subroute == "prompts"', "get_prompt_profiles", "update_prompt_profiles"):
+            self.assertIn(marker, server)
+        console_html = (STATIC / "console.html").read_text(encoding="utf-8")
+        console_js = (STATIC / "console.js").read_text(encoding="utf-8")
+        for marker in (
+            "prompt-manager-modal",
+            "新增提示词",
+            "旧会话历史不会自动带过去",
+        ):
+            self.assertIn(marker, console_html)
+        for marker in ("/prompts", "restart_required", "conversation_created", "提示词列表"):
+            self.assertIn(marker, console_js)
+        api_doc = (ROOT / "docs" / "ui-api-contract-v2.md").read_text(encoding="utf-8")
+        for marker in (
+            "GET /api/instances/<instance_id>/prompts",
+            "POST /api/instances/<instance_id>/prompts",
+            "prompt_plugin_sync_pending",
+            "conversation_pending",
+            "restart_required",
+            "最多 100 个 profile",
+        ):
+            self.assertIn(marker, api_doc)
+        plugin_doc = (ROOT / "docs" / "plugin-qqbot-enhancer.md").read_text(
+            encoding="utf-8"
+        )
+        for marker in (
+            "按名称",
+            "ambient",
+            "群身份",
+            "/food",
+            "多分类",
+            "语义",
+            "group_personas",
+        ):
+            self.assertIn(marker, plugin_doc)
+        for relative in (
+            "docs/qa-report-v2.md",
+            "qqbot_studio/static/services/api.js",
+        ):
+            self.assertTrue((ROOT / relative).is_file(), relative)
 
     def test_plugin_parameter_config_api_and_ui_are_synced(self):
         server = (ROOT / "qqbot_studio" / "server.py").read_text(encoding="utf-8")

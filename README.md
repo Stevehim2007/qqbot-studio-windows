@@ -6,17 +6,17 @@ QQ Bot Studio 的**独立 Windows 10/11 双发行版项目**：
 
 - **Docker edition（稳定）**：Docker Desktop + WSL2 + Linux containers；
 - **Native edition（POC）**：官方 SnowLuma Windows + 本机 NTQQ 单实例路线；
-  Native EXE 已实现本地进程/PID/日志/端口/health/config/OneBot 管理，但真实
-  AstrBot/SnowLuma/NTQQ 安装与 QQ 登录 E2E 仍未验证。
+  Native EXE 已实现本地进程/PID/日志/端口/health/config/OneBot 管理，并已在临时
+  目录真实验证 AstrBot/SnowLuma 启动；QQ EULA/登录仍为 ENV_BLOCKED。
 
 本仓库不是 Linux 项目的打包目录，也不是它的自动更新分支。它拥有自己的启动器、
 Windows 服务生命周期实现、版本号、数据目录约定、测试和发布流水线。
 
-> **状态：Windows v0.7.1 Native POC 开发版（最新正式 Release 为 v0.7.0），已同步主项目 core 3.9.0。**
+> **状态：Windows v0.8.0 发布候选（最新正式 Release 为 v0.7.0），已同步主项目 core 3.12.0。**
 >
 > 已包含独立 `/assistant` AI 助手页面、控制台 30 分钟刷新 + 手动刷新、
 > AI 助手 B 本机/公网配置、控制台插件参数编辑（`reply_probability` 等）、
-> qqbot_enhancer 1.15.0 `/food`、按群 persona、统一 AI tool marker、schema fallback 和最新 API/FAQ 文档；
+> qqbot_enhancer 1.21.0 提示词 profiles/active/新会话、按名会话、ambient 群聊、群身份、`/food`、统一 AI tool marker、多分类语义收藏和最新 API/FAQ 文档；
 > v0.4.1 新增 Windows 文件位置说明和 CLI 安全迁移；v0.4.2 新增
 > token 保护的控制台“存储文件夹”迁移入口、后台 helper 自动停服/复制/重启，
 > 以及 Docker/Native 双 EXE 构建与 `sync-upstream` 同步流水线。
@@ -26,6 +26,8 @@ Windows 服务生命周期实现、版本号、数据目录约定、测试和发
 > 自然语言重分类/发表情、AI 工具权限 UI、配置并发重试与 partial stats。
 > v0.7.0 同步 Linux 3.9.0：`/food`、按群 direct persona、schema fallback、
 > 统一 AI tool marker、#sl 关闭、提示词换行保留和最新 UI/backend。
+> v0.8.0 同步 Linux 3.12.0：提示词 profiles/active/新会话、按名会话、ambient
+> 全群上下文/@ 回复、AstrBot 每群 Persona、群身份、多分类语义收藏和 QA 文档。
 > Docker EXE、隐藏管理服务、Docker Desktop/Linux engine 和本机 smoke 已做部分
 > 真实验证；发布使用 `v*` tag 触发的 GitHub Release。
 > **Native EXE 已是单实例 POC 进程管理器，并在临时目录用真实 AstrBot 4.29.3 +
@@ -57,7 +59,7 @@ websockify，共享整个交互式 Windows 桌面，不承诺每实例独立屏�
 
 ### Native Windows POC
 
-Native POC 当前实现（`VERSION=0.7.1`，不作为已发布稳定版）：
+Native POC 当前实现（`VERSION=0.8.0`，随 v0.8.0 发行）：
 
 - 数据根：`%LOCALAPPDATA%\QQBotStudio\data\native`；
 - `native.json` 保存 AstrBot 命令/`ASTRBOT_ROOT`、SnowLuma 目录/命令、NTQQ 路径、
@@ -98,18 +100,29 @@ AstrBot OneBot `ws://127.0.0.1:16199/ws` TCP listening=true、health
 没有伪造登录成功。完整证据、版本、日志摘要和清理见
 [`docs/native-e2e-validation.md`](docs/native-e2e-validation.md)。
 
-Native POC 开发构建（`VERSION=0.7.1`，未 tag/Release）：
+Native v0.8.0 本地候选构建：
 
-- Docker `QQBotStudioWindows.exe`：`8,567,126` bytes，SHA256
-  `7478d9581fa9963e92b58b3cf5e4db7e37a810562e0384fd8bcef0407fdae76f`；
-- Native POC `QQBotStudioWindowsNative.exe`：`6,965,919` bytes，SHA256
-  `53950b2a57498523a1076e47ad47d7f76c8959718055b3b9cd58c78eac340fea`；
-- Linux/Windows 各 90 tests OK；真实组件启动、health、OneBot listener、logs、stop
+- Docker `QQBotStudioWindows.exe`：`8,594,242` bytes，SHA256
+  `4e5cf67e733cd4eee63c81d414e2aee9be9454ac53d0979ac3795bcf72b9fab0`；
+- Native POC `QQBotStudioWindowsNative.exe`：`6,965,992` bytes，SHA256
+  `235b44cefcd32fbd0231474e27bd53194b0dc99d685e8403c6c60d82c96d6362`；
+- Linux/Windows 各 91 tests OK；真实组件启动、health、OneBot listener、logs、stop
   已验证；QQ EULA/扫码人工步骤 ENV_BLOCKED。
 
 本仓库 vendor 了主项目的 `qqbot_studio/` Python 核心、静态 UI、`assets/` 和
 `plugins/qqbot_enhancer/`。这不是符号链接，也不会在运行时从 Linux 主项目拉取代码。
 快照来源与更新方法见 [`UPSTREAM.md`](UPSTREAM.md)。
+
+### v3.12.0 同步内容
+
+- core `3.12.0`、qqbot_enhancer `1.21.0`；
+- 多提示词 profiles：create/update/delete/activate、active 切换、新提示词启动新会话；
+- 按名会话（`/会话`、`/切换会话`、`/新会话`）、群 persona 绑定与安全校验；
+- AstrBot memory 按群 Persona/记忆；astrbot 模式不再错误使用每用户会话；
+- ambient 全群短期上下文、低频参与、官方 At/昵称降级、私聊边界；
+- 群身份上下文、多分类/语义收藏、`/food`、统一 tool marker；
+- stale/pending restart 语义、容量上限、prompt API/UI、E2E smoke/harness、QA 文档；
+- 保留 Windows Native POC 及真实启动验证文档。
 
 ### v3.9.0 同步内容
 
@@ -197,8 +210,8 @@ Native POC 开发构建（`VERSION=0.7.1`，未 tag/Release）：
 
 ### 升级边界
 
-- 本仓库独立维护版本：当前开发版 `VERSION = 0.7.1`，bundled core 版本为
-  `qqbot_studio.__version__ = 3.9.0`。
+- 本仓库独立维护版本：当前开发版 `VERSION = 0.8.0`，bundled core 版本为
+  `qqbot_studio.__version__ = 3.12.0`。
 - Linux 主项目的自动更新、`scripts/auto-update.sh` 和网页内“更新并重启”不适用于
   本仓库。
 - Windows 版升级方式是：下载新的 EXE / PowerShell 发行包，停止旧管理服务，保留
@@ -704,17 +717,17 @@ Windows 文档同步规则与 Linux 主项目 `docs/windows-editions-research.md
 本仓库已在同一台 Windows 主机上通过 WSL interop 使用 Windows PowerShell 5.1、
 Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 
-- 独立测试套件 **90 tests** 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
+- 独立测试套件 **91 tests** 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
 - Windows Python `compileall`、PowerShell 5.1 AST、Node JS 检查通过；
 - Docker Desktop 4.93.0 / Engine 29.8.1 / `OSType=linux` / Compose v5.5.1；
 - 最小 busybox Compose `config/up/down` 全部 exit 0，容器实际输出
   `qqbot-windows-v070-compose-smoke` 后清理；
 - PyInstaller 6.10.0 实际构建出 Docker/Native 两个 one-file EXE：
-  - Docker：`8,567,126` bytes，SHA256
-    `7478d9581fa9963e92b58b3cf5e4db7e37a810562e0384fd8bcef0407fdae76f`；
-  - Native POC：`6,965,919` bytes，SHA256
-    `53950b2a57498523a1076e47ad47d7f76c8959718055b3b9cd58c78eac340fea`；
-- Docker EXE `--assistant` 启动后 `/healthz` 返回 version `3.9.0`，`/console` 与
+  - Docker：`8,594,242` bytes，SHA256
+    `4e5cf67e733cd4eee63c81d414e2aee9be9454ac53d0979ac3795bcf72b9fab0`；
+  - Native POC：`6,965,992` bytes，SHA256
+    `235b44cefcd32fbd0231474e27bd53194b0dc99d685e8403c6c60d82c96d6362`；
+- Docker EXE `--assistant` 启动后 `/healthz` 返回 version `3.12.0`，`/console` 与
   `/assistant` 均 HTTP 200；
 - Native POC `--version/--help/--guide/--check` 实际通过；fake 进程和 fake HTTP
   smoke 验证过 `--configure/--start/--status/--logs/--stop/--health`；随后在临时
@@ -722,37 +735,40 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
   AstrBot/SnowLuma HTTP 200、OneBot listener=true、health OK；QQ EULA/扫码未完成，
   明确标记 ENV_BLOCKED；
 - `--move-data` 最终 EXE smoke 通过：旧目录保留、目标数据/迁移记录/pointer 写入，
-  可通过 pointer 在目标目录重启 `/healthz` 3.9.0，`--stop` 后 health 不可达；
-- 最终插件配置 API 实测 **169 字段**；`safe_tools_marker_enabled`、
-  `sticker_semantic_tags_enabled`、`collected_sticker_multi_category_enabled`、
-  `sticker_ai_auto_collect_enabled` 存在，`image_search_second_source_enabled=false`
-  （默认 Bing-only）；POST `reply_probability=0.57` /
-  `user_sticker_reaction_probability=0.72` / `safe_tools_allow_search_images=false`
-  后读取持久化值，`restart_required=true`；
+  可通过 pointer 在目标目录重启 `/healthz` 3.12.0，`--stop` 后 health 不可达；
+- 最终插件配置 API 实测 **191 字段**；schema 含提示词 profiles、按名会话、
+  ambient/grou identity、`safe_tools_marker_enabled`、语义标签、多分类收藏、
+  `/food` 等字段；POST 保存 `reply_probability=0.61` /
+  `user_sticker_reaction_probability=0.74` / `safe_tools_allow_search_images=false`
+  / ambient / conversation / group_personas 后读取持久化值；未部署实例的插件配置
+  POST 返回 `restart_required=true`、`api_available=false`、`source=local`；
 - 控制台 `/console.js` 和实例设置 modal 含 **AI 工具权限 / AI 自动表情** UI；
   `/components/instance-settings.js`、`/services/plugin-config.js`、存储迁移 UI
   均 HTTP 200；partial stats 返回 `ok=true, partial=true`；
 - 插件 schema 缺失时实测回退 bundled schema：`schema_source=bundled`、
   `schema_path=C:\...\_MEI...\plugins\qqbot_enhancer\_conf_schema.json`，
-  169 字段；`/food` 相关字段（`food_enabled` 等）、`group_persona_enabled`、
-  `group_personas`、`ai_unified_tool_protocol_enabled` 均存在；
-- 通过插件配置 API 设置 `group_personas` 两群 JSON 和
+  191 字段；提示词 profiles、ambient、群身份、conversation、/food 和多分类
+  语义收藏字段均存在；
+- 通过插件配置 API 设置 `group_personas` 两群 JSON、conversation/ambient 设置和
   `safe_tools_allow_search_images=false`，迁移后仍读取到群 ID/默认 persona 和设置；
+- 提示词 profiles API 实测：创建/激活 `Windows Profile A`，多行 prompt 原样保留；
+  未部署实例 `restart_required=false`、`conversation_pending=false`，
+  离线插件配置 POST 则 `restart_required=true`（pending 语义）；
+- `/food` 真实读取 `food.dlsz.top`：HTTP 200、6 条结果、格式化成功（不经过 QQ）；
 - 控制台实例设置 modal、`/components/instance-settings.js`、
   `/services/plugin-config.js` 实际 HTTP 200；插件列表 API 返回本地降级列表；
   未部署实例的插件开关 API 返回可操作的 400（没有 AstrBot 运行）；
 - B 诊断 API `/api/assistant/diagnose` 实际 200，`healthy=false`、
   `error_code=not_installed`，并返回 listener/local_health/public_probe 字段；
 - `sync-upstream` 本地 dry-run + 实际同步通过；上游记录为
-  `6ed41b9b281e01b48e3f58e4ad088f3afdebe2df`（core 3.9.0/plugin 1.15.0），
+  `ae10104427b0f1384732d5c9c03b0db1ef75af55`（core 3.12.0/plugin 1.21.0），
   第二次 dry-run 为 no changes；GitHub workflow_dispatch 因无 token/gh 未实际触发；
 - 通过 token API 创建实例 `bot-1`，并使用插件 schema 实测插件参数配置：
-  - GET 返回 169 个 schema 字段；`reply_probability=0.12`，
-    `user_sticker_reaction_enabled=true`；
-  - POST 保存 `reply_probability=0.57` 和
-    `user_sticker_reaction_probability=0.72`，离线返回
-    `restart_required=true`；
-  - 再次 GET 读取为 `0.57` / `0.72`；
+  - GET 返回 191 个 schema 字段；默认 `reply_probability=0.12`；
+  - POST 保存 `reply_probability=0.61`、`user_sticker_reaction_probability=0.74`
+    及提示词/ambient/conversation/persona 设置，离线返回
+    `restart_required=true`、`api_available=false`、`source=local`；
+  - 再次 GET 读取为 `0.61` / `0.74`，并保留 ambient、conversation 和群 persona；
 - `/console` 含插件编辑器和 `/assistant` 链接，不含旧 A/B DOM；
 - `--status` 和 `--stop` 实测通过，停止后 health 不可达。
 
@@ -760,13 +776,12 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 
 ### 仍未验证
 
-- v0.7.0 的 dual build run `41078163641` 和 dual Release run `41078425027` 已实际成功；
-  双 EXE、SHA256、README、VALIDATION 均已上传。
+- v0.8.0 的 dual build / Release workflow 将在本次发布中实际执行；v0.7.0 Release 保留不重复 tag。
 - 浏览器自动打开未测试，服务生命周期测试均使用 `--no-open`。
 - `install.ps1` 全流程、winget 安装、WSL2 初始化/重启未测试。
 - Windows Defender 防火墙、云安全组、局域网/VPN 远程访问未测试。
 - GitHub Actions `sync-upstream` 实际 dispatch/schedule 未执行（环境没有
-  gh/GH_TOKEN/GITHUB_TOKEN）；当前 v0.7.0 是本地执行同一 sync 脚本手动同步。
+  gh/GH_TOKEN/GITHUB_TOKEN）；当前 v0.8.0 是本地执行同一 sync 脚本手动同步。
   请在 Actions 页面手动点一次 `Sync upstream Linux snapshot` 做远端流程验证。
 - 双 EXE `v*` Release workflow 已实际执行并成功；Release URL 和两个资产 SHA 见上。
 - Native POC 已在临时目录真实安装/启动 AstrBot 4.29.3 + SnowLuma 2.2.1 + Node
@@ -784,10 +799,10 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 ## 8. 文档与 FAQ
 
 - [`docs/README.md`](docs/README.md)：Windows 文档索引；
-- [`docs/FAQ.md`](docs/FAQ.md)：`/assistant`、AI 助手 B 公网、30 分钟刷新、插件 1.15.0、
+- [`docs/FAQ.md`](docs/FAQ.md)：`/assistant`、AI 助手 B 公网、30 分钟刷新、插件 1.21.0、
   EXE、端口和升级问题；
 - [`docs/ui-api-contract-v2.md`](docs/ui-api-contract-v2.md)：最新管理 API 契约；
-- [`docs/plugin-qqbot-enhancer.md`](docs/plugin-qqbot-enhancer.md)：qqbot_enhancer 1.15.0；
+- [`docs/plugin-qqbot-enhancer.md`](docs/plugin-qqbot-enhancer.md)：qqbot_enhancer 1.21.0；
 - [`VALIDATION.md`](VALIDATION.md)：真实执行和未验证项；
 - [`UPSTREAM.md`](UPSTREAM.md)：vendor 来源与下次同步步骤；
 - [Linux 主项目 README](https://github.com/Stevehim2007/qqbot-studio/blob/main/README.md)：
