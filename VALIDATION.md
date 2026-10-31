@@ -74,6 +74,27 @@ Executed against the local `QQBotStudioWindows.exe` with isolated
   - 6 raw items, formatting for max 5 succeeded; no AstrBot/QQ command was
     involved.
 
+### Release publication
+
+- Pre-release dual build run `41150534303`: success; artifact
+  `QQBotStudioWindows-dual-7b39d17...` size `19,812,904` bytes.
+- `v0.8.0` tag points at `7b39d1712038347f88a038294b5d1c54d0fb50c7`.
+- Release workflow run `41150711387`: success, all release steps passed
+  (tag/VERSION, upstream metadata gate, 91 tests, compileall, PowerShell AST,
+  dual PyInstaller, both EXE smokes, artifact upload and Create GitHub Release).
+- Release URL:
+  https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.8.0
+- Public GitHub API confirmed:
+  - `QQBotStudioWindows.exe`: `10,958,873` bytes,
+    digest `sha256:917e716df767759151d43874a8715df70b73fdbb463207850879dc06c4ca6305`;
+  - `QQBotStudioWindowsNative.exe`: `9,042,757` bytes,
+    digest `sha256:ceb8c36bea77b3271edbf56857d91942aea8431043f30c0dd58682b26988933a`;
+  - `SHA256SUMS.txt` downloaded; both lines matched the GitHub API digests;
+  - `README.md` and `VALIDATION.md` present.
+- `sync-upstream.yml` `workflow_dispatch` was attempted unauthenticated and
+  returned HTTP 401 Requires authentication; no token was available, so the
+  remote workflow was not triggered. Manual local sync and no-op dry-run passed.
+
 ### Native POC preservation
 
 - Native launcher/runtime, real AstrBot/SnowLuma validation record

@@ -1,8 +1,9 @@
 # Native Windows 真实组件安装与启动验证
 
 日期：2026-10-31（本机时区）
-验证对象：Windows Native POC（`VERSION=0.7.1`，Windows repo commit
-`4860d12` 加本文件所在提交）
+验证对象：Windows Native POC（真实验证使用 `VERSION=0.7.1`；该 runtime 代码在
+v0.8.0 中保留，Native EXE 只做了版本/`--check` smoke，未重复安装真实组件）
+Windows repo commit `4860d12` 加本文件所在提交
 验证范围：Windows 10/11 x64 原生进程；无 Docker、无 WSL、无 noVNC，
 单实例；QQ 登录只在官方本机 NTQQ 窗口中人工完成。
 
