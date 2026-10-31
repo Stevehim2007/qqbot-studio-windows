@@ -32,7 +32,8 @@ Windows 服务生命周期实现、版本号、数据目录约定、测试和发
 > 依赖、E2E 脚本（排除 artifacts）和净减源码/测试。
 > v0.9.0 同步 Linux 3.13.0：profile 模板库/pinned 默认模板、activate 不 pending、
 > `/新会话 名称 [提示词标题]`、`/表情状态`、配置 backup 恢复。
-> v0.10.0 POC：pywebview/WebView2 双版本桌面 App shell、详细启动/诊断日志、
+> v0.10.0 POC：pywebview/WebView2 双版本桌面 App shell、左栏“控制台/向导”、
+> Linux v4.0.1 向导步骤下拉/部署后前三步锁定、详细启动/诊断日志、
 > Native 一键安装向导（官方组件 URL/SHA256 校验）；尚未发布 tag。
 > Docker EXE、隐藏管理服务、Docker Desktop/Linux engine 和本机 smoke 已做部分
 > 真实验证；发布使用 `v*` tag 触发的 GitHub Release。
@@ -108,11 +109,11 @@ AstrBot OneBot `ws://127.0.0.1:16199/ws` TCP listening=true、health
 
 App Shell POC 本地构建（未发布，详见 [`docs/app-shell-and-native-installer-poc.md`](docs/app-shell-and-native-installer-poc.md)）：
 
-- Docker `QQBotStudioWindows.exe`：`16,146,311` bytes，SHA256
-  `a2358356abe6a43733f37e8c36a4b7b02ab9c493c38848a968eb7c7426f88097`；
-- Native `QQBotStudioWindowsNative.exe`：`14,926,682` bytes，SHA256
-  `2163ddc4a290f7a4db5cc38d6b66817e95d7e2f352e3346a451f49ca88301348`；
-- Linux/Windows 各 97 tests OK（POC tree）；Docker App 窗口和 Native Dashboard
+- Docker `QQBotStudioWindows.exe`：`16,148,946` bytes，SHA256
+  `71fb0226578a93bd308c520a7041fcbf7c13ced081aea29f1ef9438b46e96ec0`；
+- Native `QQBotStudioWindowsNative.exe`：`14,931,650` bytes，SHA256
+  `242a91f3893dcb9cdbf77721eb4e0e665b75146f182c0e49e763c2a6fd76aae8`；
+- Linux/Windows 各 101 tests OK（POC tree）；Docker App 窗口和 Native Dashboard
   实际启动/关闭通过；Native 一键安装 plan 检测通过；
 - 真实 QQ 登录/SnowLuma EULA/QQ 消息 E2E 仍为 ENV_BLOCKED。
 
@@ -128,7 +129,9 @@ App Shell POC 本地构建（未发布，详见 [`docs/app-shell-and-native-inst
   当前 v0.9.0 本地构建没有 Python/PyInstaller 崩溃，父进程按设计启动后台服务、
   打开外部浏览器后退出；首次运行还可能打开自动探测的公网 IP URL。
 - POC 改为 pywebview + Edge WebView2 桌面窗口，始终加载 loopback URL；
-  窗口关闭前父进程保持；诊断日志浮层可复制/打开日志目录。
+  窗口关闭前父进程保持；左栏“控制台/向导”在同一窗口内导航；
+  向导复用 Linux v4.0.1 的步骤下拉与部署后前三步锁定逻辑；
+  诊断日志浮层可复制/打开日志目录。
 - Native 默认打开 App 仪表盘；一键安装核心使用官方固定 URL/SHA256 下载
   uv/AstrBot wheel/SnowLuma/Node，并生成 AstrBot/SnowLuma OneBot 配置；
   NTQQ 仅检测，QQ 扫码/EULA 人工。
@@ -758,7 +761,7 @@ Windows 文档同步规则与 Linux 主项目 `docs/windows-editions-research.md
 本仓库已在同一台 Windows 主机上通过 WSL interop 使用 Windows PowerShell 5.1、
 Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 
-- 独立测试套件 **97 tests**（POC tree） 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
+- 独立测试套件 **101 tests**（POC tree） 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
 - Windows Python `compileall`、PowerShell 5.1 AST、Node JS 检查通过；
 - Docker Desktop 4.93.0 / Engine 29.8.1 / `OSType=linux` / Compose v5.5.1；
 - 最小 busybox Compose `config/up/down` 全部 exit 0，容器实际输出

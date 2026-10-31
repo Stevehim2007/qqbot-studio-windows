@@ -29,29 +29,36 @@ Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](d
 ### POC implementation/verification
 
 - `windows/app_shell.py`: pywebview 6.2.1 WebView2 shell, rotating logs,
-  injected diagnostics panel (copy/open log folder), Tk error-window fallback,
-  loopback-only app URL.
+  left App navigation (控制台/向导), injected diagnostics panel
+  (copy/open log folder), Tk error-window fallback, loopback-only app URL.
+- Wizard navigation now ports Linux v4.0.1/task-96: in-page step dropdown,
+  and after deployment (deployed/jobCompleted) steps 1-3 are locked; only
+  completion/manual verification remains accessible.
 - `windows/native_app.py`: Native dashboard with status cards, install progress,
   start/stop, NTQQ open, logs copy/open.
 - `windows/native_setup.py`: one-click official-source installer plan/download
   with pinned sizes and SHA256:
   uv 0.13.6, AstrBot 4.29.3 wheel, SnowLuma 2.2.1 win-x64-lite,
   Node.js 26.13.0; NTQQ detection only; EULA/QQ verification manual.
-- POC dual EXE build (not released): Docker `16,146,311` bytes SHA256
-  `a2358356abe6a43733f37e8c36a4b7b02ab9c493c38848a968eb7c7426f88097`;
-  Native `14,926,682` bytes SHA256
-  `2163ddc4a290f7a4db5cc38d6b66817e95d7e2f352e3346a451f49ca88301348`.
+- POC dual EXE build (not released): Docker `16,148,946` bytes SHA256
+  `71fb0226578a93bd308c520a7041fcbf7c13ced081aea29f1ef9438b46e96ec0`;
+  Native `14,931,650` bytes SHA256
+  `242a91f3893dcb9cdbf77721eb4e0e665b75146f182c0e49e763c2a6fd76aae8`.
 - Docker App smoke: window opened existing console at
-  `http://127.0.0.1:18830/console`; app-shell log recorded
-  `diagnostics panel injected` and `app window closed normally`; server assets
-  HTTP 200; health 3.13.0 after window close.
+  `http://127.0.0.1:18830/console` with left “控制台/向导” nav; app-shell log
+  recorded `app navigation and diagnostics panel injected` and
+  `app window closed normally`; server assets HTTP 200; health 3.13.0 after
+  window close.
+- Docker wizard smoke: automated click of “向导” navigated to
+  `/wizard?instance=bot-1` (HTTP 200) in the same WebView2 window; the
+  Linux v4.0.1-style quick jump dropdown was visible; no external browser.
 - Native App smoke: dashboard window opened/closed and logged normally;
   packaged `--install-plan --json` detected real Windows x64 + NTQQ
   `D:\Program Files\Tencent\QQ.exe` + uv/node and returned all four official
   sources/checksums.
 - Tk error-window fallback test opened and auto-closed with return 1; log panel
   is copyable.
-- POC test suite: Linux/Windows **97 tests OK** (Linux skips one Windows-only
+- POC test suite: Linux/Windows **101 tests OK** (Linux skips one Windows-only
   drive test); compileall, PowerShell AST, JS/YAML/upstream metadata gate pass.
 
 ### POC limitations

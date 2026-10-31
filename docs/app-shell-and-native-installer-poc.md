@@ -47,9 +47,19 @@ POC 修复方向：不再启动外部浏览器；父进程保持到 WebView2 窗
 - Native 版窗口承载新的单实例 Native 仪表盘；
 - 共用 `windows/app_shell.py`：
   - WebView2 窗口；
+  - 左侧 App 导航分栏：第一行“控制台”，第二行“向导”；
   - 文件日志；
   - 页面内“诊断日志”浮层（复制/打开日志目录）；
   - pywebview/WebView2 失败时退回 Tk 错误窗口，窗口内显示可复制日志，不静默退出；
+- Docker App 导航：
+  - “控制台”-> `/console`；
+  - “向导”-> 读取 `/api/instances` 后打开 `/wizard?instance=<本机实例>`；无实例时打开 `/wizard` 入口；
+  - 全程同一 WebView2 窗口内导航，不打开外部浏览器。
+- 向导复用 Linux v4.0.1/task-96 的锁定逻辑并移植到 Windows v3.13.0 静态页面：
+  - 向导侧栏加入“快速跳转步骤”下拉菜单；
+  - 步骤 1 环境、2 账号与模型、3 部署进度、4 完成与运行；
+  - `deployment.deployed || app.jobCompleted` 后前三步按钮和下拉选项全部禁用，只允许“完成与运行”；
+  - 已部署页面显示“环境/账号/部署步骤已锁定”说明。
 - `QQBOT_APP_AUTOCLOSE_SECONDS` 仅用于自动化 smoke，正式用户不设置。
 - Docker 窗口始终用 loopback URL；`public_host` 只用于显示/远程访问链接。
 
@@ -58,18 +68,21 @@ POC 修复方向：不再启动外部浏览器；父进程保持到 WebView2 窗
 构建：`windows/build.ps1`，Windows Python 3.10，PyInstaller 6.10.0。
 POC EXE（未发布）：
 
-- Docker：16,146,311 bytes，SHA256
-  `a2358356abe6a43733f37e8c36a4b7b02ab9c493c38848a968eb7c7426f88097`
-- Native：14,926,682 bytes，SHA256
-  `2163ddc4a290f7a4db5cc38d6b66817e95d7e2f352e3346a451f49ca88301348`
+- Docker：16,148,946 bytes，SHA256
+  `71fb0226578a93bd308c520a7041fcbf7c13ced081aea29f1ef9438b46e96ec0`
+- Native：14,931,650 bytes，SHA256
+  `242a91f3893dcb9cdbf77721eb4e0e665b75146f182c0e49e763c2a6fd76aae8`
 
 用隔离环境、预配置 loopback、`QQBOT_APP_AUTOCLOSE_SECONDS=6` 启动 Docker EXE：
 
-- app window 打开现有控制台；
+- app window 打开现有控制台，左侧 App 导航显示“控制台/向导”；
 - app-shell.log：
   - `starting app window ... url=http://127.0.0.1:18830/console`
-  - `diagnostics panel injected`
+  - `app navigation and diagnostics panel injected`
   - `app window closed normally`
+- 自动化 POC hook 点击“向导”后，server log 实际出现
+  `GET /wizard?instance=bot-1 HTTP/1.1 200`，页面显示 Linux v4.0.1
+  同源的“快速跳转步骤”下拉菜单；
 - server log 显示控制台及 services/api.js 等资产全部 HTTP 200；
 - 管理服务在窗口关闭后仍健康，健康检查 3.13.0；
 - 不再依赖外部浏览器。
@@ -77,6 +90,9 @@ POC EXE（未发布）：
 ## 4. Native App / 一键安装 POC
 
 - Native 启动器默认打开 Native 仪表盘窗口，不再默认打印 CLI guide；
+- 仪表盘同样有左侧“控制台/向导”导航；向导含 4 步下拉菜单
+  （环境检查/安装组件/配置与启动/完成与人工验证），组件安装完成后
+  前三步锁定，只允许进入完成与人工验证；
 - 仪表盘显示 NTQQ/AstrBot/SnowLuma/Node 状态、安装进度、运行控制、
   诊断日志复制/打开目录；
 - 一次安装核心在 `windows/native_setup.py`，全部使用固定官方来源并校验大小/SHA256：
@@ -101,7 +117,22 @@ POC 验证：
   Node 26.13 的启动；本轮遵循“不重复 Native 真机安装”的范围限制。
 - 一键安装的完整下载→安装→启动 E2E 仍需在有网干净用户目录执行一次后再宣称完成。
 
-## 5. 当前限制
+## 5. 2026-10-31 补充验证：导航与向导演进
+
+- 已同步 Linux v4.0.1/task-96 的向导步骤下拉与部署后前三步锁定逻辑到
+  Windows v3.13.0 静态页面；新增 `wizard-step-select`、`wizard-step-lock-note`，
+  `deploymentStepsLocked()/isStepAvailable()` 单元 JS 测试通过。
+- Docker App 实际截图/自动化 smoke：左栏“控制台/向导”正常，点击“向导”
+  成功进入 `/wizard?instance=bot-1`，页面内下拉菜单可见；无外部浏览器。
+- Native 仪表盘增加相同左栏导航；向导 4 步下拉/锁定代码就绪。
+- Windows/Linux 测试均为 **101 tests OK**（Linux 1 个 Windows-only skip）；
+  最终 POC 构建哈希：
+  - Docker `16,148,946` bytes
+    `71fb0226578a93bd308c520a7041fcbf7c13ced081aea29f1ef9438b46e96ec0`
+  - Native `14,931,650` bytes
+    `242a91f3893dcb9cdbf77721eb4e0e665b75146f182c0e49e763c2a6fd76aae8`
+
+## 6. 当前限制
 
 - App shell POC 尚未在真实用户干净目录做首次双击/缩放/DPI/托盘体验验收；
 - 正式下载的 v0.9.0 EXE 有 MOTW/SmartScreen/未签名下载风险，本轮未能下载 release

@@ -168,6 +168,93 @@ class AppDiagnosticsAPI:
         }
 
 
+
+_APP_NAV_JS = r"""
+(function () {
+  if (document.getElementById('qb-app-nav')) return;
+  const navWidth = 176;
+  const currentPath = String(window.location.pathname || '');
+  const isWizard = currentPath.indexOf('/wizard') === 0;
+  const style = document.createElement('style');
+  style.id = 'qb-app-nav-style';
+  style.textContent = `
+    :root { --qb-app-nav-width: 176px; }
+    #qb-app-nav{position:fixed;inset:0 auto 0 0;width:176px;z-index:2147483644;display:flex;
+      flex-direction:column;gap:8px;padding:18px 12px 14px;box-sizing:border-box;
+      color:#e7fffa;background:linear-gradient(170deg,#06172a 0%,#0a2944 60%,#082238 100%);
+      border-right:1px solid rgba(255,255,255,.1);box-shadow:12px 0 34px rgba(2,12,24,.2);
+      font:13px/1.4 'Segoe UI','Microsoft YaHei UI',sans-serif;}
+    #qb-app-nav .qb-app-brand{display:flex;align-items:center;gap:9px;padding:2px 6px 16px;
+      border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px;}
+    #qb-app-nav .qb-app-brand-mark{width:31px;height:31px;border-radius:10px;display:grid;place-items:center;
+      color:#65efd0;background:linear-gradient(145deg,#0e3556,#0c5b60);border:1px solid #2b6881;font-size:17px;}
+    #qb-app-nav .qb-app-brand-copy{display:flex;flex-direction:column;min-width:0;}
+    #qb-app-nav .qb-app-brand-copy strong{font-size:13px;color:#f5fffd;letter-spacing:.01em;}
+    #qb-app-nav .qb-app-brand-copy small{font-size:9px;color:#87b3c6;letter-spacing:.08em;}
+    #qb-app-nav .qb-app-nav-label{padding:7px 7px 2px;color:#6f9db3;font-size:9px;font-weight:750;
+      letter-spacing:.14em;text-transform:uppercase;}
+    #qb-app-nav .qb-app-nav-button{display:flex;align-items:center;gap:10px;width:100%;min-height:43px;
+      padding:9px 11px;border:1px solid transparent;border-radius:10px;color:#c2dce8;background:transparent;
+      font:650 13px 'Segoe UI','Microsoft YaHei UI',sans-serif;text-align:left;cursor:pointer;}
+    #qb-app-nav .qb-app-nav-button:hover{color:#f4fffd;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1);}
+    #qb-app-nav .qb-app-nav-button[aria-current="page"]{color:#06251f;
+      background:linear-gradient(135deg,#7cf2d5,#29d6a7);border-color:#a2ffe5;box-shadow:0 7px 18px rgba(9,120,91,.22);}
+    #qb-app-nav .qb-app-nav-icon{width:22px;height:22px;display:grid;place-items:center;border:1px solid currentColor;
+      border-radius:7px;font-size:13px;line-height:1;}
+    #qb-app-nav .qb-app-nav-spacer{flex:1;}
+    #qb-app-nav .qb-app-nav-meta{padding:10px 7px 0;border-top:1px solid rgba(255,255,255,.1);
+      color:#7198ac;font:10px/1.5 'Cascadia Mono','Consolas',monospace;word-break:break-all;}
+    #qb-app-nav .qb-app-nav-meta strong{display:block;color:#a7cad8;font-weight:600;}
+    @media (max-width: 900px){
+      :root { --qb-app-nav-width: 148px; }
+      #qb-app-nav{width:148px;padding:12px 8px;}
+      #qb-app-nav .qb-app-brand-copy small{display:none;}
+      #qb-app-nav .qb-app-nav-button{padding:8px;font-size:12px;}
+    }
+  `;
+  document.head.appendChild(style);
+  const nav = document.createElement('aside');
+  nav.id = 'qb-app-nav';
+  nav.setAttribute('aria-label', 'QQ Bot Studio App 导航');
+  nav.innerHTML = `
+    <div class="qb-app-brand"><div class="qb-app-brand-mark">◎</div><div class="qb-app-brand-copy">
+      <strong>QQ Bot Studio</strong><small>桌面应用</small></div></div>
+    <div class="qb-app-nav-label">工作区</div>
+    <button class="qb-app-nav-button" type="button" data-qb-nav="console" aria-current="${isWizard ? 'false' : 'page'}">
+      <span class="qb-app-nav-icon">▦</span><span>控制台</span></button>
+    <button class="qb-app-nav-button" type="button" data-qb-nav="wizard" aria-current="${isWizard ? 'page' : 'false'}">
+      <span class="qb-app-nav-icon">↗</span><span>向导</span></button>
+    <div class="qb-app-nav-spacer"></div>
+    <div class="qb-app-nav-meta"><strong>本地回环运行</strong>127.0.0.1 · WebView2</div>
+  `;
+  document.body.appendChild(nav);
+  const existingPadding = window.getComputedStyle(document.body).paddingLeft || '0px';
+  document.body.style.setProperty('padding-left', `calc(${navWidth}px + ${existingPadding})`, 'important');
+  document.body.style.setProperty('box-sizing', 'border-box', 'important');
+  nav.querySelector('[data-qb-nav="console"]').addEventListener('click', () => {
+    if (!isWizard) return;
+    window.location.assign('/console');
+  });
+  nav.querySelector('[data-qb-nav="wizard"]').addEventListener('click', async () => {
+    if (isWizard) return;
+    let target = '/wizard';
+    try {
+      const token = typeof window.QB_TOKEN === 'string' ? window.QB_TOKEN : '';
+      const response = await fetch('/api/instances', {headers: {'X-QB-Token': token}, cache: 'no-store'});
+      if (response.ok) {
+        const data = await response.json();
+        const instances = Array.isArray(data.instances) ? data.instances : [];
+        const first = instances.find((item) => item && ((item.id || item.instance_id)));
+        const id = first && (first.id || first.instance_id);
+        if (id) target = '/wizard?instance=' + encodeURIComponent(String(id));
+      }
+    } catch (error) { /* wizard without an instance still renders the entry page */ }
+    window.location.assign(target);
+  });
+})();
+"""
+
+
 _DIAGNOSTICS_JS = r"""
 (function () {
   if (document.getElementById('qb-app-diagnostics-button')) return;
@@ -252,10 +339,22 @@ def _start_auto_close(window, seconds: float) -> None:
 def _install_diagnostics(window, api: AppDiagnosticsAPI, logger: logging.Logger) -> None:
     def on_loaded() -> None:
         try:
-            window.evaluate_js(_DIAGNOSTICS_JS)
-            logger.info("diagnostics panel injected")
+            window.evaluate_js(_APP_NAV_JS + "\n" + _DIAGNOSTICS_JS)
+            logger.info("app navigation and diagnostics panel injected")
+            test_nav = os.environ.get("QQBOT_APP_TEST_NAV", "").strip().lower()
+            if test_nav in {"wizard", "console"}:
+                # Deterministic POC smoke hook; never set for normal users.
+                window.evaluate_js(
+                    "(() => {"
+                    "const key='qb-app-test-nav';"
+                    "if (sessionStorage.getItem(key)) return;"
+                    "sessionStorage.setItem(key, '1');"
+                    f"setTimeout(() => document.querySelector('[data-qb-nav={test_nav}]')?.click(), 80);"
+                    "})();"
+                )
+                logger.info("test navigation to %s scheduled", test_nav)
         except Exception:
-            logger.exception("diagnostics panel injection failed")
+            logger.exception("app navigation injection failed")
     try:
         window.events.loaded += on_loaded
     except Exception:
