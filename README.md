@@ -5,18 +5,20 @@
 QQ Bot Studio 的**独立 Windows 10/11 双发行版项目**：
 
 - **Docker edition（稳定）**：Docker Desktop + WSL2 + Linux containers；
-- **Native edition（POC）**：官方 SnowLuma Windows + 本机 NTQQ 单实例路线；
+- **Native edition（单实例桌面 / 一键安装核心）**：官方 SnowLuma Windows + 本机 NTQQ 单实例路线；
   Native EXE 已实现本地进程/PID/日志/端口/health/config/OneBot 管理，并已在临时
   目录真实验证 AstrBot/SnowLuma 启动；QQ EULA/登录仍为 ENV_BLOCKED。
 
 本仓库不是 Linux 项目的打包目录，也不是它的自动更新分支。它拥有自己的启动器、
 Windows 服务生命周期实现、版本号、数据目录约定、测试和发布流水线。
 
-> **状态：Windows v0.10.0 App Shell POC（未发布；最新正式 Release 为 v0.9.0），core 3.13.0。**
+> **状态：Windows v1.0.0 Desktop App（最新正式 Release），bundled core 4.0.1、plugin 2.1.0。**
 >
-> 已包含独立 `/assistant` AI 助手页面、控制台 30 分钟刷新 + 手动刷新、
+> 已合并 task-92 Windows POC：pywebview/Edge WebView2 桌面窗口、左栏“控制台/向导”、
+> task-96 向导步骤下拉与部署后前三步锁定、详细启动/诊断日志、Native 一键安装核心；
+> 不再打开外部浏览器。已包含独立 `/assistant` AI 助手页面、控制台 30 分钟刷新 + 手动刷新、
 > AI 助手 B 本机/公网配置、控制台插件参数编辑（`reply_probability` 等）、
-> qqbot_enhancer 1.22.0 会话级提示词模板/pinned 默认、按名会话模板、ambient 群聊、群身份、`/表情状态`、`/food`、统一 AI tool marker、多分类语义收藏和最新 API/FAQ 文档；
+> qqbot_enhancer 2.1.0 会话级提示词模板/pinned 默认、按名会话模板、ambient 群聊、群身份、`/表情状态`、`/food`、统一 AI tool marker、多分类语义收藏和最新 API/FAQ 文档；
 > v0.4.1 新增 Windows 文件位置说明和 CLI 安全迁移；v0.4.2 新增
 > token 保护的控制台“存储文件夹”迁移入口、后台 helper 自动停服/复制/重启，
 > 以及 Docker/Native 双 EXE 构建与 `sync-upstream` 同步流水线。
@@ -32,9 +34,8 @@ Windows 服务生命周期实现、版本号、数据目录约定、测试和发
 > 依赖、E2E 脚本（排除 artifacts）和净减源码/测试。
 > v0.9.0 同步 Linux 3.13.0：profile 模板库/pinned 默认模板、activate 不 pending、
 > `/新会话 名称 [提示词标题]`、`/表情状态`、配置 backup 恢复。
-> v0.10.0 POC：pywebview/WebView2 双版本桌面 App shell、左栏“控制台/向导”、
-> Linux v4.0.1 向导步骤下拉/部署后前三步锁定、详细启动/诊断日志、
-> Native 一键安装向导（官方组件 URL/SHA256 校验）；尚未发布 tag。
+> v1.0.0：正式桌面 App，同步 Linux v4.0.1（core 4.0.1/plugin 2.1.0/441 tests），
+> 保留 task-92 App shell、左栏“控制台/向导”、向导锁定、Native 一键安装核心。
 > Docker EXE、隐藏管理服务、Docker Desktop/Linux engine 和本机 smoke 已做部分
 > 真实验证；发布使用 `v*` tag 触发的 GitHub Release。
 > **Native EXE 已是单实例 POC 进程管理器，并在临时目录用真实 AstrBot 4.29.3 +
@@ -57,16 +58,16 @@ Windows 服务生命周期实现、版本号、数据目录约定、测试和发
 | 发行版 | EXE | 运行时 | 当前状态 |
 |---|---|---|---|
 | Docker edition | `QQBotStudioWindows.exe` | Docker Desktop + WSL2 + Linux containers | **稳定推荐**；EXE/API/Compose smoke 已验证，真实 QQ/noVNC E2E 未验证 |
-| Native edition | `QQBotStudioWindowsNative.exe` | 官方 SnowLuma Windows + 本机桌面 NTQQ | **单实例 Native POC**；真实 AstrBot/SnowLuma 启动、HTTP 200、OneBot listener、PID/log/stop 已验证；QQ 登录/EULA 人工步骤 ENV_BLOCKED |
+| Native edition | `QQBotStudioWindowsNative.exe` | 官方 SnowLuma Windows + 本机桌面 NTQQ | **单实例 Native**；一键安装核心已接入；真实 AstrBot/SnowLuma 启动、HTTP 200、OneBot listener、PID/log/stop 已验证；QQ 登录/EULA 人工步骤 ENV_BLOCKED |
 
 Native 版优先使用官方 SnowLuma Windows 发行包和本机 NTQQ 桌面扫码；官方路径不要求
 Docker/WSL，也不要求 noVNC。noVNC 仅作为可选高级增强：需要 Windows VNC Server +
 websockify，共享整个交互式 Windows 桌面，不承诺每实例独立屏幕，也不是 SnowLuma
 自带 QQ 登录二维码。需要简单稳定部署时继续使用 Docker edition。
 
-### Native Windows POC
+### Native Windows 单实例
 
-Native POC 当前实现（`VERSION=0.10.0` POC）：
+Native 当前实现（`VERSION=1.0.0`）：
 
 - 数据根：`%LOCALAPPDATA%\QQBotStudio\data\native`；
 - `native.json` 保存 AstrBot 命令/`ASTRBOT_ROOT`、SnowLuma 目录/命令、NTQQ 路径、
@@ -78,7 +79,7 @@ Native POC 当前实现（`VERSION=0.10.0` POC）：
 - `--write-onebot-config` 写入 SnowLuma `config/onebot.json`：
   `ws://127.0.0.1:<onebot-port>/ws`，同样的 token，`statusCommand.enabled=false`（#sl 关闭）；
 - 默认只绑定 `127.0.0.1`；非 loopback 配置会被拒绝；
-- QQ 登录必须使用官方本机 NTQQ 窗口，Native POC 不使用 noVNC、不自动输入密码/验证码。
+- QQ 登录必须使用官方本机 NTQQ 窗口，Native 版不使用 noVNC、不自动输入密码/验证码。
 
 典型命令：
 
@@ -107,14 +108,14 @@ AstrBot OneBot `ws://127.0.0.1:16199/ws` TCP listening=true、health
 没有伪造登录成功。完整证据、版本、日志摘要和清理见
 [`docs/native-e2e-validation.md`](docs/native-e2e-validation.md)。
 
-App Shell POC 本地构建（未发布，详见 [`docs/app-shell-and-native-installer-poc.md`](docs/app-shell-and-native-installer-poc.md)）：
+v1.0.0 Desktop App 本地构建（详见 [`docs/app-shell-and-native-installer-poc.md`](docs/app-shell-and-native-installer-poc.md)）：
 
-- Docker `QQBotStudioWindows.exe`：`16,148,946` bytes，SHA256
-  `71fb0226578a93bd308c520a7041fcbf7c13ced081aea29f1ef9438b46e96ec0`；
-- Native `QQBotStudioWindowsNative.exe`：`14,931,650` bytes，SHA256
-  `242a91f3893dcb9cdbf77721eb4e0e665b75146f182c0e49e763c2a6fd76aae8`；
-- Linux/Windows 各 101 tests OK（POC tree）；Docker App 窗口和 Native Dashboard
-  实际启动/关闭通过；Native 一键安装 plan 检测通过；
+- Docker `QQBotStudioWindows.exe`：`16,155,369` bytes，SHA256
+  `a33239b8412625a4ae2abc37c144411499c3d26b83791b70dfc4bd40304c2a59`；
+- Native `QQBotStudioWindowsNative.exe`：`14,931,791` bytes，SHA256
+  `18bdd630f1918f5808d9fff830e600e0be4fe8eab3223a43ca2ea220f910cb5c`；
+- Linux upstream 441 tests OK；Windows 独立套件 106 tests OK（Linux 1 个 Windows-only skip）；
+  Docker App 窗口、左栏导航、向导路由和 Native install-plan 实际 smoke 通过；
 - 真实 QQ 登录/SnowLuma EULA/QQ 消息 E2E 仍为 ENV_BLOCKED。
 
 本仓库 vendor 了主项目的 `qqbot_studio/` Python 核心、静态 UI、`assets/` 和
@@ -122,7 +123,7 @@ App Shell POC 本地构建（未发布，详见 [`docs/app-shell-and-native-inst
 快照来源与更新方法见 [`UPSTREAM.md`](UPSTREAM.md)。
 
 
-### v0.10.0 App Shell POC
+### v1.0.0 Desktop App / 同步 v4.0.1
 
 - Docker EXE 闪退根因证据与 Windows 证据记录见
   [`docs/app-shell-and-native-installer-poc.md`](docs/app-shell-and-native-installer-poc.md)：
@@ -135,8 +136,19 @@ App Shell POC 本地构建（未发布，详见 [`docs/app-shell-and-native-inst
 - Native 默认打开 App 仪表盘；一键安装核心使用官方固定 URL/SHA256 下载
   uv/AstrBot wheel/SnowLuma/Node，并生成 AstrBot/SnowLuma OneBot 配置；
   NTQQ 仅检测，QQ 扫码/EULA 人工。
-- 本 POC 未 tag/未创建 GitHub Release，等待 Lead 确认 v0.10.0 tag。
+- VERSION 1.0.0；不重复 Native 真机下载安装，QQ/SnowLuma EULA 仍人工。
+- sync-upstream 无 token 的 API 触发会返回 HTTP 401 `Requires authentication`；
+  本次在干净 Linux `790d6c0` 工作树上本地执行同一 `scripts/sync_upstream.py`，
+  未伪造 workflow run。
 
+### v4.0.1 同步内容
+
+- core `4.0.1`、qqbot_enhancer `2.1.0`，上游快照 `790d6c0`；
+- 向导页面步骤下拉菜单；部署完成（`deployed` 或 `jobCompleted`）后前三步锁定，
+  只能进入完成与运行；
+- 全量同步 allowlisted core/plugin/static/API/plugin docs/tests-e2e；
+- 保留 Windows App shell、左栏导航、WebView2、诊断日志、Native 一键安装核心；
+- Linux upstream 441 tests；Windows 独立套件 106 tests。
 ### v3.13.0 同步内容
 
 - core `3.13.0`、qqbot_enhancer `1.22.0`；
@@ -254,8 +266,8 @@ App Shell POC 本地构建（未发布，详见 [`docs/app-shell-and-native-inst
 
 ### 升级边界
 
-- 本仓库独立维护版本：当前开发版 `VERSION = 0.9.0`，bundled core 版本为
-  `qqbot_studio.__version__ = 3.13.0`。
+- 本仓库独立维护版本：当前 `VERSION = 1.0.0`，bundled core 版本为
+  `qqbot_studio.__version__ = 4.0.1`。
 - Linux 主项目的自动更新、`scripts/auto-update.sh` 和网页内“更新并重启”不适用于
   本仓库。
 - Windows 版升级方式是：下载新的 EXE / PowerShell 发行包，停止旧管理服务，保留
@@ -330,31 +342,30 @@ docker info --format "{{.OSType}}"
 正式发布从 GitHub Releases 下载，而不是只依赖 Actions artifact：
 
 - Releases: <https://github.com/Stevehim2007/qqbot-studio-windows/releases>
-- 最新正式 Release: `v0.9.0`
-- Release URL: <https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.9.0>
-- 发布 workflow: `windows-release.yml` run `41168782400`，conclusion `success`
-- Release assets 已确认（双 EXE）：
-  - `QQBotStudioWindows.exe`（Docker edition）：`10,963,139` bytes，
-    SHA256 `f2eecab3b0f5319e806199e665b00c1dbcce53d38ca68f23f3c3db459659c0d5`
-  - `QQBotStudioWindowsNative.exe`（Native POC）：`9,042,934` bytes，
-    SHA256 `e7c063a2fac1c6a136132a723ec0a0eb3671776065b1a89945e8e2b75809fcd7`
-  - `SHA256SUMS.txt`（已下载核对，与上述 GitHub API digest 一致）
+- 最新正式 Release: `v1.0.0`
+- Release URL: <https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v1.0.0>
+- 发布 workflow: 由唯一 `v1.0.0` tag 触发 `windows-release.yml`；实际双 EXE
+  asset、大小和 SHA256 以 GitHub Release 与 `SHA256SUMS.txt` 为准。
+- Release assets 应包含：
+  - `QQBotStudioWindows.exe`（Docker edition）
+  - `QQBotStudioWindowsNative.exe`（Native edition）
+  - `SHA256SUMS.txt`
   - `README.md`、`VALIDATION.md`
-- 正式 Release 由 same-tag `v0.9.0` workflow 构建，和本地开发构建不保证逐字节一致。
 
-本地 v0.9.0 双 EXE 开发构建（Windows Python 3.10 + PyInstaller 6.10.0）：
+本地 v1.0.0 双 EXE 开发构建（Windows Python 3.10 + PyInstaller 6.10.0；
+由于 Windows Actions Python 版本/构建环境可能不同，正式资产 hash 可能不逐字节一致）：
 
-- Docker `QQBotStudioWindows.exe`：`8,597,456` bytes，SHA256
-  `2207209cae9c559d228132405c669f18e365ccf63a4930d34ea23be76dc9bf2e`；
-- Native POC `QQBotStudioWindowsNative.exe`：`6,966,079` bytes，SHA256
-  `135aad620ab6e05fbda225e23964495ce9131fd2a61c527ed320e20f9e98460f`。
+- Docker `QQBotStudioWindows.exe`：`16,155,369` bytes，SHA256
+  `a33239b8412625a4ae2abc37c144411499c3d26b83791b70dfc4bd40304c2a59`；
+- Native `QQBotStudioWindowsNative.exe`：`14,931,791` bytes，SHA256
+  `18bdd630f1918f5808d9fff830e600e0be4fe8eab3223a43ca2ea220f910cb5c`。
 
-正式用户应使用上面的 Release 资产和 `SHA256SUMS.txt`；不要用本地开发 hash 替代。
+正式用户应使用 Release 资产和 `SHA256SUMS.txt`；不要用本地开发 hash 替代正式资产。
 
 下载与校验示例：
 
 ```powershell
-$release = 'https://github.com/Stevehim2007/qqbot-studio-windows/releases/download/v0.9.0'
+$release = 'https://github.com/Stevehim2007/qqbot-studio-windows/releases/download/v1.0.0'
 Invoke-WebRequest "$release/QQBotStudioWindows.exe" -OutFile .\QQBotStudioWindows.exe
 Invoke-WebRequest "$release/QQBotStudioWindowsNative.exe" -OutFile .\QQBotStudioWindowsNative.exe
 Invoke-WebRequest "$release/SHA256SUMS.txt" -OutFile .\SHA256SUMS.txt
@@ -392,13 +403,8 @@ Get-FileHash .\QQBotStudioWindows.exe -Algorithm SHA256
 .\QQBotStudioWindows.exe
 ```
 
-首次运行会询问并持久化：
-
-```text
-管理服务监听 IP（默认 0.0.0.0）
-管理控制台端口（默认 8765）
-对外访问 IP/域名（用于浏览器链接）
-```
+首次双击默认使用非交互配置并持久化：管理监听 IP（默认 0.0.0.0）、
+管理控制台端口（默认 8765）和对外访问 IP/域名。需要精确控制时使用 `--configure`。
 
 设置保存到 `%LOCALAPPDATA%\QQBotStudio\data\studio.json`。程序会：
 
@@ -407,10 +413,12 @@ Get-FileHash .\QQBotStudioWindows.exe -Algorithm SHA256
 3. 通过隐藏子进程启动管理服务；
 4. 写入 PID、日志和 runtime 文件；
 5. 轮询 `/healthz`；
-6. 打开多实例控制台；
-7. 父进程退出，后台管理服务继续运行。
+6. 在同一 `QQBot Studio` WebView2 窗口打开多实例控制台（左栏可切换“控制台/向导”）；
+7. 关闭 App 窗口后启动器退出；后台管理服务继续运行，可用 `--status/--logs/--stop` 管理。
 
-控制台点击顶部 **“AI 助手”** 可进入独立 `/assistant` 页面。也可以直接启动到该页面：
+桌面 App 左栏第一行是“控制台”，第二行是“向导”。向导页面包含“快速跳转步骤”下拉；
+机器人部署完成后，前三个步骤会锁定，只能进入“完成与运行”。右下角“诊断日志”浮层可
+复制日志或打开日志目录。控制台内的 **“AI 助手”** 可进入独立 `/assistant` 页面，也可以：
 
 ```powershell
 .\QQBotStudioWindows.exe --assistant
@@ -444,7 +452,7 @@ Get-FileHash .\QQBotStudioWindows.exe -Algorithm SHA256
 | `QQBotStudioWindows.exe --logs 300` | 输出最近 300 行服务日志 |
 | `QQBotStudioWindows.exe --restart` | 安全停止由本数据目录管理的服务后重启 |
 | `QQBotStudioWindows.exe --configure` | 强制重新配置 IP/端口/public_host |
-| `QQBotStudioWindows.exe --no-open` | 不自动打开浏览器 |
+| `QQBotStudioWindows.exe --no-open` | 无 App 窗口/headless 模式；仅启动后台服务 |
 | `QQBotStudioWindows.exe --data-dir D:\QQBotStudioData` | 使用独立数据目录 |
 | `QQBotStudioWindows.exe --ip 127.0.0.1 --public-host 127.0.0.1` | 只允许本机访问 |
 | `QQBotStudioWindows.exe --help` | 完整参数 |
@@ -455,7 +463,17 @@ Get-FileHash .\QQBotStudioWindows.exe -Algorithm SHA256
 .\QQBotStudioWindows.exe --ip 127.0.0.1 --port 8765 --public-host 127.0.0.1 --restart
 ```
 
-修改 `--public-host` 只改变打印/打开的 URL，不改变实际监听地址。
+修改 `--public-host` 只改变打印/远程访问 URL；桌面 App 始终使用 loopback 加载，不打开外部浏览器。
+
+### 桌面 App 启动失败
+
+启动失败时不会静默闪退：应用会显示 Tk 错误窗口，其中包含可复制日志和“打开日志目录”
+按钮。详细阶段日志位于：
+
+```text
+%LOCALAPPDATA%\QQBotStudio\logs\launcher.log
+%LOCALAPPDATA%\QQBotStudio\logs\app-shell.log
+```
 
 ### 数据目录、PID 和日志
 
@@ -707,7 +725,7 @@ Artifact 包括两个 EXE、SHA256、README、VERSION、LICENSE、UPSTREAM、VAL
 [`.github/workflows/windows-release.yml`](.github/workflows/windows-release.yml) 在
 推送 `v*` tag 时：
 
-1. 校验 `VERSION` 与 tag 一致（例如 `VERSION=0.9.0` 必须对应 `v0.9.0`）；
+1. 校验 `VERSION` 与 tag 一致（例如 `VERSION=1.0.0` 必须对应 `v1.0.0`）；
 2. 重新跑独立测试、compileall、PowerShell AST、PyInstaller 构建和 EXE smoke；
 3. 上传 Actions artifact；
 4. 通过 `softprops/action-gh-release@v2` 创建真实 GitHub Release；
@@ -761,7 +779,7 @@ Windows 文档同步规则与 Linux 主项目 `docs/windows-editions-research.md
 本仓库已在同一台 Windows 主机上通过 WSL interop 使用 Windows PowerShell 5.1、
 Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 
-- 独立测试套件 **101 tests**（POC tree） 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
+- Windows 独立测试套件 **106 tests**（Linux upstream 441 tests） 在 Linux Python 和 Windows Python 下均通过（Linux 仅跳过 1 个 Windows drive-type 测试）；
 - Windows Python `compileall`、PowerShell 5.1 AST、Node JS 检查通过；
 - Docker Desktop 4.93.0 / Engine 29.8.1 / `OSType=linux` / Compose v5.5.1；
 - 最小 busybox Compose `config/up/down` 全部 exit 0，容器实际输出
@@ -851,7 +869,7 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 - [`docs/ui-api-contract-v2.md`](docs/ui-api-contract-v2.md)：最新管理 API 契约；
 - [`docs/plugin-qqbot-enhancer.md`](docs/plugin-qqbot-enhancer.md)：qqbot_enhancer 1.22.0；
 - [`VALIDATION.md`](VALIDATION.md)：真实执行和未验证项；
-- [`docs/app-shell-and-native-installer-poc.md`](docs/app-shell-and-native-installer-poc.md)：v0.10.0 App Shell/Native 一键安装 POC 根因与验证；
+- [`docs/app-shell-and-native-installer-poc.md`](docs/app-shell-and-native-installer-poc.md)：v1.0.0 App Shell/Native 一键安装根因与验证；
 - [`UPSTREAM.md`](UPSTREAM.md)：vendor 来源与下次同步步骤；
 - [Linux 主项目 README](https://github.com/Stevehim2007/qqbot-studio/blob/main/README.md)：
   Ubuntu/Linux 安装说明，不要与 Windows 数据目录混用。

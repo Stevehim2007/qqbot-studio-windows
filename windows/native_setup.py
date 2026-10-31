@@ -156,7 +156,7 @@ def _download(
         temp.unlink(missing_ok=True)
     _emit(progress, phase, start_pct, f"下载 {url}")
     request = urllib.request.Request(
-        url, headers={"User-Agent": "QQBotStudioWindowsNativeInstaller/0.10"}
+        url, headers={"User-Agent": "QQBotStudioWindowsNativeInstaller/1.0"}
     )
     try:
         with urllib.request.urlopen(request, timeout=60) as response:

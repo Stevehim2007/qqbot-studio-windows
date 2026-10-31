@@ -1,6 +1,21 @@
 # Validation record
 
-## v0.10.0 App Shell + Native Installer POC (unreleased)
+## v1.0.0 Desktop App / core 4.0.1 / plugin 2.1.0 (release)
+
+- Source Linux snapshot: `790d6c0bfc1aa1019934fa348ab9ad847ae8685b`
+  (`v4.0.1`, clean working tree); Windows `VERSION=1.0.0`.
+- Synced through the maintained allowlisted `scripts/sync_upstream.py`
+  (core/plugin/static/E2E/docs allowlist) and preserved Windows-owned
+  `windows/app_shell.py`, `native_app.py`, `native_setup.py` and launchers.
+- Upstream Linux suite: **441 tests OK**. Windows independent suite:
+  **106 tests OK** (Linux skips one Windows-only drive test).
+- `sync-upstream` unauthenticated `workflow_dispatch` API cannot be triggered:
+  `POST /actions/workflows/sync-upstream.yml/dispatches` returned HTTP **401**
+  with body `{"message":"Requires authentication","status":"401"}`
+  (GitHub request id `B086:112471:EE1FD:16F337:6AE57FBF`). No fake workflow run
+  is claimed; the sync was executed manually from the clean local Linux
+  `790d6c0` tree with the same committed sync script, then checked with
+  `check_upstream_state.py`.
 
 Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](docs/app-shell-and-native-installer-poc.md).
 
@@ -26,7 +41,7 @@ Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](d
 - POC fix: pywebview/WebView2 desktop window loads loopback UI and keeps parent
   alive until window close; errors display a Tk window with copyable logs.
 
-### POC implementation/verification
+### v1.0.0 implementation and POC verification
 
 - `windows/app_shell.py`: pywebview 6.2.1 WebView2 shell, rotating logs,
   left App navigation (控制台/向导), injected diagnostics panel
@@ -40,10 +55,10 @@ Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](d
   with pinned sizes and SHA256:
   uv 0.13.6, AstrBot 4.29.3 wheel, SnowLuma 2.2.1 win-x64-lite,
   Node.js 26.13.0; NTQQ detection only; EULA/QQ verification manual.
-- POC dual EXE build (not released): Docker `16,148,946` bytes SHA256
-  `71fb0226578a93bd308c520a7041fcbf7c13ced081aea29f1ef9438b46e96ec0`;
-  Native `14,931,650` bytes SHA256
-  `242a91f3893dcb9cdbf77721eb4e0e665b75146f182c0e49e763c2a6fd76aae8`.
+- v1.0.0 local dual EXE build (Windows Python 3.10; CI Release asset hash may differ): Docker `16,155,369` bytes SHA256
+  `a33239b8412625a4ae2abc37c144411499c3d26b83791b70dfc4bd40304c2a59`;
+  Native `14,931,791` bytes SHA256
+  `18bdd630f1918f5808d9fff830e600e0be4fe8eab3223a43ca2ea220f910cb5c`.
 - Docker App smoke: window opened existing console at
   `http://127.0.0.1:18830/console` with left “控制台/向导” nav; app-shell log
   recorded `app navigation and diagnostics panel injected` and
@@ -58,13 +73,13 @@ Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](d
   sources/checksums.
 - Tk error-window fallback test opened and auto-closed with return 1; log panel
   is copyable.
-- POC test suite: Linux/Windows **101 tests OK** (Linux skips one Windows-only
-  drive test); compileall, PowerShell AST, JS/YAML/upstream metadata gate pass.
+- Upstream Linux **441 tests OK**; Windows independent suite **106 tests OK**
+  (Linux skips one Windows-only drive test); compileall, PowerShell AST, JS/YAML/upstream metadata gate pass.
 
-### POC limitations
+### v1.0.0 limitations / not verified
 
-- No v0.10.0 tag/Release; waiting for Lead confirmation. Existing v0.9.0
-  Release remains untouched.
+- v1.0.0 is the target release; v0.9.0 Release remains untouched.
+  Native full download/install E2E is not re-run in this task.
 - pywebview/WebView2 packaged window verified on this Windows host; clean
   target-PC WebView2-missing path currently falls back to Tk error window and
   needs runtime-install UX later.

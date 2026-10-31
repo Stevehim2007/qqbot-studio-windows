@@ -1,7 +1,6 @@
 # Desktop App Shell + Native One-Click Installer POC
 
-状态：`v0.10.0` POC 开发构建，**未 tag、未发布**。正式 Release 等 Lead 确认。
-现有正式 Release 仍为 `v0.9.0`。
+状态：`v1.0.0` 正式 Windows Desktop App。bundled core 4.0.1、plugin 2.1.0。
 
 ## 1. Docker EXE 闪退根因与证据
 
@@ -55,7 +54,7 @@ POC 修复方向：不再启动外部浏览器；父进程保持到 WebView2 窗
   - “控制台”-> `/console`；
   - “向导”-> 读取 `/api/instances` 后打开 `/wizard?instance=<本机实例>`；无实例时打开 `/wizard` 入口；
   - 全程同一 WebView2 窗口内导航，不打开外部浏览器。
-- 向导复用 Linux v4.0.1/task-96 的锁定逻辑并移植到 Windows v3.13.0 静态页面：
+- 向导复用 Linux v4.0.1/task-96 的锁定逻辑并移植到 Windows 当前 core 4.0.1 静态页面：
   - 向导侧栏加入“快速跳转步骤”下拉菜单；
   - 步骤 1 环境、2 账号与模型、3 部署进度、4 完成与运行；
   - `deployment.deployed || app.jobCompleted` 后前三步按钮和下拉选项全部禁用，只允许“完成与运行”；
@@ -66,12 +65,12 @@ POC 修复方向：不再启动外部浏览器；父进程保持到 WebView2 窗
 ## 3. Docker App 窗口 POC 实测
 
 构建：`windows/build.ps1`，Windows Python 3.10，PyInstaller 6.10.0。
-POC EXE（未发布）：
+v1.0.0 EXE：
 
-- Docker：16,148,946 bytes，SHA256
-  `71fb0226578a93bd308c520a7041fcbf7c13ced081aea29f1ef9438b46e96ec0`
-- Native：14,931,650 bytes，SHA256
-  `242a91f3893dcb9cdbf77721eb4e0e665b75146f182c0e49e763c2a6fd76aae8`
+- Docker：16,155,369 bytes，SHA256
+  `a33239b8412625a4ae2abc37c144411499c3d26b83791b70dfc4bd40304c2a59`
+- Native：14,931,791 bytes，SHA256
+  `18bdd630f1918f5808d9fff830e600e0be4fe8eab3223a43ca2ea220f910cb5c`
 
 用隔离环境、预配置 loopback、`QQBOT_APP_AUTOCLOSE_SECONDS=6` 启动 Docker EXE：
 
@@ -117,22 +116,23 @@ POC 验证：
   Node 26.13 的启动；本轮遵循“不重复 Native 真机安装”的范围限制。
 - 一键安装的完整下载→安装→启动 E2E 仍需在有网干净用户目录执行一次后再宣称完成。
 
-## 5. 2026-10-31 补充验证：导航与向导演进
+## 5. v1.0.0 补充验证：导航与向导演进
 
 - 已同步 Linux v4.0.1/task-96 的向导步骤下拉与部署后前三步锁定逻辑到
-  Windows v3.13.0 静态页面；新增 `wizard-step-select`、`wizard-step-lock-note`，
+  Linux v4.0.1 静态页面（Windows v1.0.0 已全量同步）；新增 `wizard-step-select`、`wizard-step-lock-note`，
   `deploymentStepsLocked()/isStepAvailable()` 单元 JS 测试通过。
 - Docker App 实际截图/自动化 smoke：左栏“控制台/向导”正常，点击“向导”
   成功进入 `/wizard?instance=bot-1`，页面内下拉菜单可见；无外部浏览器。
 - Native 仪表盘增加相同左栏导航；向导 4 步下拉/锁定代码就绪。
-- Windows/Linux 测试均为 **101 tests OK**（Linux 1 个 Windows-only skip）；
+- 上游 Linux **441 tests OK**；Windows 独立套件 **106 tests OK**（Linux 1 个
+  Windows-only skip）；
   最终 POC 构建哈希：
-  - Docker `16,148,946` bytes
-    `71fb0226578a93bd308c520a7041fcbf7c13ced081aea29f1ef9438b46e96ec0`
-  - Native `14,931,650` bytes
-    `242a91f3893dcb9cdbf77721eb4e0e665b75146f182c0e49e763c2a6fd76aae8`
+  - Docker `16,155,369` bytes
+    `a33239b8412625a4ae2abc37c144411499c3d26b83791b70dfc4bd40304c2a59`
+  - Native `14,931,791` bytes
+    `18bdd630f1918f5808d9fff830e600e0be4fe8eab3223a43ca2ea220f910cb5c`
 
-## 6. 当前限制
+## 6. 当前限制与未验证项
 
 - App shell POC 尚未在真实用户干净目录做首次双击/缩放/DPI/托盘体验验收；
 - 正式下载的 v0.9.0 EXE 有 MOTW/SmartScreen/未签名下载风险，本轮未能下载 release
@@ -142,4 +142,4 @@ POC 验证：
 - Native 一键安装的下载/安装完整 E2E 未执行；官方 URL/SHA/大小、环境检测、
   AstrBot 配置生成代码已实现；
 - QQ 扫码/EULA/真实消息 E2E 仍为 ENV_BLOCKED；
-- 未 tag、未发布 v0.10.0；等 Lead 确认。
+- Windows VERSION 已提升到 1.0.0；正式发布由唯一 `v1.0.0` tag 触发。

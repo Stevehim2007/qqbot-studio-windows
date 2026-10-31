@@ -10,7 +10,7 @@
 | [`../README.md`](../README.md) | Windows 独立项目安装、EXE 使用、Docker Desktop/WSL2、数据与升级边界 |
 | [`../VALIDATION.md`](../VALIDATION.md) | 真实执行过的测试、构建和 EXE smoke；Native POC 进程/health/PID 结果和未验证项 |
 | [`native-e2e-validation.md`](native-e2e-validation.md) | 真实 AstrBot 4.29.3 + SnowLuma 2.2.1 + NTQQ 临时目录安装/启动/health/OneBot/stop 验证及人工阻塞 |
-| [`app-shell-and-native-installer-poc.md`](app-shell-and-native-installer-poc.md) | v0.10.0 pywebview/WebView2 App shell、Docker 闪退根因证据、Native 一键安装 POC |
+| [`app-shell-and-native-installer-poc.md`](app-shell-and-native-installer-poc.md) | v1.0.0 pywebview/WebView2 Desktop App、左栏导航、Docker 闪退根因证据、Native 一键安装核心 |
 | [`FAQ.md`](FAQ.md) | Windows 常见问题：Docker Desktop、端口、AI 助手 B、EXE、扫码与更新 |
 | [`../UPSTREAM.md`](../UPSTREAM.md) | vendor 来源、上游 commit、同步和升级流程 |
 
@@ -19,7 +19,7 @@
 | 文档 | 内容 |
 |---|---|
 | [`ui-api-contract-v2.md`](ui-api-contract-v2.md) | v3.13.0 管理 API，包括 `/assistant`、AI 助手 B 配置/启停、提示词 profiles、插件、记忆、统计 |
-| [`plugin-qqbot-enhancer.md`](plugin-qqbot-enhancer.md) | qqbot_enhancer 1.22.0：会话级提示词模板/pinned、按名会话、ambient、群身份、`/表情状态`、多分类语义收藏 |
+| [`plugin-qqbot-enhancer.md`](plugin-qqbot-enhancer.md) | qqbot_enhancer 2.1.0：会话级提示词模板/pinned、按名会话、ambient、群身份、`/表情状态`、多分类语义收藏 |
 | [`server-troubleshooting.md`](server-troubleshooting.md) | Linux/云服务器排错资料；Windows 场景请同时阅读本目录 FAQ 和根 README |
 | [`integration-research.md`](integration-research.md) | AstrBot / SnowLuma / OneBot / DeepSeek 集成调研 |
 | [`qa-report-v2.md`](qa-report-v2.md) | 主项目 v3.13.0 条件验收、P0/P1 和真实 E2E 待测清单 |
@@ -29,7 +29,7 @@
 
 ## v3.13.0 同步重点
 
-- core 3.13.0、qqbot_enhancer 1.22.0；
+- core 4.0.1、qqbot_enhancer 2.1.0；
 - 提示词 profile 作为会话模板库，pinned/default_profile 排序；
 - activate 只更新默认模板，不 pending/新建会话；`/新会话` 可选模板；
 - `/会话` 仅切换已有；旧 system_prompt UI 去重、配置 backup 恢复；
