@@ -12,7 +12,7 @@ QQ Bot Studio 的**独立 Windows 10/11 双发行版项目**：
 本仓库不是 Linux 项目的打包目录，也不是它的自动更新分支。它拥有自己的启动器、
 Windows 服务生命周期实现、版本号、数据目录约定、测试和发布流水线。
 
-> **状态：Windows v0.9.0 发布候选（最新正式 Release 为 v0.8.1），已同步主项目 core 3.13.0。**
+> **状态：Windows v0.9.0（最新正式 Release 为 v0.9.0），已同步主项目 core 3.13.0。**
 >
 > 已包含独立 `/assistant` AI 助手页面、控制台 30 分钟刷新 + 手动刷新、
 > AI 助手 B 本机/公网配置、控制台插件参数编辑（`reply_probability` 等）、
@@ -310,17 +310,17 @@ docker info --format "{{.OSType}}"
 正式发布从 GitHub Releases 下载，而不是只依赖 Actions artifact：
 
 - Releases: <https://github.com/Stevehim2007/qqbot-studio-windows/releases>
-- 最新正式 Release: `v0.8.1`
-- Release URL: <https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.8.1>
-- 发布 workflow: `windows-release.yml` run `41153271187`，conclusion `success`
+- 最新正式 Release: `v0.9.0`
+- Release URL: <https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.9.0>
+- 发布 workflow: `windows-release.yml` run `41168782400`，conclusion `success`
 - Release assets 已确认（双 EXE）：
-  - `QQBotStudioWindows.exe`（Docker edition）：`10,958,104` bytes，
-    SHA256 `03ad38545b57192ea8cb013a5d5dd6575dc5c030370f0e028051ec1ddfa49b4f`
-  - `QQBotStudioWindowsNative.exe`（Native POC）：`9,042,861` bytes，
-    SHA256 `434e7fc1476802a14e28baf2aa60cb0406809be2fcf2dd9a4f2ba10b733de99a`
+  - `QQBotStudioWindows.exe`（Docker edition）：`10,963,139` bytes，
+    SHA256 `f2eecab3b0f5319e806199e665b00c1dbcce53d38ca68f23f3c3db459659c0d5`
+  - `QQBotStudioWindowsNative.exe`（Native POC）：`9,042,934` bytes，
+    SHA256 `e7c063a2fac1c6a136132a723ec0a0eb3671776065b1a89945e8e2b75809fcd7`
   - `SHA256SUMS.txt`（已下载核对，与上述 GitHub API digest 一致）
   - `README.md`、`VALIDATION.md`
-- 正式 Release 由 same-tag `v0.8.1` workflow 构建，和本地开发构建不保证逐字节一致。
+- 正式 Release 由 same-tag `v0.9.0` workflow 构建，和本地开发构建不保证逐字节一致。
 
 本地 v0.9.0 双 EXE 开发构建（Windows Python 3.10 + PyInstaller 6.10.0）：
 
@@ -334,7 +334,7 @@ docker info --format "{{.OSType}}"
 下载与校验示例：
 
 ```powershell
-$release = 'https://github.com/Stevehim2007/qqbot-studio-windows/releases/download/v0.8.1'
+$release = 'https://github.com/Stevehim2007/qqbot-studio-windows/releases/download/v0.9.0'
 Invoke-WebRequest "$release/QQBotStudioWindows.exe" -OutFile .\QQBotStudioWindows.exe
 Invoke-WebRequest "$release/QQBotStudioWindowsNative.exe" -OutFile .\QQBotStudioWindowsNative.exe
 Invoke-WebRequest "$release/SHA256SUMS.txt" -OutFile .\SHA256SUMS.txt
@@ -667,7 +667,7 @@ AI 助手 B 默认端口为 `8766`，但实际值以 `/assistant` 页面配置�
 push/PR 时构建并上传测试 artifact。正式发布由
 [`.github/workflows/windows-release.yml`](.github/workflows/windows-release.yml)
 在 `v*` tag 上执行。v0.4.0 的 Release run `40997401439` 是单 EXE 历史结果；
-v0.7.0 run `41078425027`、v0.8.0 run `41150711387` 和 v0.8.1 run `41153271187` 均已成功上传双 EXE。
+v0.7.0 run `41078425027`、v0.8.0 run `41150711387`、v0.8.1 run `41153271187` 和 v0.9.0 run `41168782400` 均已成功上传双 EXE。
 构建 workflow 会：
 
 1. 安装 Python 3.12；
@@ -687,7 +687,7 @@ Artifact 包括两个 EXE、SHA256、README、VERSION、LICENSE、UPSTREAM、VAL
 [`.github/workflows/windows-release.yml`](.github/workflows/windows-release.yml) 在
 推送 `v*` tag 时：
 
-1. 校验 `VERSION` 与 tag 一致（例如 `VERSION=0.8.1` 必须对应 `v0.8.1`）；
+1. 校验 `VERSION` 与 tag 一致（例如 `VERSION=0.9.0` 必须对应 `v0.9.0`）；
 2. 重新跑独立测试、compileall、PowerShell AST、PyInstaller 构建和 EXE smoke；
 3. 上传 Actions artifact；
 4. 通过 `softprops/action-gh-release@v2` 创建真实 GitHub Release；
@@ -801,7 +801,8 @@ Windows Python 3.10.9 和 Docker Desktop 4.93.0 做了本地验证：
 
 ### 仍未验证
 
-- v0.9.0 的 dual build / Release workflow 将在本次发布中实际执行；v0.8.1 Release 保留不重复 tag。
+- v0.9.0 的 dual build run `41168669037` 和 dual Release run `41168782400` 已实际成功；
+  双 EXE、SHA256、README、VALIDATION 均已上传。
 - 浏览器自动打开未测试，服务生命周期测试均使用 `--no-open`。
 - `install.ps1` 全流程、winget 安装、WSL2 初始化/重启未测试。
 - Windows Defender 防火墙、云安全组、局域网/VPN 远程访问未测试。

@@ -57,6 +57,29 @@
 - `--stop` exit 0 and health unreachable;
 - `/food` helper HTTP 200 from `food.dlsz.top`, 6 items and formatted max 5.
 
+### Release publication
+
+- Pre-release dual build run `41168669037`: success; artifact
+  `QQBotStudioWindows-dual-0f71f52...` size `19,821,313` bytes.
+- `v0.9.0` tag points at `0f71f522fba85dce0966b3afc52ddcd78275caa5`.
+- Release workflow run `41168782400`: success, all release steps passed
+  (tag/VERSION, upstream metadata gate, 93 tests, compileall, PowerShell AST,
+  dual PyInstaller, both EXE smokes, artifact upload and Create GitHub Release).
+- Release URL:
+  https://github.com/Stevehim2007/qqbot-studio-windows/releases/tag/v0.9.0
+- Public GitHub API confirmed:
+  - `QQBotStudioWindows.exe`: `10,963,139` bytes,
+    digest `sha256:f2eecab3b0f5319e806199e665b00c1dbcce53d38ca68f23f3c3db459659c0d5`;
+  - `QQBotStudioWindowsNative.exe`: `9,042,934` bytes,
+    digest `sha256:e7c063a2fac1c6a136132a723ec0a0eb3671776065b1a89945e8e2b75809fcd7`;
+  - `SHA256SUMS.txt` downloaded; both lines matched the GitHub API digests;
+  - `README.md` and `VALIDATION.md` present.
+- `sync-upstream.yml` unauthenticated workflow_dispatch attempt returned HTTP 401
+  Requires authentication. A separately authenticated workflow_dispatch run
+  `41167744095` completed success at prior main `bca9e09` with upstream-change
+  steps skipped (no changes); it did not publish Windows v0.9.0. Current sync
+  was performed manually from clean `764b7ca`; no-op dry-run passed.
+
 ### Native POC preservation
 
 - Native runtime/launcher, real-component validation document and Windows-only
