@@ -68,6 +68,8 @@ DEFAULTS: dict[str, Any] = {
     "food_submit_draft_ttl_seconds": 600,
     "food_submit_name_max_chars": 100,
     "food_submit_location_max_chars": 60,
+    "food_submit_location_max_parts": 6,
+    "food_submit_location_part_max_chars": 30,
     "food_submit_comment_max_chars": 500,
     "food_submit_tag_max_chars": 20,
     "food_submit_tags_max_count": 5,
@@ -108,6 +110,36 @@ DEFAULTS: dict[str, Any] = {
         "这次提交没有生效：请用普通文字告诉我店名、位置、味道分（0.1-5）、"
         "性价比分（0.1-5）和评价内容，不要带链接、密码或额外参数。"
     ),
+    "food_submit_no_sender_reply": (
+        "无法确认你的身份，暂时不能提交评价；请稍后再试。"
+    ),
+    "food_search_enabled": True,
+    "safe_tools_allow_search_food_restaurants": True,
+    "food_search_max_tags": 3,
+    "food_search_default_limit": 5,
+    "food_search_name_max_chars": 50,
+    "food_search_tag_max_chars": 20,
+    "food_search_location_max_chars": 30,
+    "food_search_usage_reply": (
+        "想找哪家店？告诉我店名、标签（如火锅、烤肉）或地点（如南关区）就行。"
+    ),
+    "food_search_unknown_tag_reply": (
+        "没有找到标签「{tags}」。换一个标签，或只按店名/地点找。"
+    ),
+    "food_search_ambiguous_tag_reply": (
+        "标签「{tag}」匹配到多个：{options}。请说得更精确一点。"
+    ),
+    "food_search_location_not_found_reply": (
+        "没有找到地点「{location}」。换个写法，或只按店名/标签找。"
+    ),
+    "food_search_ambiguous_location_reply": (
+        "「{location}」匹配到多个位置：{options}。请说得更具体一点。"
+    ),
+    "food_search_empty_reply": (
+        "没有符合条件的结果，换个店名/标签/地点试试。"
+    ),
+    "food_search_timeout_reply": "餐厅搜索超时，请稍后再试。",
+    "food_search_error_reply": "餐厅搜索暂时失败，请稍后再试。",
     "food_nl_enabled": True,
     "food_nl_probability": 0.35,
     "food_nl_cooldown_seconds": 120,
@@ -287,6 +319,11 @@ DEFAULTS: dict[str, Any] = {
     "web_fetch_max_chars": 4000,
     "web_fetch_max_redirects": 3,
     "web_fetch_cooldown_seconds": 10,
+    "web_auto_fetch_enabled": True,
+    "web_auto_fetch_max_urls": 1,
+    "web_auto_fetch_max_chars": 4000,
+    "web_auto_fetch_timeout_seconds": 12,
+    "web_auto_fetch_question_only": True,
     "safe_tools_sticker_prefix": "给你一个表情：",
     "safe_tools_collect_cooldown_seconds": 30,
     "max_images_per_message": 4,

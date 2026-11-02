@@ -12,18 +12,18 @@ WINDOWS = ROOT / "windows"
 
 class V1ReleaseContractTests(unittest.TestCase):
     def test_versions_and_upstream_snapshot(self) -> None:
-        self.assertEqual((ROOT / "VERSION").read_text(encoding="ascii").strip(), "1.1.0")
-        self.assertEqual((ROOT / ".upstream-commit").read_text(encoding="ascii").strip(), "097e522d19d535f3448cc7e7ced2a75c64208d68")
+        self.assertEqual((ROOT / "VERSION").read_text(encoding="ascii").strip(), "1.2.0")
+        self.assertEqual((ROOT / ".upstream-commit").read_text(encoding="ascii").strip(), "0d8038cebc1d63097eb9fba25bb8ce55789468e4")
         init = (ROOT / "qqbot_studio" / "__init__.py").read_text(encoding="utf-8")
-        self.assertIn('__version__ = "4.1.0"', init)
+        self.assertIn('__version__ = "4.1.1"', init)
         upstream = (ROOT / "UPSTREAM.md").read_text(encoding="utf-8")
-        for marker in ("097e522d19d535f3448cc7e7ced2a75c64208d68", "v4.1.0", "4.1.0", "2.4.0"):
+        for marker in ("0d8038cebc1d63097eb9fba25bb8ce55789468e4", "v4.1.1", "4.1.1", "2.7.0"):
             self.assertIn(marker, upstream)
         metadata = (ROOT / "plugins" / "qqbot_enhancer" / "metadata.yaml").read_text(encoding="utf-8")
-        self.assertIn("version: 2.4.0", metadata)
-        self.assertIn('LAUNCHER_VERSION = "1.1.0"', (WINDOWS / "launcher.py").read_text(encoding="utf-8"))
+        self.assertIn("version: 2.7.0", metadata)
+        self.assertIn('LAUNCHER_VERSION = "1.2.0"', (WINDOWS / "launcher.py").read_text(encoding="utf-8"))
         native_launcher = (WINDOWS / "native_launcher.py").read_text(encoding="utf-8")
-        self.assertIn('NATIVE_LAUNCHER_VERSION = "1.1.0"', native_launcher)
+        self.assertIn('NATIVE_LAUNCHER_VERSION = "1.2.0"', native_launcher)
         self.assertIn("if args.guide:", native_launcher)
         self.assertLess(native_launcher.index("if args.guide:"), native_launcher.index("from windows import native_app"))
 
@@ -59,7 +59,7 @@ class V1ReleaseContractTests(unittest.TestCase):
 
     def test_schema_and_prompt_template_contract(self) -> None:
         schema = json.loads((ROOT / "plugins" / "qqbot_enhancer" / "_conf_schema.json").read_text(encoding="utf-8"))
-        self.assertGreaterEqual(len(schema), 233)
+        self.assertGreaterEqual(len(schema), 256)
         for marker in ("prompt_profiles", "prompt_profile_active_id", "group_personas", "food_enabled"):
             self.assertIn(marker, schema)
         self.assertIn("已弃用：不参与决策", schema["ambient_group_reply_probability"]["description"])
@@ -147,7 +147,7 @@ class V1ReleaseContractTests(unittest.TestCase):
                 encoding="utf-8"
             )
         )
-        self.assertGreaterEqual(len(schema), 233)
+        self.assertGreaterEqual(len(schema), 256)
         for key in (
             "safe_tools_allow_fetch_webpage",
             "web_fetch_timeout_seconds",
@@ -164,6 +164,31 @@ class V1ReleaseContractTests(unittest.TestCase):
         docs = (ROOT / "docs" / "plugin-qqbot-enhancer.md").read_text(encoding="utf-8")
         for marker in ("fetch_webpage", "submit_food_review", "公开网页", "非法/超长/多条"):
             self.assertIn(marker, docs)
+
+
+    def test_v4_1_1_smart_web_food_search_and_retry_contract(self) -> None:
+        schema = json.loads(
+            (ROOT / "plugins" / "qqbot_enhancer" / "_conf_schema.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertGreaterEqual(len(schema), 256)
+        for key in (
+            "web_auto_fetch_enabled",
+            "web_auto_fetch_max_urls",
+            "web_auto_fetch_max_chars",
+            "web_auto_fetch_timeout_seconds",
+            "web_auto_fetch_question_only",
+            "safe_tools_allow_search_food_restaurants",
+            "safe_tools_allow_submit_food_review",
+        ):
+            self.assertIn(key, schema)
+        plugin = (ROOT / "plugins" / "qqbot_enhancer" / "main.py").read_text(encoding="utf-8")
+        for marker in ("web_auto_fetch", "search_food_restaurants", "submit_food_review"):
+            self.assertIn(marker, plugin)
+        deployer = (ROOT / "qqbot_studio" / "deployer.py").read_text(encoding="utf-8")
+        self.assertIn("call_with_retry", deployer)
+        self.assertIn("Broken pipe", deployer)
 
 
 if __name__ == "__main__":

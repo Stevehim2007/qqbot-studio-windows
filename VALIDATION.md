@@ -1,15 +1,15 @@
 # Validation record
 
-## v1.1.0 Desktop App / core 4.1.0 / plugin 2.4.0 (release)
+## v1.2.0 Desktop App / core 4.1.1 / plugin 2.7.0 (release)
 
-- Source Linux snapshot: `097e522d19d535f3448cc7e7ced2a75c64208d68`
-  (`v4.1.0`, clean working tree); Windows `VERSION=1.1.0`.
+- Source Linux snapshot: `0d8038cebc1d63097eb9fba25bb8ce55789468e4`
+  (`v4.1.1`, clean working tree); Windows `VERSION=1.2.0`.
 - Synced through the maintained allowlisted `scripts/sync_upstream.py`
   (core/plugin/static/E2E/docs allowlist) and preserved Windows-owned
   `windows/app_shell.py`, `native_app.py`, `native_setup.py` and launchers.
-- Upstream Linux suite: **504 tests OK**. Windows independent suite:
-  **112 tests OK** (Linux skips one Windows-only drive test).
-- Built v1.1.0 EXE smoke: `--version` reports launcher 1.1.0 / core 4.1.0;
+- Upstream Linux suite: **568 tests OK**. Windows independent suite:
+  **113 tests OK** (Linux skips one Windows-only drive test).
+- Built v1.2.0 EXE smoke: `--version` reports launcher 1.2.0 / core 4.1.1;
   management `/healthz` is `4.0.4`; plugin config GET returns `ok=true`,
   `schema=193`, `values=193`, `reply_probability=0.12`; deprecated
   `ambient_group_reply_probability` returns the compatibility-only message;
@@ -34,6 +34,10 @@
   schema/values fields; it exposes `safe_tools_allow_fetch_webpage`,
   `web_fetch_timeout_seconds`, `web_fetch_max_chars`, and
   `safe_tools_allow_submit_food_review`; `/option` includes fetch/food status.
+- v1.2.0 smoke: health=`4.1.1`; plugin config GET `schema_source=bundled`,
+  256 schema/values fields; `web_auto_fetch_*`, `safe_tools_allow_search_food_restaurants`,
+  `safe_tools_allow_submit_food_review` visible; `/option` includes smart-read/search/submit;
+  App left nav/wizard/diagnostics/close and Native install-plan pass.
 - `sync-upstream` unauthenticated `workflow_dispatch` API cannot be triggered:
   `POST /actions/workflows/sync-upstream.yml/dispatches` returned HTTP **401**
   with body `{"message":"Requires authentication","status":"401"}`
@@ -66,7 +70,7 @@ Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](d
 - POC fix: pywebview/WebView2 desktop window loads loopback UI and keeps parent
   alive until window close; errors display a Tk window with copyable logs.
 
-### v1.1.0 implementation and verification
+### v1.2.0 implementation and verification
 
 - `windows/app_shell.py`: pywebview 6.2.1 WebView2 shell, rotating logs,
   left App navigation (控制台/向导), injected diagnostics panel
@@ -80,10 +84,10 @@ Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](d
   with pinned sizes and SHA256:
   uv 0.13.6, AstrBot 4.29.3 wheel, SnowLuma 2.2.1 win-x64-lite,
   Node.js 26.13.0; NTQQ detection only; EULA/QQ verification manual.
-- v1.1.0 local dual EXE build (Windows Python 3.10; CI Release asset hash may differ): Docker `16,178,805` bytes SHA256
-  `08c7e415799ac5999500544082e15941f2d2b0c20053d6e375b9b6843c580184`;
-  Native `14,933,759` bytes SHA256
-  `869c972e99236ce470df7979523f4a3afeaf6fbf1e85cf7f43e64961cc542e91`.
+- v1.2.0 local dual EXE build (Windows Python 3.10; CI Release asset hash may differ): Docker `16,190,428` bytes SHA256
+  `8b63ae9d576be80c80495c3725687b02e7ce8b05d392a64db957159efc4d721a`;
+  Native `14,933,809` bytes SHA256
+  `8d8e1e7f859adb791f0260d7e4dc037566ec0ee908b7f9456f9ca8c7901d045c`.
 - Docker App smoke: window opened existing console at
   `http://127.0.0.1:18830/console` with left “控制台/向导” nav; app-shell log
   recorded `app navigation and diagnostics panel injected` and
@@ -98,13 +102,13 @@ Full evidence and architecture: [`docs/app-shell-and-native-installer-poc.md`](d
   sources/checksums.
 - Tk error-window fallback test opened and auto-closed with return 1; log panel
   is copyable.
-- Upstream Linux **504 tests OK**; Windows independent suite **112 tests OK**
+- Upstream Linux **568 tests OK**; Windows independent suite **113 tests OK**
   (Linux skips one Windows-only drive test); compileall, PowerShell AST, JS/YAML/upstream metadata gate pass.
 
-### v1.1.0 limitations / not verified
+### v1.2.0 limitations / not verified
 
-- v1.1.0 adds safe fetch_webpage + submit_food_review; v1.0.1 was never tagged;
-  prior v1.0.4/v1.0.3/v1.0.2/v1.0.0 Releases remain untouched.
+- v1.2.0 adds smart URL reading + restaurant search/address creation; v1.0.1 was never tagged;
+  prior v1.1.0/v1.0.4/v1.0.3/v1.0.2/v1.0.0 Releases remain untouched.
   Native full download/install E2E is not re-run in this task.
 - pywebview/WebView2 packaged window verified on this Windows host; clean
   target-PC WebView2-missing path currently falls back to Tk error window and
