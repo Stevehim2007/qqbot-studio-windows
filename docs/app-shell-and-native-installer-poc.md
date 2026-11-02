@@ -1,6 +1,6 @@
 # Desktop App Shell + Native One-Click Installer POC
 
-状态：`v1.0.4` 正式 Windows Desktop App/hotfix。bundled core 4.0.4、plugin 2.3.0。
+状态：`v1.1.0` 正式 Windows Desktop App。bundled core 4.1.0、plugin 2.4.0。
 
 ## 1. Docker EXE 闪退根因与证据
 
@@ -54,7 +54,7 @@ POC 修复方向：不再启动外部浏览器；父进程保持到 WebView2 窗
   - “控制台”-> `/console`；
   - “向导”-> 读取 `/api/instances` 后打开 `/wizard?instance=<本机实例>`；无实例时打开 `/wizard` 入口；
   - 全程同一 WebView2 窗口内导航，不打开外部浏览器。
-- 向导复用 Linux v4.0.1/task-96 的锁定逻辑并移植到 Windows 当前 core 4.0.4 静态页面：
+- 向导复用 Linux v4.0.1/task-96 的锁定逻辑并移植到 Windows 当前 core 4.1.0 静态页面：
   - 向导侧栏加入“快速跳转步骤”下拉菜单；
   - 步骤 1 环境、2 账号与模型、3 部署进度、4 完成与运行；
   - `deployment.deployed || app.jobCompleted` 后前三步按钮和下拉选项全部禁用，只允许“完成与运行”；
@@ -65,12 +65,12 @@ POC 修复方向：不再启动外部浏览器；父进程保持到 WebView2 窗
 ## 3. Docker App 窗口 POC 实测
 
 构建：`windows/build.ps1`，Windows Python 3.10，PyInstaller 6.10.0。
-v1.0.4 EXE：
+v1.1.0 EXE：
 
-- Docker：16,158,380 bytes，SHA256
-  `09e9ae1f52c06becbfc2902d3ee9c72bf29995dfe0c89592372a8313f7eb85e6`
-- Native：14,933,721 bytes，SHA256
-  `a9a5608ed01023dfc43e4295181efa4c90762fabc44e74a0cc83873efa0bf62e`
+- Docker：16,178,805 bytes，SHA256
+  `08c7e415799ac5999500544082e15941f2d2b0c20053d6e375b9b6843c580184`
+- Native：14,933,759 bytes，SHA256
+  `869c972e99236ce470df7979523f4a3afeaf6fbf1e85cf7f43e64961cc542e91`
 
 用隔离环境、预配置 loopback、`QQBOT_APP_AUTOCLOSE_SECONDS=6` 启动 Docker EXE：
 
@@ -124,13 +124,13 @@ POC 验证：
 - Docker App 实际截图/自动化 smoke：左栏“控制台/向导”正常，点击“向导”
   成功进入 `/wizard?instance=bot-1`，页面内下拉菜单可见；无外部浏览器。
 - Native 仪表盘增加相同左栏导航；向导 4 步下拉/锁定代码就绪。
-- 上游 Linux **453 tests OK**；Windows 独立套件 **111 tests OK**（Linux 1 个
+- 上游 Linux **504 tests OK**；Windows 独立套件 **112 tests OK**（Linux 1 个
   Windows-only skip）；
   最终 POC 构建哈希：
-  - Docker `16,158,380` bytes
-    `09e9ae1f52c06becbfc2902d3ee9c72bf29995dfe0c89592372a8313f7eb85e6`
-  - Native `14,933,721` bytes
-    `a9a5608ed01023dfc43e4295181efa4c90762fabc44e74a0cc83873efa0bf62e`
+  - Docker `16,178,805` bytes
+    `08c7e415799ac5999500544082e15941f2d2b0c20053d6e375b9b6843c580184`
+  - Native `14,933,759` bytes
+    `869c972e99236ce470df7979523f4a3afeaf6fbf1e85cf7f43e64961cc542e91`
 
 ## 6. 当前限制与未验证项
 
@@ -142,8 +142,8 @@ POC 验证：
 - Native 一键安装的下载/安装完整 E2E 未执行；官方 URL/SHA/大小、环境检测、
   AstrBot 配置生成代码已实现；
 - QQ 扫码/EULA/真实消息 E2E 仍为 ENV_BLOCKED；
-- Windows VERSION 1.0.4；Native dashboard hotfix；正式发布由唯一 `v1.0.4` tag 触发。
+- Windows VERSION 1.1.0；正式发布由唯一 `v1.1.0` tag 触发。
 - Native JS 使用 lazy `getApi()` + `pywebviewready`；默认明亮主题，Docker 左栏同步。
-- v1.0.4 smoke：config GET schema/values 均 193，`reply_probability=0.12`，
+- v1.1.0 smoke：config GET schema/values 均 233，`reply_probability=0.12`，
   `ambient_group_reply_probability` 返回弃用兼容说明；`/option` ambient 文案匹配；
   schema 缺失时返回 `schema_source=bundled` + `schema_warning`。
