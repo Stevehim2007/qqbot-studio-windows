@@ -6,7 +6,7 @@ runtime or build time.
 
 - Upstream project: `git@github.com:Stevehim2007/qqbot-studio.git`
 - Upstream snapshot commit: `209c5568e5a51742cec3fd8a7749688fe531d93e`
-- Snapshot date: 2026-11-01
+- Snapshot date: 2026-11-02
 - Upstream release line: v4.0.4
 - Bundled core version: `qqbot_studio.__version__ == 4.0.4`
 - Windows launcher version: `1.0.4`
